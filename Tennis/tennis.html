@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+
+<canvas id="gameCanvas" width="800" height="600"></canvas>
+
+<script>
+	var canvas;
+	var canvasContext;
+
+	var p1Score = 0;
+	var p2Score = 0;
+	var playing = true;
+	var waiting = false;
+
+	// velocities
+	var paddle1Velocity = 10;
+	var paddle2Velocity = 10;
+
+	var ballXVelocity = 10;
+	var ballYVelocity = 5;
+
+	// positions
+	var paddle1Y = 10;
+	var paddle2Y = 10;
+
+	var ballX = 50;
+	var ballY = 50;
+
+	var lastMousePos = {x:5, y:60};
+
+	const PADDLE_HEIGHT = 100;
+	const PADDLE_WIDTH = 10;
+	const MAX_SCORE = 3;
+
+	window.onload = function() {
+		canvas = document.getElementById('gameCanvas');
+		canvasContext = canvas.getContext('2d');
+		canvasContext.font = "20px Georgia";
+
+		paddle2Y = canvas.height / 2;
+
+		var fps = 30;
+		setInterval(playGame, 1000 / fps);
+
+		canvas.addEventListener('mousemove', function(evt) {
+			lastMousePos = calculateMousePos(evt);
+		})
+
+		canvas.addEventListener('mousedown', handleMouseClick)
+
+	}
+
+	function playGame() {
+		if(playing) {
+			moveEverything();
+			drawCanvas();
+			drawCenter();
+		} else {
+			if(!waiting) {
+				canvasContext.fillStyle = 'white';
+				canvasContext.fillText("click to continue", canvas.width / 2 - 150, 5 * canvas.height / 6);
+				waiting = true;
+			}
+		}
+	}
+
+	function handleMouseClick(evt) {
+		if(!playing) {
+			p1Score = 0;
+			p2Score = 0;
+			playing = true;
+			waiting = false;
+		}
+	}
+
+	function calculateMousePos(evt) {
+		var rect = canvas.getBoundingClientRect();
+		var root = document.documentElement;
+		var mouseX = evt.clientX - rect.left - root.scrollLeft;
+		var mouseY = evt.clientY - rect.top - root.scrollTop;
+		return {
+			x:mouseX,
+			y:mouseY
+		}
+	}
+
+	function moveEverything() {
+		if(!playing) {
+			canvasContext.fillStyle = 'white';
+			canvasContext.fillText("Click to continue!", 100, 100);
+			return;			
+		}
+		// this logic just allows the paddle a wider range of intercept
+		if(ballX < PADDLE_WIDTH) {
+			if(!doesBallCollide()) {
+				// you lost
+				p2Score++;
+				ballXVelocity += Math.sign(ballXVelocity);
+				resetBall();
+			}
+		} else if(ballX < 25) {
+			if(doesBallCollide()) {
+				var v = getBallVelocity(1);
+				ballYVelocity = v;
+				ballXVelocity *= -1;
+			}
+		} else if(ballX > canvas.width - PADDLE_WIDTH) {
+			if(!doesBallCollide()) {
+				// computer lost
+				p1Score++;
+				ballXVelocity += Math.sign(ballXVelocity);
+				resetBall();
+			}
+		} else if(ballX > canvas.width - 25) {
+			if(doesBallCollide()) {
+				var v = getBallVelocity(2);
+				ballYVelocity = v;
+				ballXVelocity *= -1;
+			}
+		}
+
+		if(ballX > canvas.width) {
+			p1Score++;
+			ballXVelocity += Math.sign(ballXVelocity);
+			resetBall();
+		} else if(ballX < 0) {
+			p2Score++;
+			ballXVelocity += Math.sign(ballXVelocity);
+			resetBall();
+		}
+
+		// top/bottom bouncing
+		if(ballY > canvas.height - 10 || ballY < 10) {
+			ballYVelocity *= -1;
+		}
+
+		// update positions
+		ballX += ballXVelocity;
+		ballY += ballYVelocity;
+
+		paddle1Velocity = Math.floor((lastMousePos.y - (paddle1Y + PADDLE_HEIGHT / 2)) / 10);
+		paddle2Velocity = Math.floor((ballY - (paddle2Y + PADDLE_HEIGHT / 2)) / 6);
+
+		paddle1Y += paddle1Velocity;
+		paddle2Y += paddle2Velocity;
+	}
+
+	function doesBallCollide() {
+		if(ballX < 20) {
+			// player collision?
+			if(ballY > paddle1Y && ballY < paddle1Y + PADDLE_HEIGHT) {
+				return true;
+			} else {
+				return false;
+			}
+		} else if(ballX > canvas.width - 20) {
+			// computer collision?
+			if(ballY > paddle2Y && ballY < paddle2Y + PADDLE_HEIGHT) {
+				return true;
+			} else {
+				return false;
+			}
+		}		
+	}
+
+	function getBallVelocity(side) {
+		// return new ball velocity after having hit the paddle
+		var diff;
+		if(side == 1) {
+			// check paddle 1
+			diff = (paddle1Y + PADDLE_HEIGHT / 2) - ballY;
+		} else {
+			// check paddle 2
+			diff = (paddle2Y + PADDLE_HEIGHT / 2) - ballY;
+		}
+
+		return -1 * diff / 2.5;
+	}
+
+	function resetBall() {
+		if(p1Score >= MAX_SCORE) {
+			gameWon(1);
+		} else if(p2Score >= MAX_SCORE) {
+			gameWon(2);
+		}
+		ballX = canvas.width / 2;
+		ballY = canvas.height / 2;
+		ballXVelocity *= -1;	
+		ballYVelocity = 5;	
+	}
+
+	function gameWon(player) {
+		var winString;
+		if(player == 1) {
+			winString = "Winner: Player 1";
+		} else {
+			winString = "Winner: Player 2";
+		}
+
+		// not showing?
+		canvasContext.fillStyle = 'white';
+		canvasContext.fillText(winString, canvas.width / 2 - 150, 2 * canvas.height / 6);
+
+		playing = false;
+		ballXVelocity = 10;
+	}
+
+	function drawCanvas() {
+		canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+
+		drawRect(0, 0, canvas.width, canvas.height, 'black');
+
+		// ball
+		drawCircle(ballX, ballY, 10, 'red');
+
+		// left paddle	
+		drawRect(5, paddle1Y, PADDLE_WIDTH, PADDLE_HEIGHT, 'white');
+
+		// right paddle		
+		drawRect(canvas.width - 15, paddle2Y, PADDLE_WIDTH, PADDLE_HEIGHT, 'white');
+
+		var p1String = "Player 1: " + p1Score;
+		var p2String = "Player 2: " + p2Score;
+		canvasContext.fillText(p1String, 75, 25);
+		canvasContext.fillText(p2String, canvas.width - 100, 25);
+	}
+
+	function drawCenter() {
+		for(var i = 0; i < 10; i++) {
+				drawRect(canvas.width / 2, i * canvas.height / 10 + 20, 2, 20, 'white');
+		}
+	}
+
+	function drawCircle(centerX, centerY, r, color) {
+		canvasContext.fillStyle = color;
+		canvasContext.beginPath();
+		canvasContext.arc(centerX, centerY, r, 0, Math.PI * 2, true);
+		canvasContext.fill();		
+	}
+
+	function drawRect(x, y, width, height, color) {
+		canvasContext.fillStyle = color;
+		canvasContext.fillRect(x, y, width, height);	// x, y, w, h
+	}
+
+</script>
+
+</html>

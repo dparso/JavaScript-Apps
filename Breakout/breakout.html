@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+	<meta content="utf-8" http-equiv="encoding">
+</head>
+
+<canvas id="gameCanvas" width="800" height="600"></canvas>
+
+<script>
+	var canvas, canvasContext;
+
+	var bricks;
+	var gameWon = false;
+	var waiting = false;
+
+	// velocities
+	var paddleVelocity = 10;
+
+	var ballXVelocity = 0;
+	var ballYVelocity = 5;
+
+	// positions
+	var paddleX = 10;
+	var paddleY = 10;
+
+	var ballX = 50;
+	var ballY = 50;
+
+	var mouseX, mouseY;
+
+	// sizes
+	const BRICK_W = 80;
+	const BRICK_H = 20;
+	const BRICK_PADDING = 2;
+	const BRICK_ROWS = 5 + 3; // first 3 are skipped
+	const BRICK_COLS = 10;
+
+	const PADDLE_HEIGHT = 10;
+	const PADDLE_WIDTH = 120;
+	const PADDLE_DIST_FROM_EDGE = 60;
+	const PADDLE_DELAY_FACTOR = 5;
+
+	window.onload = function() {
+		canvas = document.getElementById('gameCanvas');
+		canvasContext = canvas.getContext('2d');
+		canvasContext.font = "20px Georgia";
+
+		// initializations
+		paddleX = canvas.width / 2;
+		paddleY = canvas.height - PADDLE_HEIGHT - 10;
+		ballX = canvas.width / 2;
+		ballY = canvas.height / 2;
+		mouseX = canvas.width / 2;
+		mouseY = canvas.height / 2;
+		bricks = new Array(BRICK_ROWS);
+		generateBricks();
+
+		var fps = 30;
+		setInterval(playGame, 1000 / fps);
+
+		canvas.addEventListener('mousemove', function(evt) {
+			var mouse = calculateMousePos(evt);
+			mouseX = mouse.x;
+			mouseY = mouse.y;
+		})
+
+		canvas.addEventListener('mousedown', handleMouseClick)
+	}
+
+	function playGame() {
+		if(!gameWon) {
+			moveEverything();
+			drawCanvas();
+		} else if(!waiting) {
+			canvasContext.fillText("You won!", canvas.width / 2, canvas.height / 2);
+			canvasContext.fillText("click to continue", canvas.width / 2 - 27, 4 * canvas.height / 5);
+			waiting = true;
+		}
+	}
+
+	function handleMouseClick(evt) {
+		if(gameWon) {
+			generateBricks();
+			resetBall();
+			gameWon = false;
+			waiting = false;
+		}
+	}
+
+	function calculateMousePos(evt) {
+		var rect = canvas.getBoundingClientRect();
+		var root = document.documentElement;
+		mouseX = evt.clientX - rect.left - root.scrollLeft;
+		mouseY = evt.clientY - rect.top - root.scrollTop;
+
+		// cheat / hack to test ball in any position
+		// ballX = mouseX;
+		// ballY = mouseY;
+		// ballXVelocity = -3;
+		// ballYVelocity = -3;
+
+		return {
+			x:mouseX,
+			y:mouseY
+		}
+	}
+
+	function ballBrickCollision() {
+		// brick collision
+		var gridPos = posToGrid(ballX, ballY);
+		if(gridPos.col >= 0 && gridPos.row >= 0 && gridPos.col < BRICK_COLS && gridPos.row < BRICK_ROWS) {
+			if(bricks[gridPos.row][gridPos.col]) {
+				// collision has occurred
+				bricks[gridPos.row][gridPos.col] = false;
+				// determine how to ricochet
+				var prevBallX = ballX - ballXVelocity;
+				var prevBallY = ballY - ballYVelocity;
+
+				var prevGrid = posToGrid(prevBallX, prevBallY);
+				var bothTestsFailed = true;
+				if(prevGrid.col != gridPos.col) {
+					// check if brick is covered
+					var adjacentCol = gridPos.col - Math.sign(gridPos.col - prevGrid.col);
+
+					if(adjacentCol >= 0 && adjacentCol < BRICK_COLS) {
+						if(!bricks[gridPos.row][adjacentCol]) {
+							ballXVelocity *= -1;
+							bothTestsFailed = false;
+						}
+					} else {
+						ballXVelocity *= -1;
+						bothTestsFailed = false;
+					}
+
+				}
+
+				if(prevGrid.row != gridPos.row) {
+					var adjacentRow = gridPos.row - Math.sign(gridPos.row - prevGrid.row);
+
+					if(adjacentRow >= 0 && adjacentRow < BRICK_ROWS) {
+						if(!bricks[adjacentRow][gridPos.col]) {
+							ballYVelocity *= -1;
+							bothTestsFailed = false;
+						}
+					} else {
+						ballYVelocity *= -1;
+						bothTestsFailed = false;
+					}
+				}
+
+				if(bothTestsFailed) {
+					ballXVelocity *= -1;
+					ballYVelocity *= -1;
+				}
+			}
+		}
+	}
+
+	function ballMove() {
+		ballX += ballXVelocity;
+		ballY += ballYVelocity;
+
+		// left/right bouncing
+		if((ballX < 0.0 && ballXVelocity < 0.0) || (ballX > canvas.width && ballXVelocity > 0.0)) {
+			ballXVelocity *= -1;
+		}
+
+		// top bouncing
+		if(ballY < 0 && ballYVelocity < 0.0) {
+			ballYVelocity *= -1;
+		}
+
+		// bottom dropoff
+		if(ballY > canvas.height) {
+			resetBall();
+			generateBricks();
+		}
+	}
+
+	function ballPaddleHandling() {
+		// +- 5 so the ball doesn't pass the paddle (speed 10 and paddle height 10 means it could pass through it)
+		var topY = canvas.height - PADDLE_DIST_FROM_EDGE - 5;
+		var bottomY = topY + PADDLE_HEIGHT + 5;
+		var leftX = paddleX - 5;
+		var rightX = leftX + PADDLE_WIDTH + 5;
+
+		if(ballY > topY && // below top of paddle
+			ballY < bottomY && // above bottom
+			ballX > leftX && // right of left side
+			ballX < rightX) { // left of right side
+				ballXVelocity = getBallVelocity();
+				ballYVelocity *= -1;
+		}
+
+		paddleVelocity = Math.floor((mouseX - (paddleX + PADDLE_WIDTH / 2)) / PADDLE_DELAY_FACTOR);
+		paddleX += paddleVelocity;
+	}
+
+	function moveEverything() {
+		ballMove();
+		ballBrickCollision();
+		ballPaddleHandling();
+	}
+
+	function getBallVelocity() {
+		// return new ball velocity after having hit the paddle
+		var diff = (paddleX + PADDLE_WIDTH / 2) - ballX;
+		return -1 * diff / 2.5;
+	}
+
+	function resetBall() {
+		ballX = canvas.width / 2;
+		ballY = canvas.height / 2;
+		ballXVelocity = 0;
+		ballYVelocity = 5;
+	}
+
+	function drawCanvas() {
+		canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+
+		drawRect(0, 0, canvas.width, canvas.height, 'black');
+
+		// ball
+		drawCircle(ballX, ballY, 10, 'red');
+
+		// paddle	
+		drawRect(paddleX, canvas.height - PADDLE_DIST_FROM_EDGE, PADDLE_WIDTH, PADDLE_HEIGHT, 'white');
+
+		// bricks
+		drawBricks();
+		canvasContext.fillStyle = 'white';
+		// var gridPos = posToGrid(mouseX, mouseY);
+		// colorText(gridPos.col + ", " + gridPos.row, mouseX, mouseY);
+	}
+
+	function drawCircle(centerX, centerY, r, color) {
+		canvasContext.fillStyle = color;
+		canvasContext.beginPath();
+		canvasContext.arc(centerX, centerY, r, 0, Math.PI * 2, true);
+		canvasContext.fill();		
+	}
+
+	function drawRect(x, y, width, height, color) {
+		canvasContext.fillStyle = color;
+		canvasContext.fillRect(x, y, width, height);	// x, y, w, h
+	}
+
+	function colorText(showWords, textX, textY, fillColor) {
+		canvasContext.fillStyle = fillColor;
+		canvasContext.fillText(showWords, textX, textY);
+	}
+
+	function generateBricks() {
+		for(var row = 0; row < BRICK_ROWS; row++) {
+			bricks[row] = new Array(BRICK_COLS);
+			for(var col = 0; col < BRICK_COLS; col++) {
+				if(Math.random() < 0.90 && row > 2) {
+					bricks[row][col] = true;
+				} else {
+					bricks[row][col] = false;
+				}
+			}
+		}
+	}
+
+	function drawBricks() {
+		var brickLeft = false
+		for(var row = 0; row < BRICK_ROWS; row++) {
+			for(var col = 0; col < BRICK_COLS; col++) {
+				if(bricks[row][col]) {
+					brickLeft = true;
+					drawRect(BRICK_W * col, BRICK_H * row, BRICK_W - BRICK_PADDING, BRICK_H - BRICK_PADDING, 'blue');
+				}
+			}
+		}
+		if(!brickLeft) {
+			gameWon = true;
+		}
+	}
+
+	function posToGrid(xPos, yPos) {
+		// return coordinates corresponding to which brick the mouse is over
+		var gridX, gridY;
+
+		gridX = Math.floor(xPos / BRICK_W);
+		gridY = Math.floor(yPos / BRICK_H);
+
+		return {col: gridX, row: gridY};
+	}
+
+</script>
+
+</html>
