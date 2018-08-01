@@ -6,17 +6,17 @@ function drawBitmapCenteredWithRotation(useBitmap, atX, atY, withAngle) {
     canvasContext.restore();
 }
 
-function drawCircle(centerX, centerY, r, color) {
-    canvasContext.fillStyle = color;
+  function colorRect(topLeftX, topLeftY, boxWidth, boxHeight, fillColor) {
+    canvasContext.fillStyle = fillColor;
+    canvasContext.fillRect(topLeftX, topLeftY, boxWidth, boxHeight);
+  }
+  
+  function colorCircle(centerX, centerY, radius, fillColor) {
+    canvasContext.fillStyle = fillColor;
     canvasContext.beginPath();
-    canvasContext.arc(centerX, centerY, r, 0, Math.PI * 2, true);
+    canvasContext.arc(centerX, centerY, radius, 0, Math.PI*2, true);
     canvasContext.fill();
-}
-
-function drawRect(x, y, width, height, color) {
-    canvasContext.fillStyle = color;
-    canvasContext.fillRect(x, y, width, height);	// x, y, w, h
-}
+  }
 
 function drawText(showWords, textX, textY, fillColor) {
     canvasContext.fillStyle = fillColor;
