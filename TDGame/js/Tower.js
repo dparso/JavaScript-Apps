@@ -7,33 +7,59 @@ function TowerClass(image) {
     this.x = 220;
     this.y = 140;
     this.angle = 0;
-    this.range = 2;
+    this.range = 3;
     this.id = TOWER_ID++;
-    this.timeSinceAttack = 0;
+    this.timeSinceAttack = (1000 / fps) / TOWER_FIRE_RATE; // allow immediate firing
+    this.active = false; // drag & drop shouldn't be firing
 
     this.img = image;
 
     this.reset = function() {
-        // setInterval(this.attack, 1000 / TOWER_FIRE_RATE);
-        this.target = monsterList[0];
-        // for(var row = 0; row < TILE_ROWS; row++) {
-        //     for(var col = 0; col < TILE_COLS; col++) {
-        //         if(tiles[row][col] == TILE_START) {
-        //             tiles[row][col] = 0;
-        //             this.x = col * TILE_W + TILE_W / 2;
-        //             this.y = row * TILE_H + TILE_H / 2;
-        //             return;
-        //         } // end of if
-        //     } // end of col
-        // } // end of row
+        this.findTarget();
+        this.active = false; // might not want this here
     } // end of towerReset
 
-    this.move = function() {
-        this.track({x: this.target.x, y: this.target.y});
+    this.findTarget = function() {
+        // for now, targets based on physical proximity
+        var tilePos = pixelToGrid(this.x, this.y);
+        // iterate through tiles in range and find a target
+        for(var row = tilePos.row - this.range; row <= tilePos.row + this.range; row++) {
+            for(var col = tilePos.col - this.range; col <= tilePos.col + this.range; col++) {
+                if(gridInRange(row, col)) {
+                    var tile = tiles[row][col];
+                    if(tile.hasMonsters()) {
+                        this.target = monsterList[tile.monstersOnTile.values().next().value];
+                        return;                       
+                    }
+                }
+            }
+        }
+    }
 
-        if(this.timeSinceAttack > (1000 / fps) / TOWER_FIRE_RATE) {
-            this.attack();
-            this.timeSinceAttack = 0;
+    this.move = function() {
+        if(!this.active) {
+            return;
+        }
+
+        // is locally set
+        if(this.target) {
+            // is alive
+            if(this.target.health > 0) {
+                // check if target has moved out of range
+                if(Math.abs(this.target.x - this.x) > TILE_W * this.range || Math.abs(this.target.y - this.y) > TILE_H * this.range) {
+                    this.target = null;
+                } else {
+                    this.track({x: this.target.x, y: this.target.y});
+                    if(this.timeSinceAttack > (1000 / fps) / TOWER_FIRE_RATE) {
+                        this.attack();
+                        this.timeSinceAttack = 0;
+                    }
+                }
+            } else {
+                this.findTarget();       
+            }
+        } else {
+            this.findTarget();
         }
         this.timeSinceAttack++;
     }
@@ -44,16 +70,22 @@ function TowerClass(image) {
 
     this.attack = function() {
         var projectile = new ProjectileClass({x: this.x, y: this.y}, this.target, PROJECTILE_TYPE_1);
-        projectileList.push(projectile);
+        projectileList[projectile.id] = projectile;
     }
 
     this.draw = function() {
-            drawBitmapCenteredWithRotation(this.img, this.x, this.y, this.angle);
+        drawBitmapCenteredWithRotation(this.img, this.x, this.y, this.angle);
     }
 }
 
 function createTowers() {
-    var tower = new TowerClass(tower1Pic);
-    tower.reset();
-    towerList.push(tower);
+    // var tower = new TowerClass(tilePics[TILE_TOWER_1]);
+    // tower.reset();
+    // tower.active = true;
+    // towerList[tower.id] = tower;
+
+    // var tower2 = new TowerClass(tilePics[TILE_TOWER_2]);
+    // tower2.reset();
+    // tower2.active = true;
+    // towerList[tower2.id] = tower2;
 }

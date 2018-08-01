@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<meta content="utf-8" http-equiv="encoding">
+</head>
+<canvas id="gameCanvas" width="200" height="100"></canvas>
+
+<script>
+  const RUN_SPEED = 5.5;
+
+  var camPanX = 0.0;
+  var camPanY = 0.0;
+
+  var mouseX = 0, mouseY = 0;
+  const PLAYER_DIST_FROM_CENTER_BEFORE_CAMERA_PAN_X = 150;
+  const PLAYER_DIST_FROM_CENTER_BEFORE_CAMERA_PAN_Y = 100;
+
+  const KEY_LEFT_ARROW = 37;
+  const KEY_UP_ARROW = 38;
+  const KEY_RIGHT_ARROW = 39;
+  const KEY_DOWN_ARROW = 40;
+  var holdLeft = false;
+  var holdRight = false;
+  var holdUp = false;
+  var holdDown = false;
+  
+  function initInput() {
+    document.addEventListener("keydown", keyPressed);
+    document.addEventListener("keyup", keyReleased);
+  }
+  
+  function setKeyHoldState(thisKey, setTo) {
+    if(thisKey == KEY_LEFT_ARROW) {
+      holdLeft = setTo;
+    }
+    if(thisKey == KEY_RIGHT_ARROW) {
+      holdRight = setTo;
+    }
+    if(thisKey == KEY_UP_ARROW) {
+      holdUp = setTo;
+    }
+    if(thisKey == KEY_DOWN_ARROW) {
+      holdDown = setTo;
+    }
+  }
+  
+  function keyPressed(evt) {
+    setKeyHoldState(evt.keyCode, true);
+    // evt.preventDefault(); // without this, arrow keys scroll the browser!
+  }
+  
+  function keyReleased(evt) {
+    setKeyHoldState(evt.keyCode, false);
+  }
+
+  const BRICK_W = 50;
+  const BRICK_H = 50;
+  const BRICK_GAP = 1;
+  const BRICK_COLS = 25;
+  const BRICK_ROWS = 15;
+  var brickGrid =
+      [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0,
+        1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    
+  var canvas, canvasContext;
+  var colQueue = new Queue();
+  
+  function brickTileToIndex(tileCol, tileRow) {
+    return (tileCol + BRICK_COLS*tileRow);
+  }
+
+  function isBrickAtTileCoord(brickTileCol, brickTileRow) {
+    var brickIndex = brickTileToIndex(brickTileCol, brickTileRow);
+    return (brickGrid[brickIndex] == 1);
+  }
+  
+  function isBrickAtPixelCoord(hitPixelX, hitPixelY) {
+    var tileCol = hitPixelX / BRICK_W;
+    var tileRow = hitPixelY / BRICK_H;
+    
+    // using Math.floor to round down to the nearest whole number
+    tileCol = Math.floor( tileCol );
+    tileRow = Math.floor( tileRow );
+
+    // first check whether the slider is within any part of the brick wall
+    if(tileCol < 0 || tileCol >= BRICK_COLS ||
+       tileRow < 0 || tileRow >= BRICK_ROWS) {
+       return false;
+    }
+    
+    var brickIndex = brickTileToIndex(tileCol, tileRow);
+    return (brickGrid[brickIndex] == 1);
+  }
+  
+  function sliderMove() {
+    var nextX = sliderX;
+    var nextY = sliderY;
+
+    if(holdLeft) {
+      nextX += -RUN_SPEED;
+    }
+    if(holdRight) {
+      nextX += RUN_SPEED;
+    }
+    if(holdUp) {
+      nextY += -RUN_SPEED;
+    }
+    if(holdDown) {
+      nextY += RUN_SPEED;
+    }
+
+    // if(isBrickAtPixelCoord(nextX,nextY) == false) {
+      sliderX = nextX;
+      sliderY = nextY;
+    // }
+  }
+
+  window.onload = function() {
+    canvas = document.getElementById('gameCanvas');
+    canvasContext = canvas.getContext('2d');
+    
+    initInput();
+
+    camPanX = -canvas.width / 2; // ground scrolls in
+    
+    for(var col = 0; col < BRICK_COLS; col++) {
+      var currCol = [];
+      for(var row = 0; row < BRICK_ROWS; row++) {
+        var index = brickTileToIndex(col, row);
+        currCol.push(brickGrid[index]);
+      }
+      var column = new Column(currCol, col * BRICK_W);
+      colQueue.push(column);
+    }
+
+    // these next few lines set up our game logic and render to happen 30 times per second
+    var framesPerSecond = 30;
+    setInterval(function() {
+        moveEverything();
+        drawEverything();
+      }, 1000 / framesPerSecond);
+      
+    sliderReset();
+    canvas.addEventListener('mousemove', calculateMousePos);
+  }
+  
+  function sliderReset() {
+    // center slider on screen
+    sliderX = canvas.width/2;
+    sliderY = canvas.height/2;
+  }
+  
+  function moveEverything() {
+    sliderMove();
+    moveCamera();
+  }
+
+  function moveCamera() {
+    camPanX += 5;
+  }
+  
+  function colorRect(topLeftX, topLeftY, boxWidth, boxHeight, fillColor) {
+    canvasContext.fillStyle = fillColor;
+    canvasContext.fillRect(topLeftX, topLeftY, boxWidth, boxHeight);
+  }
+  
+  function colorCircle(centerX, centerY, radius, fillColor) {
+    canvasContext.fillStyle = fillColor;
+    canvasContext.beginPath();
+    canvasContext.arc(centerX, centerY, radius, 0, Math.PI*2, true);
+    canvasContext.fill();
+  }
+
+  function drawQueue() {
+    var length = colQueue.data.length;
+    for(var col = 0; col < length; col++) {
+      var column = colQueue.data[col];
+      if(column.x - camPanX < -BRICK_W * 2) {
+        console.log("adding");
+        column.x = colQueue.data[length - 1].x + BRICK_W; // add to end
+        colQueue.pop();
+        colQueue.push(column);
+      } else if(column.x < canvas.width) {
+        column.draw();
+      }
+    }
+  }
+
+  function drawEverything() {
+    // drawing black to erase previous frame, doing before .translate() since
+    // its coordinates are not supposed to scroll when the camera view does
+    colorRect(0, 0, canvas.width, canvas.height, 'black');
+
+    // canvasContext.save(); // needed to undo this .translate() used for scroll
+
+    // this next line is like subtracting camPanX and camPanY from every
+    // canvasContext draw operation up until we call canvasContext.restore
+    // this way we can just draw them at their "actual" position coordinates
+    // canvasContext.translate(-camPanX,-camPanY);
+
+    drawQueue();
+    
+    // canvasContext.restore(); // undoes the .translate() used for cam scroll
+
+    // doing this after .restore() so it won't scroll with the camera pan
+    canvasContext.fillStyle = 'white';
+    canvasContext.fillText("Arrow keys to slide, scrolling demo", 8, 14);
+
+    colorCircle(sliderX, sliderY, 10, 'white');
+
+    canvasContext.fillStyle = 'white';
+    canvasContext.font = "20px Georgia";
+    canvasContext.fillText((mouseX + camPanX) + ", " + (mouseY + camPanY), mouseX, mouseY);
+  
+  }
+
+  function calculateMousePos(evt) {
+    var rect = canvas.getBoundingClientRect();
+    var root = document.documentElement;
+    mouseX = evt.clientX - rect.left - root.scrollLeft;
+    mouseY = evt.clientY - rect.top - root.scrollTop;
+
+    return {
+        x: mouseX,
+        y: mouseY
+    }
+  }
+
+  function Column(data, startX) {
+    this.col = data;
+    this.x = startX;
+
+    this.draw = function() {
+      for(var row = 0; row < this.col.length; row++) {
+        if(this.col[row] == 1) {
+          colorRect(this.x - camPanX, row * BRICK_H, BRICK_W - BRICK_GAP, BRICK_H - BRICK_GAP, 'blue');
+        }
+      }
+    }
+  }
+
+  function Queue() {
+      this.data = []; // most recently pushed is at the END
+
+      this.push = function(data) {
+          this.data.push(data);
+      }
+
+      this.pop = function() {
+          return this.data.shift();
+      }
+
+      this.empty = function() {
+          return this.data.length == 0;
+      }
+  }
+</script>
+
+</body>
+</html>

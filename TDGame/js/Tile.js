@@ -1,24 +1,36 @@
-function TileClass(position, type, img) {
+function TileClass(position, type, img, transparent) {
     this.row = position.row;
     this.col = position.col;
     this.type = type;
     this.img = img;
+    this.transparent = transparent;
 
-    this.monstersOnTile = new Set();
+    // BFS variables
+    this.visited = false;
+    this.parent = null;
+
+    this.monstersOnTile = new Set(); // monster IDs
+    this.towersOnTile = new Set();
 
     this.getMonsters = function() {
-        return this.monstersOnTile();
+        return this.monstersOnTile;
     }
 
-    this.notifyMonsterArrive = function(monster) {
+    this.hasTowers = function() {
+        return this.towersOnTile.size > 0;
+    }
+
+    this.hasMonsters = function () {
+        return this.monstersOnTile.size > 0;
+    }
+
+    this.notifyMonsterArrive = function(monsterID) {
         // monster is an id, not a monster object
-        this.monstersOnTile.add(monster);
-        // console.log("tile " + this.row + ", " + this.col + " has gained " + monster);
+        this.monstersOnTile.add(monsterID);
     }
 
-    this.notifyMonsterDepart = function(monster) {
-        this.monstersOnTile.delete(monster);
-        // console.log("tile " + this.row + ", " + this.col + " has lost " + monster);
+    this.notifyMonsterDepart = function(monsterID) {
+        this.monstersOnTile.delete(monsterID);
     }
 }
 
@@ -28,18 +40,18 @@ function tilesDraw() {
     for(var row = 0; row < TILE_ROWS; row++) {
         drawTileX = 0;
         for(var col = 0; col < TILE_COLS; col++) {
-            var currTile = tiles[row][col].type;
+            var currTile = tiles[row][col];
 
-            if(tileTypeHasTransparency(currTile)) {
+            if(currTile.transparent) {
                 canvasContext.drawImage(tilePics[TILE_GROUND], drawTileX, drawTileY);
             }
 
-            if(currTile == TILE_MONSTER_START) {
-                drawTileX += TILE_W;
-                continue;
+            if(currTile.type >= TOWER_OFFSET_NUM) {
+                // draw with rotation
+                drawBitmapCenteredWithRotation(currTile.img, drawTileX + currTile.img.width / 2, drawTileY + currTile.img.height / 2, 0);
+            } else {
+                canvasContext.drawImage(currTile.img, drawTileX, drawTileY);
             }
-
-            canvasContext.drawImage(tiles[row][col].img, drawTileX, drawTileY);
             drawTileX += TILE_W;
         }
 
@@ -99,27 +111,15 @@ function collisionHandling(tower) {
     if(gridPos.col >= 0 && gridPos.row >= 0 && gridPos.col < TILE_COLS && gridPos.row < TILE_ROWS) {
         var tileType = tiles[gridPos.row][gridPos.col].type;
         switch(tileType) {
-            case TILE_GOAL:
-                // this player has won!
-                gameWon = true;
-                winner = tower.name;
-                return true;
-            case TILE_KEY:
-                tower.keys++;
-                tiles[gridPos.row][gridPos.col].type = TILE_GROUND;
-                return true;
+            case TILE_TREE:
+                return false;
             case TILE_WALL:
                 return false;
-            case TILE_GOAL:
-                return false;
-            case TILE_DOOR:
-                if(tower.keys > 0) {
-                    tower.keys--;
-                    tiles[gridPos.row][gridPos.col].type = TILE_GROUND;
-                    return true;
-                } else {
-                    return false;
-                }
+            case TILE_GROUND:
+                return true;
+            default:
+                return true;
+
         }
     } else {
         // outside boundaries!

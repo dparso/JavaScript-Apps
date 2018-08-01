@@ -5,10 +5,12 @@ var winner = "";
 var fps = 30;
 
 var ballList = [];
-var monsterList = [];
-var towerList = [];
-var projectileList = [];
+var monsterList = {};
+var towerList = {};
+var projectileList = {};
 var monsterSelections = {}; // these things should be moved elsewhere!
+var monsterPath = [];
+
 var StateController = new StateControllerClass();
 
 window.onload = function() {
@@ -31,10 +33,18 @@ function loadLevel(level) {
         tiles[row] = new Array(TILE_COLS);
         for(var col = 0; col < TILE_COLS; col++) {
             var type = level[row][col];
-            var tile = new TileClass({row: row, col: col}, type, tilePics[type]);
+            var isTransparent = type > 4 ? true : false;
+            var tile = new TileClass({row: row, col: col}, type, tilePics[type], isTransparent);
             tiles[row][col] = tile;
+
+            if(type == TILE_MONSTER_START) {
+                MONSTER_START = {row: row, col: col};
+            } else if(type == TILE_MONSTER_END) {
+                MONSTER_END = {row: row, col: col};
+            }
         }
     }
+    calculateMonsterPath();
 }
 
 function updateAll() {
@@ -55,7 +65,7 @@ var timeSinceLastRelease = 0;
 function monsterUpdate() {
     var len = StateController.monstersWaiting.length;
     if(len > 0) {
-        if(timeSinceLastRelease > 1 * fps) {
+        if(timeSinceLastRelease > 1 * fps) { // once per second
             var monster = StateController.monstersWaiting.pop();
             monster.visible = true;
             timeSinceLastRelease = 0;
@@ -66,21 +76,20 @@ function monsterUpdate() {
 }
 
 function moveAll() {
-
     for(var i = 0; i < ballList.length; i++) {
       ballList[i].move();
     }
 
-    for(var i = 0; i < monsterList.length; i++) {
-      monsterList[i].move();
+    for(id in monsterList) {
+      monsterList[id].move();
     }
 
-    for(var i = 0; i < towerList.length; i++) {
-      towerList[i].move();
+    for(id in towerList) {
+      towerList[id].move();
     }
 
-    for(var i = 0; i < projectileList.length; i++) {
-      projectileList[i].move();
+    for(id in projectileList) {
+      projectileList[id].move();
     }
 }
 
@@ -98,16 +107,21 @@ function drawAll() {
       ballList[i].draw();
     }
 
-    for(var i = 0; i < monsterList.length; i++) {
-      monsterList[i].draw();
+    for(id in monsterList) {
+      monsterList[id].draw();
     }
 
-    for(var i = 0; i < towerList.length; i++) {
-      towerList[i].draw();
+    for(id in towerList) {
+      towerList[id].draw();
     }
 
-    for(var i = 0; i < projectileList.length; i++) {
-      projectileList[i].draw();
+    for(id in projectileList) {
+      projectileList[id].draw();
+    }
+
+    // drag object
+    if(dragObject) {
+        dragObject.draw();
     }
 }
 
@@ -123,5 +137,7 @@ function textDraw() {
             break;
     }
 
-    canvasContext.fillText(mouseX + ", " + mouseY, mouseX, mouseY);
+    var tile = pixelToGrid(mouseX, mouseY);
+    canvasContext.fillStyle = 'white';
+    canvasContext.fillText(tile.row + ", " + tile.col, mouseX, mouseY);
 }
