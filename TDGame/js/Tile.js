@@ -34,31 +34,6 @@ function TileClass(position, type, img, transparent) {
     }
 }
 
-function tilesDraw() {
-    var drawTileX = 0;
-    var drawTileY = 0;
-    for(var row = 0; row < TILE_ROWS; row++) {
-        drawTileX = 0;
-        for(var col = 0; col < TILE_COLS; col++) {
-            var currTile = tiles[row][col];
-
-            if(currTile.transparent) {
-                canvasContext.drawImage(tilePics[TILE_GROUND], drawTileX, drawTileY);
-            }
-
-            if(currTile.type >= TOWER_OFFSET_NUM) {
-                // draw with rotation
-                drawBitmapCenteredWithRotation(currTile.img, drawTileX + currTile.img.width / 2, drawTileY + currTile.img.height / 2, 0);
-            } else {
-                canvasContext.drawImage(currTile.img, drawTileX, drawTileY);
-            }
-            drawTileX += TILE_W;
-        }
-
-        drawTileY += TILE_H;
-    }
-}
-
 function tileTypeHasTransparency(tileType) {
     // 5 - 11
     // switch(tileType) {
@@ -92,7 +67,7 @@ function isWallAtPixelPosition(pixelX, pixelY) {
         return 1; // treat out of bounds as solid
     }
 
-    return tiles[tilePos.row][tilePos.col].type;
+    return StateController.currLevel.tiles[tilePos.row][tilePos.col].type;
 }
 
 function isInCanvas(tile) {
@@ -103,13 +78,13 @@ function isInCanvas(tile) {
     }
 }
 
-function collisionHandling(tower) {
+function collisionHandling(object) {
     // tile collision
-    // true if tower can continue moving
+    // true if object can continue moving
 
-    var gridPos = pixelToGrid(tower.x, tower.y);
+    var gridPos = pixelToGrid(object.x, object.y);
     if(gridPos.col >= 0 && gridPos.row >= 0 && gridPos.col < TILE_COLS && gridPos.row < TILE_ROWS) {
-        var tileType = tiles[gridPos.row][gridPos.col].type;
+        var tileType = StateController.currLevel.tiles[gridPos.row][gridPos.col].type;
         switch(tileType) {
             case TILE_TREE:
                 return false;
@@ -123,7 +98,7 @@ function collisionHandling(tower) {
         }
     } else {
         // outside boundaries!
-        // towerReset();
+        // objectReset();
         return false;
     }
     return true;

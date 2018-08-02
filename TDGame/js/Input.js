@@ -14,7 +14,7 @@ const KEY_D = 68;
 var isDown = false;
 var isDragging = false; // maybe not necessary, implied by isDown + dragDelay?
 var dragDelay = 0;
-var dragWait = 10;
+var dragWait = 5;
 var dragObject;
 
 /* order of drag & drop for tower:
@@ -36,6 +36,7 @@ function calculateMousePos(evt) {
             if(dragObject) {
                 dragObject.x = mouseX;
                 dragObject.y = mouseY;
+                dragObject.visible = true;
             }
         } else {
             dragDelay++;
@@ -52,55 +53,44 @@ function handleMouseDown(evt) {
     var mouse = calculateMousePos(evt);
     mouseX = mouse.x;
     mouseY = mouse.y;
-
-    console.log("mouse down " + mouseX + ", " + mouseY);
     isDown = true;
 
     var tileClicked = pixelToGrid(mouse.x, mouse.y);
-    var type = tiles[tileClicked.row][tileClicked.col].type;
 
     switch(StateController.state) {
+        case STATE_START:
+            // only registering clicks on the menu options
+            if(mouseX > START_IMAGE.x && mouseX < START_IMAGE.x + START_IMAGE.img.width) {
+                if(mouseY > START_IMAGE.y && mouseY < START_IMAGE.y + START_IMAGE.img.height) {
+                    // clicked start!
+                    fadeOut(STATE_SELECT, selectScreen);
+                    clearInterval(timerId);
+                    return;
+                }
+            }
+            break;
+
         case STATE_SELECT:
             // clicking "Click to proceed"
-            if(tileClicked.row < 2 && tileClicked.col < 4) {
-                StateController.changeState(STATE_PLAY);
-                return;
+            if(mouseX > CLICK_CONTINUE_IMAGE.x && mouseX < CLICK_CONTINUE_IMAGE.x + CLICK_CONTINUE_IMAGE.img.width) {
+                if(mouseY > CLICK_CONTINUE_IMAGE.y && mouseY < CLICK_CONTINUE_IMAGE.y + CLICK_CONTINUE_IMAGE.img.height) {
+                    // clicked start!
+                    fadeOut(STATE_PLAY, levelOne);
+                    clearInterval(timerId);
+                    return;
+                }
             }
 
             // choosing a monster type to add
-            switch(type) {
-                case TILE_MONSTER_1:
-                    if(StateController.state == STATE_SELECT) {
-                        // increment this monster's counter
-                        monsterSelections[type]++;
-                        // console.log("Touched " + type);
-                    }
-                    break;
-                case TILE_MONSTER_2:
-                    if(StateController.state == STATE_SELECT) {
-                        // increment this monster's counter
-                        monsterSelections[type]++;
-                        // console.log("Touched " + type);
-                    }
-                    break;
-                case TILE_MONSTER_3:
-                    if(StateController.state == STATE_SELECT) {
-                        // increment this monster's counter
-                        monsterSelections[type]++;
-                        // console.log("Touched " + type);
-                    }
-                    break;
-                case TILE_MONSTER_4:
-                    if(StateController.state == STATE_SELECT) {
-                        // increment this monster's counter
-                        monsterSelections[type]++;
-                        // console.log("Touched " + type);
-                    }
-                    break;
+            var type = StateController.currLevel.tiles[tileClicked.row][tileClicked.col].type;
+            if(type >= MONSTER_OFFSET_NUM && type <= MONSTER_OFFSET_NUM + NUM_MONSTERS) {
+                monsterSelections[type]++;
             }
             break;
+
         case STATE_PLAY:
             if(!isDragging) {
+                var type = StateController.currLevel.tiles[tileClicked.row][tileClicked.col].type;
                 if(type == TILE_TOWER_1) {
                     dragObject = new TowerClass(tilePics[TILE_TOWER_1]);
                     dragObject.reset();
@@ -132,7 +122,6 @@ function handleMouseUp(evt) {
         dragObject = null;
     }
 
-    console.log("mouse up");
     return;
 }
 
@@ -149,7 +138,7 @@ function setupInput() {
     document.addEventListener('keydown', keyPressed);
     document.addEventListener('keyup', keyReleased);
 
-    // blueTower.setupInput(KEY_LEFT_ARROW, KEY_UP_ARROW, KEY_RIGHT_ARROW, KEY_DOWN_ARROW);
+    initButtons();
 }
 
 function keySet(evt, tower, setTo) {

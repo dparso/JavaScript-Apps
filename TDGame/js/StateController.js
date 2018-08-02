@@ -1,16 +1,19 @@
 
-function StateControllerClass() {
+function StateControllerClass(startLevel) {
     this.state;
+    this.currLevel = startLevel;
 
     this.monstersWaiting = [];
 
-    this.changeState = function(newState) {
+    this.changeState = function(newState, newLevel) {
+        this.currLevel = newLevel;
+
     	switch(newState) {
     		case STATE_SELECT:
-    			loadLevel(selectScreen);
+    			this.currLevel.load();
     			break;
     		case STATE_PLAY:
-    			loadLevel(levelOne);
+    			this.currLevel.load();
     			createMonsters();
                 createTowers();
     			break;
@@ -21,6 +24,7 @@ function StateControllerClass() {
     	this.prepareState(newState);
     	this.state = newState;
     }
+
     // these should be combined
    	this.prepareState = function(state) {
 	    switch(state) {
@@ -33,6 +37,10 @@ function StateControllerClass() {
 	            return;
 	    }
 	}
+
+    this.drawLevel = function() {
+        this.currLevel.draw();
+    }
 }
 
 

@@ -11,6 +11,7 @@ function TowerClass(image) {
     this.id = TOWER_ID++;
     this.timeSinceAttack = (1000 / fps) / TOWER_FIRE_RATE; // allow immediate firing
     this.active = false; // drag & drop shouldn't be firing
+    this.visible = false;
 
     this.img = image;
 
@@ -26,7 +27,7 @@ function TowerClass(image) {
         for(var row = tilePos.row - this.range; row <= tilePos.row + this.range; row++) {
             for(var col = tilePos.col - this.range; col <= tilePos.col + this.range; col++) {
                 if(gridInRange(row, col)) {
-                    var tile = tiles[row][col];
+                    var tile = StateController.currLevel.tiles[row][col];
                     if(tile.hasMonsters()) {
                         this.target = monsterList[tile.monstersOnTile.values().next().value];
                         return;                       
@@ -74,7 +75,9 @@ function TowerClass(image) {
     }
 
     this.draw = function() {
-        drawBitmapCenteredWithRotation(this.img, this.x, this.y, this.angle);
+        if(this.visible) {
+            drawBitmapCenteredWithRotation(this.img, this.x, this.y, this.angle);
+        }
     }
 }
 

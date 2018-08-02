@@ -49,8 +49,8 @@ function MonsterClass(type, image) {
                     // since it moved, it must notify tiles if changed
                     var newTile = pixelToGrid(this.x, this.y);
                     if(newTile.col != this.currTile.col || newTile.row != this.currTile.row) {
-                        tiles[this.currTile.row][this.currTile.col].notifyMonsterDepart(this.id);
-                        tiles[newTile.row][newTile.col].notifyMonsterArrive(this.id);
+                        StateController.currLevel.tiles[this.currTile.row][this.currTile.col].notifyMonsterDepart(this.id);
+                        StateController.currLevel.tiles[newTile.row][newTile.col].notifyMonsterArrive(this.id);
                         this.currTile = newTile;
                     }
                 }
@@ -79,7 +79,7 @@ function MonsterClass(type, image) {
     }
 
     this.die = function() {
-        tiles[this.currTile.row][this.currTile.col].notifyMonsterDepart(this.id);
+        StateController.currLevel.tiles[this.currTile.row][this.currTile.col].notifyMonsterDepart(this.id);
         delete monsterList[this.id];
     }
 }
@@ -107,8 +107,8 @@ function calculateMonsterPath() {
     var currTile, finish;
     for(var row = 0; row < TILE_ROWS; row++) {
         for(var col = 0; col < TILE_COLS; col++) {
-            if(tiles[row][col].type == TILE_MONSTER_START) {
-                currTile = tiles[row][col];
+            if(StateController.currLevel.tiles[row][col].type == TILE_MONSTER_START) {
+                currTile = StateController.currLevel.tiles[row][col];
             }
         }
     }
@@ -132,7 +132,7 @@ function calculateMonsterPath() {
         for(var rowOffset = -1; rowOffset <= 1; rowOffset++) {
             if(rowOffset == 0) continue;
             if(gridInRange(currTile.row + rowOffset, currTile.col)) {
-                var tile = tiles[currTile.row + rowOffset][currTile.col];
+                var tile = StateController.currLevel.tiles[currTile.row + rowOffset][currTile.col];
 
                 if((tile.type == TILE_GROUND || tile.type == TILE_MONSTER_END) && !tile.visited) {
                     // add this to path
@@ -144,7 +144,7 @@ function calculateMonsterPath() {
         for(var colOffset = -1; colOffset <= 1; colOffset++) {
             if(colOffset == 0) continue;
             if(gridInRange(currTile.row, currTile.col + colOffset)) {
-                var tile = tiles[currTile.row][currTile.col + colOffset];
+                var tile = StateController.currLevel.tiles[currTile.row][currTile.col + colOffset];
 
                 if((tile.type == TILE_GROUND || tile.type == TILE_MONSTER_END) && !tile.visited) {
                     // add this to path

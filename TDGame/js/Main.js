@@ -3,6 +3,7 @@ var canvas, canvasContext;
 var gameWon = false;
 var winner = "";
 var fps = 30;
+var timerId = 0; // interval counter
 
 var ballList = [];
 var monsterList = {};
@@ -11,7 +12,11 @@ var projectileList = {};
 var monsterSelections = {}; // these things should be moved elsewhere!
 var monsterPath = [];
 
-var StateController = new StateControllerClass();
+var StateController = new StateControllerClass(welcomeScreen);
+
+function hi() {
+    console.log("hello!");
+}
 
 window.onload = function() {
     canvas = document.getElementById('gameCanvas');
@@ -20,31 +25,10 @@ window.onload = function() {
 }
 
 function loadingDoneStartGame() {  
-    setInterval(updateAll, 1000 / fps);
+    timerId = setInterval(updateAll, 1000 / fps);
 
     setupInput();
-    StateController.changeState(STATE_SELECT);
-    createEveryBall();
-}
-
-function loadLevel(level) {
-    tiles = new Array(TILE_ROWS);
-    for(var row = 0; row < TILE_ROWS; row++) {
-        tiles[row] = new Array(TILE_COLS);
-        for(var col = 0; col < TILE_COLS; col++) {
-            var type = level[row][col];
-            var isTransparent = type > 4 ? true : false;
-            var tile = new TileClass({row: row, col: col}, type, tilePics[type], isTransparent);
-            tiles[row][col] = tile;
-
-            if(type == TILE_MONSTER_START) {
-                MONSTER_START = {row: row, col: col};
-            } else if(type == TILE_MONSTER_END) {
-                MONSTER_END = {row: row, col: col};
-            }
-        }
-    }
-    calculateMonsterPath();
+    StateController.changeState(STATE_START, welcomeScreen);
 }
 
 function updateAll() {
@@ -94,35 +78,13 @@ function moveAll() {
 }
 
 function drawAll() {
-    tilesDraw();
-    textDraw();
+    StateController.drawLevel();
 
     var string = "";
     for(var key in monsterSelections) {
         string += "Type " + key + ": " + monsterSelections[key] + "<br>";
     }
     document.getElementById("monsterText").innerHTML = string;
-
-    for(var i = 0; i < ballList.length; i++) {
-      ballList[i].draw();
-    }
-
-    for(id in monsterList) {
-      monsterList[id].draw();
-    }
-
-    for(id in towerList) {
-      towerList[id].draw();
-    }
-
-    for(id in projectileList) {
-      projectileList[id].draw();
-    }
-
-    // drag object
-    if(dragObject) {
-        dragObject.draw();
-    }
 }
 
 function textDraw() {
@@ -139,5 +101,5 @@ function textDraw() {
 
     var tile = pixelToGrid(mouseX, mouseY);
     canvasContext.fillStyle = 'white';
-    canvasContext.fillText(tile.row + ", " + tile.col, mouseX, mouseY);
+    canvasContext.fillText(mouseX + ", " + mouseY, mouseX, mouseY);
 }
