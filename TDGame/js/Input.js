@@ -60,7 +60,7 @@ function handleMouseDown(evt) {
     switch(StateController.state) {
         case STATE_START:
             // only registering clicks on the menu options
-            if(mouseX > START_IMAGE.x && mouseX < START_IMAGE.x + START_IMAGE.img.width) {
+            if(mouseX > START_IMAGE.x - START_IMAGE.img.width / 2 && mouseX < START_IMAGE.x + START_IMAGE.img.width / 2) {
                 if(mouseY > START_IMAGE.y && mouseY < START_IMAGE.y + START_IMAGE.img.height) {
                     // clicked start!
                     fadeOut(STATE_SELECT, selectScreen);
@@ -72,7 +72,7 @@ function handleMouseDown(evt) {
 
         case STATE_SELECT:
             // clicking "Click to proceed"
-            if(mouseX > CLICK_CONTINUE_IMAGE.x && mouseX < CLICK_CONTINUE_IMAGE.x + CLICK_CONTINUE_IMAGE.img.width) {
+            if(mouseX > CLICK_CONTINUE_IMAGE.x - CLICK_CONTINUE_IMAGE.img.width / 2 && mouseX < CLICK_CONTINUE_IMAGE.x + CLICK_CONTINUE_IMAGE.img.width / 2) {
                 if(mouseY > CLICK_CONTINUE_IMAGE.y && mouseY < CLICK_CONTINUE_IMAGE.y + CLICK_CONTINUE_IMAGE.img.height) {
                     // clicked start!
                     fadeOut(STATE_PLAY, levelOne);

@@ -82,14 +82,14 @@ var levelOneGrid =
 var welcomeScreen = new LevelClass(LEVEL_START, [], function() {
     drawRect(0, 0, canvas.width, canvas.height, 'black');
     var img = tilePics[TEXT_START];
-    canvasContext.drawImage(START_IMAGE.img, START_IMAGE.x, START_IMAGE.y);
+    canvasContext.drawImage(START_IMAGE.img, START_IMAGE.x - START_IMAGE.img.width / 2, START_IMAGE.y);
     textDraw();
 });
 
 var selectScreen = new LevelClass(LEVEL_SELECT, selectScreenGrid, function() {
     this.tilesDraw();
     textDraw();
-    canvasContext.drawImage(CLICK_CONTINUE_IMAGE.img, CLICK_CONTINUE_IMAGE.x, CLICK_CONTINUE_IMAGE.y);
+    canvasContext.drawImage(CLICK_CONTINUE_IMAGE.img, CLICK_CONTINUE_IMAGE.x - CLICK_CONTINUE_IMAGE.img.width / 2, CLICK_CONTINUE_IMAGE.y);
 });
 
 var levelOne = new LevelClass(LEVEL_TRACK, levelOneGrid, function() {
@@ -148,6 +148,6 @@ function initButtons() {
     var img2 = tilePics[TEXT_CLICK_CONTINUE];
     console.log(img2);
     console.log("mid " + canvas.width / 2 + ", " + img2.width);
-    START_IMAGE = new ButtonClass(img1, (canvas.width - img1.width) / 2, 3 * canvas.height / 10);
-    CLICK_CONTINUE_IMAGE = new ButtonClass(img2, (canvas.width - img2.width) / 2, 3 * canvas.height / 10);
+    START_IMAGE = new ButtonClass(img1, canvas.width / 2, 3 * canvas.height / 10);
+    CLICK_CONTINUE_IMAGE = new ButtonClass(img2, canvas.width / 2, 3 * canvas.height / 10);
 }
