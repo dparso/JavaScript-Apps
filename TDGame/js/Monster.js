@@ -1,20 +1,24 @@
 // monster movement
 const MONSTER_HEALTH_BAR_HEIGHT = 5;
-var monsterID = 0;
-var monsterHealths = [5, 10, 20, 40];
-var monsterSpeeds = [15, 10, 6, 2];
+var MONSTER_ID = [0, 0];
+var monsterHealths = [10, 20, 40, 80];
+var monsterSpeeds = [10, 5, 3, 3];
+var monsterValues = [2, 1, 2, 6];
+var monsterCosts = [2, 1, 2, 6]; // for now, same as values
 
-function MonsterClass(type, image) {
+function MonsterClass(type, image, context) {
     // positions
-    this.x = 75;
-    this.y = 75;
+    this.x = MONSTER_START.col * TILE_W;
+    this.y = MONSTER_START.row * TILE_H;
+    this.currTile = MONSTER_START;
+
     this.img = image;
-    this.id = monsterID++;
+    this.context = context; // where to draw itself
+    this.id = MONSTER_ID[this.context]++;
 
     this.pathPosition = 0; // current goal
     this.visible = false;
     this.type = type;
-    this.currTile = pixelToGrid(this.x, this.y);
     this.health = monsterHealths[type];
     this.speed = monsterSpeeds[type];
     this.invulnerable = false;
@@ -25,7 +29,7 @@ function MonsterClass(type, image) {
     this.reset = function() {
         this.x = MONSTER_START.col * TILE_W;
         this.y = MONSTER_START.row * TILE_H;
-        this.currTile = {row: MONSTER_START.row, col: MONSTER_START.col};
+        this.currTile = MONSTER_START;
     }
 
     this.move = function() {
@@ -49,34 +53,30 @@ function MonsterClass(type, image) {
                     this.pathPosition++;
                 }
 
-                // if(!collisionHandling(this)) {
-                    // undo change if colliding
-                //     this.x -= changeX * this.speed;
-                //     this.y -= changeY * this.speed;
-                // } else {
-                    // since it moved, it must notify tiles if changed
-                    var newTile = pixelToGrid(this.x, this.y);
-                    if(newTile.col != this.currTile.col || newTile.row != this.currTile.row) {
-                        StateController.currLevel.tiles[this.currTile.row][this.currTile.col].notifyMonsterDepart(this.id);
-                        StateController.currLevel.tiles[newTile.row][newTile.col].notifyMonsterArrive(this.id);
-                        this.currTile = newTile;
-                    }
-                // }
+                // since it moved, it must notify tiles if changed
+                var newTile = pixelToGrid(this.x, this.y);
+                // console.log(this.x, this.y);
+                if(newTile.col != this.currTile.col || newTile.row != this.currTile.row) {
+                    // notify old & new tile
+                    StateController.currLevel.tiles[this.context][this.currTile.row][this.currTile.col].notifyMonsterDepart(this.id);
+                    StateController.currLevel.tiles[this.context][newTile.row][newTile.col].notifyMonsterArrive(this.id);
+                    this.currTile = newTile;
+                }
             }
         } else {
             // reached the end: take a life
             player.loseLife();
-            this.die();
+            this.die(false);
         }
     }
 
     this.draw = function() {
         if(this.visible) {
-            canvasContext.drawImage(this.img, this.x, this.y);
+            ctx[this.context].drawImage(this.img, this.x, this.y);
 
             // health bar
             var widthLimit = this.health / monsterHealths[this.type];
-            drawRect(this.x, this.y - 5, this.img.width * widthLimit, MONSTER_HEALTH_BAR_HEIGHT, 'red');
+            drawRect(this.x, this.y - 5, this.img.width * widthLimit, MONSTER_HEALTH_BAR_HEIGHT, 'red', this.context);
         }
     }
 
@@ -85,15 +85,24 @@ function MonsterClass(type, image) {
         // return true if dead
         this.health -= damage;
         if(this.health <= 0) {
-            this.die();
+            this.die(true);
             return true;
         }
         return false;
     }
 
-    this.die = function() {
-        StateController.currLevel.tiles[this.currTile.row][this.currTile.col].notifyMonsterDepart(this.id);
-        delete monsterList[this.id];
+    this.die = function(killed) {
+        if(killed) {
+            // only reward player if it was killed (also dies at end)
+            if(this.context == PLAYER) {
+                player.killedMonster(this.type);
+            } else {
+                enemy.killedMonster(this.type);
+            }
+        }
+
+        StateController.currLevel.tiles[this.context][this.currTile.row][this.currTile.col].notifyMonsterDepart(this.id);
+        delete monsterList[this.context][this.id];
     }
 }
 
@@ -117,11 +126,12 @@ function Queue() {
 
 function calculateMonsterPath() {
     // BFS from TILE_MONSTER_START to TILE_MONSTER_END
+    // NOTE: for now, the tiles are the same, so the path is the same
     var currTile, finish;
     for(var row = 0; row < TILE_ROWS; row++) {
         for(var col = 0; col < TILE_COLS; col++) {
-            if(StateController.currLevel.tiles[row][col].type == TILE_MONSTER_START) {
-                currTile = StateController.currLevel.tiles[row][col];
+            if(StateController.currLevel.tiles[PLAYER][row][col].type == TILE_MONSTER_START) {
+                currTile = StateController.currLevel.tiles[PLAYER][row][col];
             }
         }
     }
@@ -145,7 +155,7 @@ function calculateMonsterPath() {
         for(var rowOffset = -1; rowOffset <= 1; rowOffset++) {
             if(rowOffset == 0) continue;
             if(gridInRange(currTile.row + rowOffset, currTile.col)) {
-                var tile = StateController.currLevel.tiles[currTile.row + rowOffset][currTile.col];
+                var tile = StateController.currLevel.tiles[PLAYER][currTile.row + rowOffset][currTile.col];
 
                 if((tile.type == TILE_GROUND || tile.type == TILE_MONSTER_END) && !tile.visited) {
                     // add this to path
@@ -157,7 +167,7 @@ function calculateMonsterPath() {
         for(var colOffset = -1; colOffset <= 1; colOffset++) {
             if(colOffset == 0) continue;
             if(gridInRange(currTile.row, currTile.col + colOffset)) {
-                var tile = StateController.currLevel.tiles[currTile.row][currTile.col + colOffset];
+                var tile = StateController.currLevel.tiles[PLAYER][currTile.row][currTile.col + colOffset];
                 if((tile.type == TILE_GROUND || tile.type == TILE_MONSTER_END) && !tile.visited) {
                     // add this to path
                     tile.parent = currTile;
@@ -182,46 +192,29 @@ function calculateMonsterPath() {
         } else {
             monsterPath.unshift(pixelPos);
         }
-
+        var tilePos = pixelToGrid(pixelPos.x, pixelPos.y);
+        fullMonsterPath.push(tilePos); // this one goes last-first for easy tower traversal
         finish = finish.parent;
     }
 }
 
 function createMonsters() {
-    // var goalPath = [{x: 80, y: 170}, {x: 200, y: 80}, {x: 670, y: 80}, {x: 710, y: 480}, {x: 610, y: 480}]; // ideally this would be in the grid as well (how to order?)
-    var masterMonster = new MonsterClass(0, tilePics[TILE_MONSTER_4]);
-    masterMonster.reset();
-    masterMonster.x = Math.floor(TILE_COLS / 2) * TILE_W;
-    masterMonster.y = Math.floor(TILE_ROWS / 2) * TILE_H;
-    masterMonster.currTile = {row: Math.floor(TILE_ROWS / 2), col: Math.floor(TILE_COLS / 2)};
-    // masterMonster.invulnerable = true;
-    masterMonster.immobile = true;
-    masterMonster.visible = true;
+    // var masterMonster = new MonsterClass(0, tilePics[TILE_MONSTER_4]);
+    // masterMonster.reset();
+    // masterMonster.x = Math.floor(TILE_COLS / 2) * TILE_W;
+    // masterMonster.y = Math.floor(TILE_ROWS / 2) * TILE_H;
+    // masterMonster.currTile = {row: Math.floor(TILE_ROWS / 2), col: Math.floor(TILE_COLS / 2)};
+    // // masterMonster.invulnerable = true;
+    // masterMonster.immobile = true;
+    // masterMonster.visible = true;
 
-    var tile = pixelToGrid(masterMonster.x, masterMonster.y);
-    StateController.currLevel.tiles[tile.row][tile.col].notifyMonsterArrive(0);
-    monsterList[0] = masterMonster;
-
-    masterMonster = new MonsterClass(0, tilePics[TILE_MONSTER_4]);
-    masterMonster.reset();
-    masterMonster.x = Math.floor(TILE_COLS / 2) * TILE_W + TILE_W / 2;
-    masterMonster.y = Math.floor(TILE_ROWS / 2) * TILE_H + TILE_H / 2;
-    masterMonster.currTile = {row: Math.floor(TILE_ROWS / 2), col: Math.floor(TILE_COLS / 2)};
-    // masterMonster.invulnerable = true;
-    masterMonster.immobile = true;
-    masterMonster.visible = true;
-
-    var tile = pixelToGrid(masterMonster.x, masterMonster.y);
-    StateController.currLevel.tiles[tile.row][tile.col].notifyMonsterArrive(1);
-    monsterList[1] = masterMonster;
+    // var tile = pixelToGrid(masterMonster.x, masterMonster.y);
+    // StateController.currLevel.tiles[tile.row][tile.col].notifyMonsterArrive(0);
+    // monsterList[0] = masterMonster;
 
     for(var i = 0; i < NUM_MONSTERS; i++) {
         for(var j = 0; j < monsterSelections[i + MONSTER_OFFSET_NUM]; j++) {
-            var img = tilePics[i + MONSTER_OFFSET_NUM];
-            var monster = new MonsterClass(i, tilePics[i + MONSTER_OFFSET_NUM]);
-            monster.reset();
-            monsterList[monster.id] = monster;
-            StateController.monstersWaiting.push(monster);
+            StateController.sendMonster(i, PLAYER);
         }
     }
 }

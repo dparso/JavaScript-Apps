@@ -3,24 +3,39 @@ const LEVEL_TRACK = 1;
 const LEVEL_SELECT = 2;
 
 
-function LevelClass(levelType, levelGrid, drawFunction, loadFunction) {
-	this.grid = levelGrid;
+function LevelClass(levelType, levelGrids, drawFunction, loadFunction) {
+	this.grids = levelGrids;
 	this.type = levelType;
-	this.tiles;
+	this.tiles = [[], []]; // two sets of tiles
 
 	this.draw = drawFunction;
 	this.load = function() {
 		// create tile objects from grid values
-	    this.tiles = new Array(TILE_ROWS);
+	    this.tiles[PLAYER] = new Array(TILE_ROWS);
+	    this.tiles[ENEMY] = new Array(TILE_ROWS);
 	    for(var row = 0; row < TILE_ROWS; row++) {
-	        this.tiles[row] = new Array(TILE_COLS);
+	        this.tiles[PLAYER][row] = new Array(TILE_COLS);
+	        this.tiles[ENEMY][row] = new Array(TILE_COLS);
 	        for(var col = 0; col < TILE_COLS; col++) {
-	            var type = this.grid[row][col];
-	            var isTransparent = tileTypeHasTransparency(type);
-	            var tile = new TileClass({row: row, col: col}, type, tilePics[type], isTransparent);
-	            this.tiles[row][col] = tile;
+	            var type = this.grids[PLAYER][row][col];
+	            var type2 = this.grids[ENEMY][row][col];
 
-	            if(type == TILE_MONSTER_START) {
+	            var isTransparent = tileTypeHasTransparency(type);
+	            var isTransparent2 = tileTypeHasTransparency(type2);
+
+	            // for now, make two identical tiles for two distinct (memory-wise) sets of tiles
+	            var tile = new TileClass({row: row, col: col}, type, tilePics[type], isTransparent);
+	            var tile2 = new TileClass({row: row, col: col}, type2, tilePics[type2], isTransparent2);
+
+	            this.tiles[PLAYER][row][col] = tile;
+	            this.tiles[ENEMY][row][col] = tile2;
+
+	            if(type2 == TILE_WALL_2) {
+	            	// tell the enemy handler that this is a valid location for a tower
+	            	availableTowerLocations.push({row: row, col: col});
+	            }
+
+	            if(type == TILE_MONSTER_START) { // for now, these are shared between grids
 	                MONSTER_START = {row: row, col: col};
 	            } else if(type == TILE_MONSTER_END) {
 	                MONSTER_END = {row: row, col: col};
@@ -33,24 +48,23 @@ function LevelClass(levelType, levelGrid, drawFunction, loadFunction) {
 	    }
 	}
 
-	this.tilesDraw = function() {
+	this.tilesDraw = function(context) {
 	    var drawTileX = 0;
 	    var drawTileY = 0;
 	    // draw appropriate images
 	    for(var row = 0; row < TILE_ROWS; row++) {
 	        drawTileX = 0;
 	        for(var col = 0; col < TILE_COLS; col++) {
-	            var currTile = this.tiles[row][col];
-
+	            var currTile = this.tiles[context][row][col];
 	            if(currTile.transparent) {
-	                canvasContext.drawImage(tilePics[TILE_GROUND], drawTileX, drawTileY);
+            		ctx[context].drawImage(tilePics[TILE_GROUND], drawTileX, drawTileY);
 	            }
 
 	            if(currTile.type >= TOWER_OFFSET_NUM) {
 	                // draw with rotation
-	                drawBitmapCenteredWithRotation(currTile.img, drawTileX + currTile.img.width / 2, drawTileY + currTile.img.height / 2, 0);
+	                drawBitmapCenteredWithRotation(currTile.img, drawTileX + currTile.img.width / 2, drawTileY + currTile.img.height / 2, 0, context);
 	            } else {
-	                canvasContext.drawImage(currTile.img, drawTileX, drawTileY);
+	                ctx[context].drawImage(currTile.img, drawTileX, drawTileY);
 	            }
 	            drawTileX += TILE_W;
 	        }

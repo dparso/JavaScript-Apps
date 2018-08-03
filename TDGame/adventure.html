@@ -4,17 +4,73 @@
 <head>
 	<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
 	<meta content="utf-8" http-equiv="encoding">
-</head>
+	<style>
+		body {
+		    font-family: Arial;
+		    color: white;
+		}
 
-<canvas id="gameCanvas" width="800" height="600"></canvas>
+		.split {
+		    height: 100%;
+		    width: 50%;
+		    position: fixed;
+		    z-index: 1;
+		    top: 0;
+		    overflow-x: hidden;
+		    padding-top: 20px;
+		}
+
+		.left {
+		    left: 0;
+		    /*padding-right: 5px;*/
+		    background-color: #111;
+		}
+
+		.right {
+		    right: 0;
+		    /*padding-left: 5px;*/
+		    background-color: gray;
+		}
+
+		.centered {
+		    position: absolute;
+		    top: 50%;
+		    left: 50%;
+		    transform: translate(-50%, -50%);
+		    text-align: center;
+		}
+
+		.centered canvas {
+		    /*width: 600px;*/
+		    border-radius: 1%;
+		    /*padding-right: 5px;*/
+		}
+	</style>
+</head>
+<body>
+
+<div class="split left">
+	<div class="centered">
+		<canvas id="gameCanvas" width="700" height="700"></canvas>
+	</div>
+</div>
+
+<div class="split right">
+	<div class="centered">
+		<canvas id="enemyCanvas" width="700" height="700"></canvas>
+	</div>
+</div>
+
 
 <p id="monsterText"></p>
 
 <script src="js/Animation.js"></script>
 <script src="js/Level.js"></script>
 <script src="js/Player.js"></script>
+<script src="js/Enemy.js"></script>
 <script src="js/Grids.js"></script>
 <script src="js/Button.js"></script>
+<script src="js/Draggable.js"></script>
 <script src="js/Util.js"></script>
 <script src="js/Monster.js"></script>
 <script src="js/GraphicsCommon.js"></script>

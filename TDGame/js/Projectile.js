@@ -3,22 +3,24 @@ const PROJECTILE_TYPE_1 = 1;
 const PROJECTILE_TYPE_1_DAMAGE = 1;
 
 const PROJECTILE_DISPLAY_RADIUS = 4;
-var PROJECTILE_ID = 0;
+var PROJECTILE_ID = [0, 0];
 
 var projectileSpeeds = [15, 30]; // note: faster speeds means less reliable hitboxes in hitTarget()
 var splashes = [1, 0]; // does it deal splash
 var splashRatios = [0.5, 0]; // how much of original damage does it deal
 var splashRange = [2, 0]; // how many tiles does it cover
 
-function ProjectileClass(start, target, type, damage) {
+function ProjectileClass(start, target, type, damage, context) {
     // positions
     this.start = start;
     this.x = start.x;
     this.y = start.y;
+    this.context = context;
+    this.id = PROJECTILE_ID[this.context]++;
+
     this.angle = 0;
     this.target = target;
     this.type = type;
-    this.id = PROJECTILE_ID++;
     this.visible = true;
     this.damage = damage;
     this.speed = projectileSpeeds[type];
@@ -49,7 +51,7 @@ function ProjectileClass(start, target, type, damage) {
             if(this.hitTarget()) {
                 // monster might have died in travel time
                 if(this.target.health > 0) {
-                    monsterList[this.target.id].hitWithProjectile(this.damage);
+                    this.target.hitWithProjectile(this.damage);
                 }
 
                 if(splashes[this.type]) {
@@ -60,12 +62,12 @@ function ProjectileClass(start, target, type, damage) {
                         for(var col = thisTile.col - splashRange[this.type]; col <= thisTile.col + splashRange[this.type]; col++) {    
                             if(!gridInRange(row, col)) continue;
 
-                            var targetTile = StateController.currLevel.tiles[row][col];
+                            var targetTile = StateController.currLevel.tiles[this.context][row][col];
                             // apply to all monsters on that tile
                             if(targetTile.hasMonsters()) {
                                 targetTile.monstersOnTile.forEach(
                                     ((monster) => {
-                                        monsterList[monster].hitWithProjectile(this.damage * splashRatios[this.type]);
+                                        monsterList[this.context][monster].hitWithProjectile(this.damage * splashRatios[this.type]);
                                     })
                                 );
                             }
@@ -88,11 +90,11 @@ function ProjectileClass(start, target, type, damage) {
 
     this.draw = function() {
         if(this.visible) {
-            drawCircle(this.x, this.y, PROJECTILE_DISPLAY_RADIUS, 'black');
+            drawCircle(this.x, this.y, PROJECTILE_DISPLAY_RADIUS, 'black', this.context);
         }
     }
 
     this.die = function() {
-        delete projectileList[this.id];
+        delete projectileList[this.context][this.id];
     }
 }

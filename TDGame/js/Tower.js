@@ -1,15 +1,16 @@
 // tower properties
-var TOWER_ID = 0;
+var TOWER_ID = [0, 0];
 var towerRanges = [3, 5];
-var towerDamages = [3.0, 1.0];
-var towerAttackSpeeds = [1, 5];
-var towerCosts = [2, 1];
+var towerDamages = [6.0, 1.0];
+var towerAttackSpeeds = [1, 6];
+var towerCosts = [5, 2];
 
-function TowerClass(image, type) {
+function TowerClass(type, context) {
     // positions
     this.x;
     this.y;
     this.currTile;
+    this.context = context;
 
     this.angle = 0;
     this.range = towerRanges[type];
@@ -17,14 +18,14 @@ function TowerClass(image, type) {
     this.damage = towerDamages[type];
     this.type = type;
 
-    this.id = TOWER_ID++;
+    this.id = TOWER_ID[this.context]++;
     this.timeSinceAttack = (1000 / fps) / this.attackSpeed; // allow immediate firing
     this.active = false; // drag & drop shouldn't be firing
     this.visible = false;
 
     this.classType = "tower";
 
-    this.img = image;
+    this.img = tilePics[this.type + TOWER_OFFSET_NUM];
 
     this.reset = function() {
         this.currTile = pixelToGrid(this.x, this.y);
@@ -33,17 +34,17 @@ function TowerClass(image, type) {
     } // end of towerReset
 
     this.findTarget = function() {
-        // for now, targets based on physical proximity
-        var tilePos = pixelToGrid(this.x, this.y);
-        // iterate through tiles in range and find a target
-        for(var row = tilePos.row - this.range; row <= tilePos.row + this.range; row++) {
-            for(var col = tilePos.col - this.range; col <= tilePos.col + this.range; col++) {
-                if(gridInRange(row, col)) {
-                    var tile = StateController.currLevel.tiles[row][col];
-                    if(tile.hasMonsters()) {
-                        this.target = monsterList[tile.monstersOnTile.values().next().value];
-                        return;                       
-                    }
+        // follow the path, end -> start, and attack the first monster in range
+        for(var tileNum = 0; tileNum < fullMonsterPath.length; tileNum++) {
+            var tilePos = fullMonsterPath[tileNum];
+            // console.log(tilePos);
+            if(this.inRange(tilePos.row, tilePos.col)) {
+                // console.log("in range");
+                var tile = StateController.currLevel.tiles[this.context][tilePos.row][tilePos.col];
+                if(tile.hasMonsters()) {
+                    // found our target!
+                    this.target = monsterList[this.context][tile.monstersOnTile.values().next().value];
+                    return;
                 }
             }
         }
@@ -82,13 +83,17 @@ function TowerClass(image, type) {
     }
 
     this.attack = function() {
-        var projectile = new ProjectileClass({x: this.x, y: this.y}, this.target, this.type, this.damage);
-        projectileList[projectile.id] = projectile;
+        var projectile = new ProjectileClass({x: this.x, y: this.y}, this.target, this.type, this.damage, this.context);
+        projectileList[this.context][projectile.id] = projectile;
     }
 
     this.draw = function() {
         if(this.visible) {
-            drawBitmapCenteredWithRotation(this.img, this.x, this.y, this.angle);
+            drawBitmapCenteredWithRotation(this.img, this.x, this.y, this.angle, this.context);
         }
+    }
+
+    this.inRange = function(row, col) {
+        return Math.abs(row - this.currTile.row) <= this.range && Math.abs(col - this.currTile.col) <= this.range;
     }
 }

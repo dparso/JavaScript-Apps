@@ -3,7 +3,7 @@ var time = 0.0;
 var fadeAlpha = 1.0;
 var delta = -0.04;
 
-function fadeIn(){
+function fadeIn(context){
     fadeAlpha += delta;
     if(fadeAlpha >= 1) {
         // reset for next transition
@@ -13,33 +13,35 @@ function fadeIn(){
         timerId = setInterval(updateAll, 1000 / fps); // restart gameplay
     } else {
         // draw black background with full alpha, then set new and re-draw
-        canvasContext.globalAlpha = 1.0;
-        drawRect(0, 0, canvas.width, canvas.height, 'black');
+        ctx[context].globalAlpha = 1.0;
+        drawRect(0, 0, canvas[context].width, canvas[context].height, 'black', context);
 
-        canvasContext.globalAlpha = fadeAlpha;
+        ctx[context].globalAlpha = fadeAlpha;
         drawAll();
 
-        requestAnimationFrame(fadeIn); // loop fade in
+        requestAnimationFrame(function() {
+            fadeIn(context);
+        }); // loop fade in
     }
 }
 
-function fadeOut(toState, toLevel) {
+function fadeOut(toState, toLevel, context) {
     fadeAlpha += delta;
     if(fadeAlpha <= 0) {
         delta *= -1;
         StateController.changeState(toState, toLevel);
         clearInterval(fadeId); // stop fade out
-        fadeIn();
+        fadeIn(context);
     } else {
         // draw black background with full alpha, then set new and re-draw
-        canvasContext.globalAlpha = 1.0;
-        drawRect(0, 0, canvas.width, canvas.height, 'black');
+        ctx[context].globalAlpha = 1.0;
+        drawRect(0, 0, canvas[context].width, canvas[context].height, 'black', context);
 
-        canvasContext.globalAlpha = fadeAlpha;
+        ctx[context].globalAlpha = fadeAlpha;
         drawAll();
 
         requestAnimationFrame(function() {
-            fadeOut(toState, toLevel);
+            fadeOut(toState, toLevel, context);
         }); // or use setTimeout(loop, 16) in older browsers
     }
 }
@@ -50,19 +52,19 @@ function queueErrorMessage(message) {
 }
 
 // message scrolls up as it fades out
-function drawErrorMessage(message, alpha, delta, x, y) {
-    canvasContext.fillStyle = 'red';
-    canvasContext.globalAlpha = alpha;
+function drawErrorMessage(message, alpha, delta, x, y, context) {
+    ctx[context].fillStyle = 'red';
+    ctx[context].globalAlpha = alpha;
 
-    canvasContext.font = "16px Helvetica";
-    canvasContext.textAlign = "left";
-    canvasContext.textBaseline = "top";
-    canvasContext.fillText(message, x, y);
-    canvasContext.globalAlpha = 1.0;
+    ctx[context].font = "16px Helvetica";
+    ctx[context].textAlign = "left";
+    ctx[context].textBaseline = "top";
+    ctx[context].fillText(message, x, y);
+    ctx[context].globalAlpha = 1.0;
 
     if(alpha >= 0.2) {
         requestAnimationFrame(function() {
-            drawErrorMessage(message, alpha + delta, delta, x, y - 0.9);
+            drawErrorMessage(message, alpha + delta, delta, x, y - 0.9, context);
         });
     }
 }

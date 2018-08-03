@@ -3,6 +3,7 @@ var imageList = {};
 
 imageList[TILE_GROUND] = "grass.png";
 imageList[TILE_WALL] = "world_gravel.png";
+imageList[TILE_WALL_2] = "world_gravel2.png";
 imageList[TILE_TREE] = "world_tree.png";
 imageList[TILE_MONSTER_START] = "grass.png";
 imageList[TILE_MONSTER_END] = "grass.png";

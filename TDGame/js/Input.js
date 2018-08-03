@@ -15,7 +15,9 @@ var isDown = false;
 var isDragging = false; // maybe not necessary, implied by isDown + dragDelay?
 var dragDelay = 0;
 var dragWait = 10;
-var dragObject;
+var dragObject = [null, null];
+
+var currCanvas;
 
 /* order of drag & drop for tower:
     mousedown initiates the delay counter and creates a tower object in dragObject
@@ -24,7 +26,7 @@ var dragObject;
 */
 
 function calculateMousePos(evt) {
-    var rect = canvas.getBoundingClientRect();
+    var rect = canvas[currCanvas].getBoundingClientRect();
     var root = document.documentElement;
     mouseX = evt.clientX - rect.left - root.scrollLeft;
     mouseY = evt.clientY - rect.top - root.scrollTop;
@@ -33,10 +35,10 @@ function calculateMousePos(evt) {
         if(dragDelay > dragWait) {
             isDragging = true;
 
-            if(dragObject) {
-                dragObject.x = mouseX;
-                dragObject.y = mouseY;
-                dragObject.visible = true;
+            if(dragObject[currCanvas]) {
+                dragObject[currCanvas].x = mouseX;
+                dragObject[currCanvas].y = mouseY;
+                dragObject[currCanvas].visible = true;
             }
         } else {
             dragDelay++;
@@ -68,7 +70,7 @@ function handleMouseDown(evt) {
             if(mouseX > START_IMAGE.x - START_IMAGE.img.width / 2 && mouseX < START_IMAGE.x + START_IMAGE.img.width / 2) {
                 if(mouseY > START_IMAGE.y && mouseY < START_IMAGE.y + START_IMAGE.img.height) {
                     // clicked start!
-                    fadeOut(STATE_SELECT, selectScreen);
+                    fadeOut(STATE_SELECT, selectScreen, currCanvas);
                     clearInterval(timerId);
                     return;
                 }
@@ -80,37 +82,61 @@ function handleMouseDown(evt) {
             if(mouseX > CLICK_CONTINUE_IMAGE.x - CLICK_CONTINUE_IMAGE.img.width / 2 && mouseX < CLICK_CONTINUE_IMAGE.x + CLICK_CONTINUE_IMAGE.img.width / 2) {
                 if(mouseY > CLICK_CONTINUE_IMAGE.y && mouseY < CLICK_CONTINUE_IMAGE.y + CLICK_CONTINUE_IMAGE.img.height) {
                     // clicked start!
-                    fadeOut(STATE_PLAY, levelOne);
+                    fadeOut(STATE_PLAY, levelOne, currCanvas);
                     clearInterval(timerId);
                     return;
                 }
             }
 
             // choosing a monster type to add
-            var type = StateController.currLevel.tiles[tileClicked.row][tileClicked.col].type;
+            var type = StateController.currLevel.tiles[currCanvas][tileClicked.row][tileClicked.col].type;
             if(type >= MONSTER_OFFSET_NUM && type <= MONSTER_OFFSET_NUM + NUM_MONSTERS) {
                 monsterSelections[type]++;
             }
             break;
 
         case STATE_PLAY:
-            if(!isDragging) {
-                var tile = StateController.currLevel.tiles[tileClicked.row][tileClicked.col];
-                if(tile.type == TILE_TOWER_1 || tile.type == TILE_TOWER_2) {
-                    if(player.gold < towerCosts[tile.type - TOWER_OFFSET_NUM]) {
+            if(currCanvas == PLAYER) { // tower
+                if(!isDragging) {
+                    // selected a tower to build
+                    var tile = StateController.currLevel.tiles[currCanvas][tileClicked.row][tileClicked.col];
+                    if(tile.type == TILE_TOWER_1 || tile.type == TILE_TOWER_2) {
+                        if(player.gold < towerCosts[tile.type - TOWER_OFFSET_NUM]) {
+                            queueErrorMessage("Insufficient gold!");
+                        } else {
+                            dragObject[currCanvas] = new DraggableClass(tile.type, mouseX, mouseY, currCanvas, "tower");
+                            dragObject[currCanvas].range = towerRanges[tile.type - TOWER_OFFSET_NUM];
+                        }
+                    } else if(tile.hasTower()) {
+                        // selected a tower
+                        if(selection[currCanvas] == tile.towerOnTile) {
+                            selection[currCanvas] = null; // deselect
+                        } else {
+                            selection[currCanvas] = tile.towerOnTile;
+                        }
+                    } else {
+                        selection[currCanvas] = null; // clicked on empty square: clear selection
+                    }
+                }
+            } else { // send monster
+                var tile = StateController.currLevel.tiles[currCanvas][tileClicked.row][tileClicked.col];
+                
+                if(tile.type >= MONSTER_OFFSET_NUM && tile.type <= MONSTER_OFFSET_NUM + NUM_MONSTERS) {
+                    // sending a monster
+                    if(player.gold < monsterCosts[tile.type - MONSTER_OFFSET_NUM]) {
                         queueErrorMessage("Insufficient gold!");
                     } else {
-                        dragObject = new TowerClass(tilePics[tile.type], tile.type - TOWER_OFFSET_NUM);
-                        dragObject.x = mouseX;
-                        dragObject.y = mouseY;
+                        StateController.sendMonster(tile.type - MONSTER_OFFSET_NUM, ENEMY);
                     }
                 } else if(tile.hasTower()) {
-                    // selected a tower
-                    if(selection == tile.towerOnTile) {
-                        selection = null; // deselect
+                    // selecting an opponent's tower
+                    if(selection[currCanvas] == tile.towerOnTile) {
+                        selection[currCanvas] = null; // deselect
                     } else {
-                        selection = tile.towerOnTile;
+                        selection[currCanvas] = tile.towerOnTile;
                     }
+                } else {
+                    selection[currCanvas] = null; // clicked on empty square: clear selection
                 }
             }
             break;
@@ -126,38 +152,52 @@ function handleMouseUp(evt) {
     isDragging = false;
     isDown = false;
 
-    if(dragObject) {
+    if(dragObject[currCanvas]) {
         // can you place that there?
         var tile = pixelToGrid(mouseX, mouseY);
-        if(canPlaceTower(tile.row, tile.col)) {
-            // snap the object to the center of the grid
-            dragObject.x = tile.col * TILE_W + TILE_W / 2;
-            dragObject.y = tile.row * TILE_H + TILE_H / 2; 
-            dragObject.currTile = tile;
-            dragObject.active = true; // tower can attack now
-            towerList[dragObject.id] = dragObject;
-            // notify tile
-            StateController.currLevel.tiles[tile.row][tile.col].notifyTowerPlaced(dragObject.id);
-
-            // player bought tower: pay for it
-            player.loseGold(towerCosts[dragObject.type]);
+        if(canPlaceTower(tile.row, tile.col, currCanvas)) {
+            // place the tower!
+            StateController.placeTower(dragObject[currCanvas].type - TOWER_OFFSET_NUM, currCanvas, tile);
         }
 
-        dragObject = null;
+        dragObject[currCanvas] = null;
     }
 
     return;
 }
 
 function setupInput() {
-    canvas.addEventListener('mousemove', function(evt) {
+    canvas[PLAYER].addEventListener('mousemove', function(evt) {
+        // easy swapping: only listen on the canvas they're moused over
+        // (that's the only one they can click)
+        currCanvas = PLAYER;
 	    var mouse = calculateMousePos(evt);
 	    mouseX = mouse.x;
 	    mouseY = mouse.y;
     });
 
-    canvas.addEventListener('mousedown', handleMouseDown);
-    canvas.addEventListener('mouseup', handleMouseUp);
+    canvas[PLAYER].addEventListener('mousedown', function(evt) {
+        handleMouseDown(evt);
+    });
+
+    canvas[PLAYER].addEventListener('mouseup', function(evt) {
+        handleMouseUp(evt);
+    });
+
+    canvas[ENEMY].addEventListener('mousemove', function(evt) {
+        currCanvas = ENEMY;
+        var mouse = calculateMousePos(evt);
+        mouseX = mouse.x;
+        mouseY = mouse.y;
+    });
+
+    canvas[ENEMY].addEventListener('mousedown', function(evt) {
+        handleMouseDown(evt);
+    });
+
+    canvas[ENEMY].addEventListener('mouseup', function(evt) {
+        handleMouseUp(evt);
+    });
     
     document.addEventListener('keydown', keyPressed);
     document.addEventListener('keyup', keyReleased);
@@ -203,7 +243,7 @@ function keyReleased(evt) {
 }
 
 function pressEscape() {
-    if(dragObject) {
-        dragObject = null;
+    if(dragObject[currCanvas]) {
+        dragObject[currCanvas] = null;
     }
 }

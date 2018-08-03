@@ -6,3 +6,28 @@ Show range of towers on click & drag
 As it stands, monsters can't be attacked in their original square, as they haven't yet notified the tile of their presence
 
 Objects like tower and monster should have their row, col as properties, rather than having to calculate it every frame
+
+Targeting system: walk backwards through the path and attack the first one there!
+
+Tower type: line directly to monster, damages per second
+
+
+Deselect tower upon drag & drop
+github html?
+
+Scrolling -5 text for tower purchase
+
+sendMonster(ofType, toSide) function for easy monster adding
+
+Press keys to select a tower type to buy/monster type to send (press 1 means tower type 1 appears at mouseX, mouseY if enough gold)
+
+Note: if maps change, BFS code must perform separate searches for each context
+
+When drawing a dragged tower, don't make an actual tower object, too much -- just need the image, object is created if necessary when placed
+
+
+Income from sending monsters
+
+Increase tower building probability the more monsters are on screen
+
+Money if monster reaches end (lives?)
