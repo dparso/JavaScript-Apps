@@ -1,21 +1,33 @@
-// tower movement
-const TOWER_FIRE_RATE = 1; // per second
+// tower properties
 var TOWER_ID = 0;
+var towerRanges = [3, 5];
+var towerDamages = [3.0, 1.0];
+var towerAttackSpeeds = [1, 5];
+var towerCosts = [2, 1];
 
-function TowerClass(image) {
+function TowerClass(image, type) {
     // positions
-    this.x = 220;
-    this.y = 140;
+    this.x;
+    this.y;
+    this.currTile;
+
     this.angle = 0;
-    this.range = 3;
+    this.range = towerRanges[type];
+    this.attackSpeed = towerAttackSpeeds[type];
+    this.damage = towerDamages[type];
+    this.type = type;
+
     this.id = TOWER_ID++;
-    this.timeSinceAttack = (1000 / fps) / TOWER_FIRE_RATE; // allow immediate firing
+    this.timeSinceAttack = (1000 / fps) / this.attackSpeed; // allow immediate firing
     this.active = false; // drag & drop shouldn't be firing
     this.visible = false;
+
+    this.classType = "tower";
 
     this.img = image;
 
     this.reset = function() {
+        this.currTile = pixelToGrid(this.x, this.y);
         this.findTarget();
         this.active = false; // might not want this here
     } // end of towerReset
@@ -47,11 +59,11 @@ function TowerClass(image) {
             // is alive
             if(this.target.health > 0) {
                 // check if target has moved out of range
-                if(Math.abs(this.target.x - this.x) > TILE_W * this.range || Math.abs(this.target.y - this.y) > TILE_H * this.range) {
+                if(Math.abs(this.target.currTile.row - this.currTile.row) > this.range || Math.abs(this.target.currTile.col - this.currTile.col) > this.range) {
                     this.target = null;
                 } else {
-                    this.track({x: this.target.x, y: this.target.y});
-                    if(this.timeSinceAttack > (1000 / fps) / TOWER_FIRE_RATE) {
+                    this.track({x: this.target.x + TILE_W / 2, y: this.target.y + TILE_H / 2});
+                    if(this.timeSinceAttack > (1000 / fps) / this.attackSpeed) {
                         this.attack();
                         this.timeSinceAttack = 0;
                     }
@@ -70,7 +82,7 @@ function TowerClass(image) {
     }
 
     this.attack = function() {
-        var projectile = new ProjectileClass({x: this.x, y: this.y}, this.target, PROJECTILE_TYPE_1);
+        var projectile = new ProjectileClass({x: this.x, y: this.y}, this.target, this.type, this.damage);
         projectileList[projectile.id] = projectile;
     }
 
@@ -79,16 +91,4 @@ function TowerClass(image) {
             drawBitmapCenteredWithRotation(this.img, this.x, this.y, this.angle);
         }
     }
-}
-
-function createTowers() {
-    // var tower = new TowerClass(tilePics[TILE_TOWER_1]);
-    // tower.reset();
-    // tower.active = true;
-    // towerList[tower.id] = tower;
-
-    // var tower2 = new TowerClass(tilePics[TILE_TOWER_2]);
-    // tower2.reset();
-    // tower2.active = true;
-    // towerList[tower2.id] = tower2;
 }

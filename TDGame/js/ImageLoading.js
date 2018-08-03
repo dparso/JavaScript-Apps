@@ -10,8 +10,8 @@ imageList[TILE_MONSTER_1] = "monster_1.png";
 imageList[TILE_MONSTER_2] = "monster_2.png";
 imageList[TILE_MONSTER_3] = "monster_3.png";
 imageList[TILE_MONSTER_4] = "monster_4.png";
-imageList[TILE_TOWER_1] = "player1car.png";
-imageList[TILE_TOWER_2] = "player2car.png";
+imageList[TILE_TOWER_1] = "cannon.png";
+imageList[TILE_TOWER_2] = "gunner.png";
 imageList[TEXT_START] = "start.png";
 imageList[TEXT_CLICK_CONTINUE] = "click_to_continue.png";
 

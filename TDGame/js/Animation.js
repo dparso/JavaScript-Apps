@@ -43,3 +43,26 @@ function fadeOut(toState, toLevel) {
         }); // or use setTimeout(loop, 16) in older browsers
     }
 }
+
+var errorMessages = [];
+function queueErrorMessage(message) {
+    errorMessages.push(message);
+}
+
+// message scrolls up as it fades out
+function drawErrorMessage(message, alpha, delta, x, y) {
+    canvasContext.fillStyle = 'red';
+    canvasContext.globalAlpha = alpha;
+
+    canvasContext.font = "16px Helvetica";
+    canvasContext.textAlign = "left";
+    canvasContext.textBaseline = "top";
+    canvasContext.fillText(message, x, y);
+    canvasContext.globalAlpha = 1.0;
+
+    if(alpha >= 0.2) {
+        requestAnimationFrame(function() {
+            drawErrorMessage(message, alpha + delta, delta, x, y - 0.9);
+        });
+    }
+}

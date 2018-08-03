@@ -14,7 +14,7 @@ const KEY_D = 68;
 var isDown = false;
 var isDragging = false; // maybe not necessary, implied by isDown + dragDelay?
 var dragDelay = 0;
-var dragWait = 5;
+var dragWait = 10;
 var dragObject;
 
 /* order of drag & drop for tower:
@@ -50,6 +50,11 @@ function calculateMousePos(evt) {
 }
 
 function handleMouseDown(evt) {
+    if(gameWon || gameLost) {
+        restartGame();
+        return;
+    }
+
     var mouse = calculateMousePos(evt);
     mouseX = mouse.x;
     mouseY = mouse.y;
@@ -90,12 +95,22 @@ function handleMouseDown(evt) {
 
         case STATE_PLAY:
             if(!isDragging) {
-                var type = StateController.currLevel.tiles[tileClicked.row][tileClicked.col].type;
-                if(type == TILE_TOWER_1) {
-                    dragObject = new TowerClass(tilePics[TILE_TOWER_1]);
-                    dragObject.reset();
-                    dragObject.x = mouseX;
-                    dragObject.y = mouseY;
+                var tile = StateController.currLevel.tiles[tileClicked.row][tileClicked.col];
+                if(tile.type == TILE_TOWER_1 || tile.type == TILE_TOWER_2) {
+                    if(player.gold < towerCosts[tile.type - TOWER_OFFSET_NUM]) {
+                        queueErrorMessage("Insufficient gold!");
+                    } else {
+                        dragObject = new TowerClass(tilePics[tile.type], tile.type - TOWER_OFFSET_NUM);
+                        dragObject.x = mouseX;
+                        dragObject.y = mouseY;
+                    }
+                } else if(tile.hasTower()) {
+                    // selected a tower
+                    if(selection == tile.towerOnTile) {
+                        selection = null; // deselect
+                    } else {
+                        selection = tile.towerOnTile;
+                    }
                 }
             }
             break;
@@ -115,8 +130,17 @@ function handleMouseUp(evt) {
         // can you place that there?
         var tile = pixelToGrid(mouseX, mouseY);
         if(canPlaceTower(tile.row, tile.col)) {
+            // snap the object to the center of the grid
+            dragObject.x = tile.col * TILE_W + TILE_W / 2;
+            dragObject.y = tile.row * TILE_H + TILE_H / 2; 
+            dragObject.currTile = tile;
             dragObject.active = true; // tower can attack now
             towerList[dragObject.id] = dragObject;
+            // notify tile
+            StateController.currLevel.tiles[tile.row][tile.col].notifyTowerPlaced(dragObject.id);
+
+            // player bought tower: pay for it
+            player.loseGold(towerCosts[dragObject.type]);
         }
 
         dragObject = null;
@@ -141,34 +165,45 @@ function setupInput() {
     initButtons();
 }
 
-function keySet(evt, tower, setTo) {
-    switch(evt.keyCode) {
-        case tower.controlKeyLeft:
-            tower.keyHeld_TurnLeft = setTo;
-            evt.preventDefault();
-            break;
-        case tower.controlKeyUp:
-            tower.keyHeld_Gas = setTo;
-            evt.preventDefault();
-            break;
-        case tower.controlKeyRight:
-            tower.keyHeld_TurnRight = setTo;
-            evt.preventDefault();
-            break;
-        case tower.controlKeyDown:
-            tower.keyHeld_Reverse = setTo;
-            evt.preventDefault();
-            break;
-    }    
+function keySet(evt, setTo) {
+    // switch(evt.keyCode) {
+    //     case tower.controlKeyLeft:
+    //         tower.keyHeld_TurnLeft = setTo;
+    //         evt.preventDefault();
+    //         break;
+    //     case tower.controlKeyUp:
+    //         tower.keyHeld_Gas = setTo;
+    //         evt.preventDefault();
+    //         break;
+    //     case tower.controlKeyRight:
+    //         tower.keyHeld_TurnRight = setTo;
+    //         evt.preventDefault();
+    //         break;
+    //     case tower.controlKeyDown:
+    //         tower.keyHeld_Reverse = setTo;
+    //         evt.preventDefault();
+    //         break;
+    // }    
 }
 
 function keyPressed(evt) {
     if(gameWon) {
         return;
     }
-    // keySet(evt, blueTower, true);
+
+    if(evt.keyCode == 27) {
+        // escape: cancel tower placement
+        pressEscape();
+    }
+    // keySet(evt, true);
 }
 
 function keyReleased(evt) {
-    // keySet(evt, blueTower, false);
+    // keySet(evt, false);
+}
+
+function pressEscape() {
+    if(dragObject) {
+        dragObject = null;
+    }
 }

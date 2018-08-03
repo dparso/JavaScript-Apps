@@ -10,12 +10,13 @@ function LevelClass(levelType, levelGrid, drawFunction, loadFunction) {
 
 	this.draw = drawFunction;
 	this.load = function() {
+		// create tile objects from grid values
 	    this.tiles = new Array(TILE_ROWS);
 	    for(var row = 0; row < TILE_ROWS; row++) {
 	        this.tiles[row] = new Array(TILE_COLS);
 	        for(var col = 0; col < TILE_COLS; col++) {
 	            var type = this.grid[row][col];
-	            var isTransparent = type > 4 ? true : false;
+	            var isTransparent = tileTypeHasTransparency(type);
 	            var tile = new TileClass({row: row, col: col}, type, tilePics[type], isTransparent);
 	            this.tiles[row][col] = tile;
 
@@ -35,6 +36,7 @@ function LevelClass(levelType, levelGrid, drawFunction, loadFunction) {
 	this.tilesDraw = function() {
 	    var drawTileX = 0;
 	    var drawTileY = 0;
+	    // draw appropriate images
 	    for(var row = 0; row < TILE_ROWS; row++) {
 	        drawTileX = 0;
 	        for(var col = 0; col < TILE_COLS; col++) {
@@ -52,7 +54,6 @@ function LevelClass(levelType, levelGrid, drawFunction, loadFunction) {
 	            }
 	            drawTileX += TILE_W;
 	        }
-
 	        drawTileY += TILE_H;
 	    }
 	}

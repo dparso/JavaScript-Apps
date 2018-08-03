@@ -15,7 +15,6 @@ function StateControllerClass(startLevel) {
     		case STATE_PLAY:
     			this.currLevel.load();
     			createMonsters();
-                createTowers();
     			break;
     		default:
     			break;

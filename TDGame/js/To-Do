@@ -4,3 +4,5 @@ One tower per tile (upon drag & drop, tower snaps to be placed in the middle)
 Show range of towers on click & drag
 
 As it stands, monsters can't be attacked in their original square, as they haven't yet notified the tile of their presence
+
+Objects like tower and monster should have their row, col as properties, rather than having to calculate it every frame

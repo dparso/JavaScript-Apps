@@ -10,14 +10,22 @@ function TileClass(position, type, img, transparent) {
     this.parent = null;
 
     this.monstersOnTile = new Set(); // monster IDs
-    this.towersOnTile = new Set();
+    this.towerOnTile = -1;
 
     this.getMonsters = function() {
         return this.monstersOnTile;
     }
 
-    this.hasTowers = function() {
-        return this.towersOnTile.size > 0;
+    this.hasTower = function() {
+        return this.towerOnTile != -1;
+    }
+
+    this.notifyTowerPlaced = function(towerID) {
+        this.towerOnTile = towerID;
+    }
+
+    this.notifyTowerRemoved = function() {
+        this.towerOnTile = -1;
     }
 
     this.hasMonsters = function () {
@@ -54,7 +62,7 @@ function tileTypeHasTransparency(tileType) {
     //     default:
     //         return false;
     // }
-    return tileType > 4;
+    return tileType > 5;
     // return false;
 }
 

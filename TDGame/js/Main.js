@@ -1,22 +1,21 @@
 var canvas, canvasContext;
 
 var gameWon = false;
+var gameLost = false;
 var winner = "";
 var fps = 30;
 var timerId = 0; // interval counter
 
-var ballList = [];
 var monsterList = {};
 var towerList = {};
 var projectileList = {};
 var monsterSelections = {}; // these things should be moved elsewhere!
 var monsterPath = [];
+var selection = null;
+
+var player = new PlayerClass();
 
 var StateController = new StateControllerClass(welcomeScreen);
-
-function hi() {
-    console.log("hello!");
-}
 
 window.onload = function() {
     canvas = document.getElementById('gameCanvas');
@@ -28,21 +27,42 @@ function loadingDoneStartGame() {
     timerId = setInterval(updateAll, 1000 / fps);
 
     setupInput();
-    StateController.changeState(STATE_START, welcomeScreen);
+    // StateController.changeState(STATE_SELECT, selectScreen);
+    StateController.changeState(STATE_PLAY, levelOne);
+    // monsterSelections[TILE_MONSTER_1] = 50;
+    monsterSelections[TILE_MONSTER_4] = 10;
+    monsterSelections[TILE_MONSTER_3] = 10;
+
+    monsterSelections[TILE_MONSTER_2] = 10;
+    monsterSelections[TILE_MONSTER_1] = 10;
+
 }
 
 function updateAll() {
-    monsterUpdate();
-    // towerUpdate();
-    moveAll();
-    drawAll();
     if(gameWon) {
         // display win message
+        drawAll();
+
         canvasContext.fillStyle = 'white';
         canvasContext.font = "20px Georgia";
         canvasContext.fillText(winner + " won!", 6 * canvas.width / 14, 23 * canvas.height / 32);
         canvasContext.fillText("click to continue", 6 * canvas.width / 14, 25 * canvas.height / 32);
+        return;
+    } else if(gameLost) {
+        // display loss message
+        drawAll();
+
+        canvasContext.fillStyle = 'white';
+        canvasContext.font = "20px Georgia";
+        canvasContext.fillText("You lost!", 6 * canvas.width / 14, 2 * canvas.height / 4);
+        canvasContext.fillText("click to restart", 8 * canvas.width / 20, 18 * canvas.height / 32);
+        return;
     }
+
+    monsterUpdate();
+    // towerUpdate();
+    moveAll();
+    drawAll();
 }
 
 var timeSinceLastRelease = 0;
@@ -60,10 +80,6 @@ function monsterUpdate() {
 }
 
 function moveAll() {
-    for(var i = 0; i < ballList.length; i++) {
-      ballList[i].move();
-    }
-
     for(id in monsterList) {
       monsterList[id].move();
     }
@@ -80,6 +96,11 @@ function moveAll() {
 function drawAll() {
     StateController.drawLevel();
 
+    // draw tower selection
+    if(selection != null) {
+        drawSelection();
+    }
+
     var string = "";
     for(var key in monsterSelections) {
         string += "Type " + key + ": " + monsterSelections[key] + "<br>";
@@ -87,19 +108,56 @@ function drawAll() {
     document.getElementById("monsterText").innerHTML = string;
 }
 
-function textDraw() {
-    switch(StateController.state) {
-        case STATE_SELECT:
-            canvasContext.font = "20px Georgia";
-            canvasContext.fillStyle = 'white';
-            var pixelPos = gridToPixel(1, 1);
-            canvasContext.fillText("Click to proceed", pixelPos.x, pixelPos.y);
-            break;
-        default:
-            break;
+function drawSelection() {
+    var tower = towerList[selection];
+    var objectTile = tower.currTile;
+    highlightTile(objectTile.row, objectTile.col, 'white', 0.4);
+    // highlight tiles in range
+    for(var row = objectTile.row - tower.range; row <= objectTile.row + tower.range; row++) {
+        for(var col = objectTile.col - tower.range; col <= objectTile.col + tower.range; col++) {
+            if(gridInRange(row, col)) { // in bounds
+                var tile = StateController.currLevel.tiles[row][col];
+
+                highlightTile(row, col, 'white', 0.3);
+            }
+        }
     }
+}
+function textDraw() {
+    // Lives
+    canvasContext.fillStyle = "rgb(250, 250, 250)";
+    canvasContext.font = "20px Helvetica";
+    canvasContext.textAlign = "left";
+    canvasContext.textBaseline = "top";
+    canvasContext.fillText("Lives: " + player.lives, 590, 20);
+    canvasContext.fillText("Gold: " + player.gold, 590, 40);
+
 
     var tile = pixelToGrid(mouseX, mouseY);
     canvasContext.fillStyle = 'white';
     canvasContext.fillText(mouseX + ", " + mouseY, mouseX, mouseY);
+    // canvasContext.fillText(tile.row + ", " + tile.col, mouseX, mouseY);
+
+    if(errorMessages.length > 0) {
+        var message = errorMessages.shift();
+        var textWidth = canvasContext.measureText(message).width;
+        var xPos = mouseX;
+        if(mouseX + textWidth > canvas.width) {
+            xPos = canvas.width - textWidth;
+        }
+        drawErrorMessage(message, 1.0, -0.008, xPos, mouseY);
+    }
+}
+
+function restartGame() {
+    gameWon = false;
+    gameLost = false;
+    player.reset();
+
+    monsterList = {};
+    towerList = {};
+    projectileList = {};
+
+    fadeOut(STATE_SELECT, selectScreen);
+    clearInterval(timerId);
 }

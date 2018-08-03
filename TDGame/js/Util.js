@@ -4,31 +4,6 @@ const STATE_PLAY = 1; // playing game normally
 const STATE_SELECT = 2; // selecting monsters for next round
 const STATE_VICTORY = 3; // game won
 
-// grid key
-const TILE_GROUND = 0;
-const TILE_WALL = 1;
-const TILE_DOOR = 2; // no longer exists
-const TILE_TREE = 3;
-const TILE_MONSTER_START = 4;
-const TILE_MONSTER_END = 5;
-
-// monsters
-const MONSTER_OFFSET_NUM = 6;
-const TILE_MONSTER_1 = 6;
-const TILE_MONSTER_2 = 7;
-const TILE_MONSTER_3 = 8;
-const TILE_MONSTER_4 = 9;
-const NUM_MONSTERS = 4;
-var MONSTER_START; // useful to have a level-by-level class with this information
-var MONSTER_END;
-
-// towers
-const TOWER_OFFSET_NUM = 10;
-const TILE_TOWER_1 = 10;
-const TILE_TOWER_2 = 11;
-const a = TILE_TOWER_1; // these allow for single-character representation in the bitmap for better drawing
-const b = TILE_TOWER_2;
-
 // text images
 const TEXT_START = 40;
 const TEXT_CLICK_CONTINUE = 41;
@@ -44,40 +19,6 @@ const TILE_COLS = 20;
 
 // misc
 var levelCounter = 0;
-
-var selectScreenGrid =
-   [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]];
-
-var levelOneGrid =
-   [[3, 3, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [3, 3, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
-    [1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, a, 0],
-    [1, 0, 3, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, b, 0],
-    [1, 0, 3, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 1],
-    [1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1],
-    [1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1],
-    [1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1],
-    [1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 3, 3],
-    [1, 4, 1, 0, 0, 1, 1, 1, 3, 3, 0, 1, 0, 1, 0, 1, 0, 1, 3, 3],
-    [1, 1, 1, 1, 0, 1, 1, 1, 3, 3, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1],
-    [1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1],
-    [1, 5, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 3, 3, 3, 3, 3, 3]];
 
 var welcomeScreen = new LevelClass(LEVEL_START, [], function() {
     drawRect(0, 0, canvas.width, canvas.height, 'black');
@@ -111,11 +52,36 @@ var levelOne = new LevelClass(LEVEL_TRACK, levelOneGrid, function() {
     // drag object
     if(dragObject) {
         dragObject.draw();
+        var objectTile = pixelToGrid(dragObject.x, dragObject.y);
+
+        // highlight the tile it'll be placed on
+        highlightTile(objectTile.row, objectTile.col, 'white', 0.4);
+
+        if(dragObject.classType == "tower") {
+            // highlight tiles in range
+            for(var row = objectTile.row - dragObject.range; row <= objectTile.row + dragObject.range; row++) {
+                for(var col = objectTile.col - dragObject.range; col <= objectTile.col + dragObject.range; col++) {
+                    if(gridInRange(row, col)) { // in bounds
+                        var tile = StateController.currLevel.tiles[row][col];
+                        if(tile.type != TILE_WALL || tile.hasTower()) {
+                            // color red
+                            highlightTile(row, col, 'red', 0.5);                      
+                        } else {
+                            highlightTile(row, col, 'white', 0.3);
+                        }
+                    }
+                }
+            }
+        }
     }
 });
 
-
-var tiles;
+function highlightTile(row, col, color, opacity) {
+    var pixel = gridToPixel(row, col);
+    canvasContext.globalAlpha = opacity;
+    drawRect(pixel.x, pixel.y, TILE_W, TILE_H, color);
+    canvasContext.globalAlpha = 1.0; // reset
+}
 
 function pixelToGrid(xPos, yPos) {
     // return coordinates corresponding to which tile the mouse is over
@@ -136,8 +102,8 @@ function gridInRange(row, col) {
 }
 
 function canPlaceTower(row, col) {
-    var type = StateController.currLevel.tiles[row][col].type;
-    if(type == TILE_WALL) {
+    var tile = StateController.currLevel.tiles[row][col];
+    if(tile.type == TILE_WALL && !tile.hasTower()) {
         return true;
     }
     return false;
@@ -146,8 +112,6 @@ function canPlaceTower(row, col) {
 function initButtons() {
     var img1 = tilePics[TEXT_START];
     var img2 = tilePics[TEXT_CLICK_CONTINUE];
-    console.log(img2);
-    console.log("mid " + canvas.width / 2 + ", " + img2.width);
     START_IMAGE = new ButtonClass(img1, canvas.width / 2, 3 * canvas.height / 10);
     CLICK_CONTINUE_IMAGE = new ButtonClass(img2, canvas.width / 2, 3 * canvas.height / 10);
 }
