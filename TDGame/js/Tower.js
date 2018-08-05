@@ -1,9 +1,10 @@
 // tower properties
 var TOWER_ID = [0, 0];
 var towerRanges = [3, 5];
-var towerDamages = [6.0, 1.0];
+var towerDamages = [6.0, 1.5];
 var towerAttackSpeeds = [1, 6];
-var towerCosts = [5, 2];
+var towerCosts = [20, 12];
+var towerNames = ["Cannon", "Shooter"];
 
 function TowerClass(type, context) {
     // positions
@@ -22,6 +23,16 @@ function TowerClass(type, context) {
     this.timeSinceAttack = (1000 / fps) / this.attackSpeed; // allow immediate firing
     this.active = false; // drag & drop shouldn't be firing
     this.visible = false;
+    this.killCount = 0;
+    this.value = towerCosts[type];
+
+    // upgrades
+    this.damageUpgrade = -1;
+    this.rangeUpgrade = -1;
+    this.attackSpeedUpgrade = -1;
+    this.canUpDmg = true;
+    this.canUpRng = true;
+    this.canUpAtk = true;
 
     this.classType = "tower";
 
@@ -35,8 +46,8 @@ function TowerClass(type, context) {
 
     this.findTarget = function() {
         // follow the path, end -> start, and attack the first monster in range
-        for(var tileNum = 0; tileNum < fullMonsterPath.length; tileNum++) {
-            var tilePos = fullMonsterPath[tileNum];
+        for(var tileNum = 0; tileNum < fullMonsterPath[context].length; tileNum++) {
+            var tilePos = fullMonsterPath[context][tileNum];
             // console.log(tilePos);
             if(this.inRange(tilePos.row, tilePos.col)) {
                 // console.log("in range");
@@ -54,6 +65,8 @@ function TowerClass(type, context) {
         if(!this.active) {
             return;
         }
+
+        this.findTarget(); // this is NOT necessary
 
         // is locally set
         if(this.target) {
@@ -83,7 +96,7 @@ function TowerClass(type, context) {
     }
 
     this.attack = function() {
-        var projectile = new ProjectileClass({x: this.x, y: this.y}, this.target, this.type, this.damage, this.context);
+        var projectile = new ProjectileClass({x: this.x, y: this.y}, this.target, this.type, this.damage, this.id, this.context);
         projectileList[this.context][projectile.id] = projectile;
     }
 
@@ -95,5 +108,51 @@ function TowerClass(type, context) {
 
     this.inRange = function(row, col) {
         return Math.abs(row - this.currTile.row) <= this.range && Math.abs(col - this.currTile.col) <= this.range;
+    }
+
+    this.notifyKilledMonster = function(type) {
+        this.killCount++;
+        // some sort of experience later on
+    }
+
+    // tells whether this tower has any upgrades available
+    this.canUpgrade = function() {
+        return this.canUpDmg && this.canUpRng && this.canUpAtk;
+    }
+
+    this.checkUpgrade = function() {
+        if(!this.canUpgrade() && this.context == ENEMY) {
+            // remove self from upgradeable
+            var index = upgradeableTowers.indexOf(this.id);
+            if (index > -1) {
+               upgradeableTowers.splice(index, 1);
+            }
+        }
+    }
+
+    this.upgradeProperty = function(prop) {
+        switch(prop) {
+            case DAMAGE_UPGRADE:
+                this.damageUpgrade++;
+                this.damage *= dmg_upgrade_effects[this.damageUpgrade];
+                if(this.damageUpgrade == dmg_upgrade_costs.length - 1) {
+                    this.canUpDmg = false;
+                }
+                break;
+            case RANGE_UPGRADE:
+                this.rangeUpgrade++;
+                this.range += rng_upgrade_effects[this.rangeUpgrade];
+                if(this.rangeUpgrade == rng_upgrade_costs.length - 1) {
+                    this.canUpRng = false;
+                }
+                break;
+            case ATTACK_SPEED_UPGRADE:
+                this.attackSpeedUpgrade++;
+                this.attackSpeed *= atk_upgrade_effects[this.attackSpeedUpgrade];
+                if(this.attackSpeedUpgrade == atk_upgrade_costs.length - 1) {
+                    this.canUpAtk = false;
+                }
+                break;
+        }
     }
 }

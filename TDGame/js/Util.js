@@ -14,7 +14,8 @@ var CLICK_CONTINUE_IMAGE;
 var levelCounter = 0;
 
 var welcomeScreen = new LevelClass(LEVEL_START, [], function() {
-    drawRect(0, 0, canvas.width, canvas.height, 'black', PLAYER);
+    drawRect(0, 0, canvas[PLAYER].width, canvas[PLAYER].height, 'black', PLAYER);
+    drawRect(0, 0, canvas[ENEMY].width, canvas[ENEMY].height, 'black', ENEMY);
     var img = tilePics[TEXT_START];
     ctx[PLAYER].drawImage(START_IMAGE.img, START_IMAGE.x - START_IMAGE.img.width / 2, START_IMAGE.y);
     textDraw(PLAYER);
@@ -25,6 +26,7 @@ var selectScreen = new LevelClass(LEVEL_SELECT, [selectScreenGrid, selectScreenG
         drawRect(0, 0, canvas[context].width, canvas[context].height, 'black', context);
         return;
     }
+
     this.tilesDraw(context);
     textDraw(context);
     ctx[context].drawImage(CLICK_CONTINUE_IMAGE.img, CLICK_CONTINUE_IMAGE.x - CLICK_CONTINUE_IMAGE.img.width / 2, CLICK_CONTINUE_IMAGE.y);
@@ -32,7 +34,6 @@ var selectScreen = new LevelClass(LEVEL_SELECT, [selectScreenGrid, selectScreenG
 
 var levelOne = new LevelClass(LEVEL_TRACK, [levelOneGrid_player, levelOneGrid_enemy], function(context) {
     this.tilesDraw(context);
-    textDraw(context);
 
     for(id in monsterList[context]) {
       monsterList[context][id].draw();
@@ -71,6 +72,8 @@ var levelOne = new LevelClass(LEVEL_TRACK, [levelOneGrid_player, levelOneGrid_en
             }
         }
     }
+
+    textDraw(context);
 });
 
 function highlightTile(row, col, color, opacity, context) {
@@ -106,9 +109,23 @@ function canPlaceTower(row, col, context) {
     return false;
 }
 
+function typeIsTower(type) {
+    return type >= TOWER_OFFSET_NUM && type <= TOWER_OFFSET_NUM + NUM_TOWERS;
+}
+
+function typeIsMonster(type) {
+    return type >= MONSTER_OFFSET_NUM && type <= MONSTER_OFFSET_NUM + NUM_MONSTERS;
+}
+
+// given an object with properties x, y, width, and height, return whether a position (x, y) is within that range
+function pixelIsWithinObject(x, y, object) {
+    return x >= object.x && x <= object.x + object.width && y >= object.y && y <= object.y + object.height;
+}
+
 function initButtons() {
     var img1 = tilePics[TEXT_START];
     var img2 = tilePics[TEXT_CLICK_CONTINUE];
-    START_IMAGE = new ButtonClass(img1, canvas[PLAYER].width / 2, 3 * canvas[PLAYER].height / 10);
-    CLICK_CONTINUE_IMAGE = new ButtonClass(img2, canvas[PLAYER].width / 2, 3 * canvas[PLAYER].height / 10);
+
+    START_IMAGE = {img: img1, x: canvas[PLAYER].width / 2, y: 3 * canvas[PLAYER].height / 10};
+    CLICK_CONTINUE_IMAGE = {img: img2, x: canvas[PLAYER].width / 2, y: 3 * canvas[PLAYER].height / 10};
 }

@@ -1,16 +1,18 @@
 const STARTING_LIVES = 5;
-const STARTING_GOLD = 10;
-const STARTING_INCOME = 1;
+const STARTING_GOLD = 50;
+const STARTING_INCOME = 5;
+const INCOME_RATE = 10; // interval is x seconds
 
-function PlayerClass() {
+function PlayerClass(context) {
 	this.lives = STARTING_LIVES;
 	this.gold = STARTING_GOLD;
 	this.income = STARTING_INCOME;
+	this.context = context;
 
 	this.loseLife = function() {
 		if(--this.lives == 0) {
 			// lost the game!
-			gameLost = true;
+			StateController.endGame(this.context);
 		}
 	}
 
@@ -30,8 +32,8 @@ function PlayerClass() {
 
 	this.sendMonster = function(ofType) {
 		this.gainGold(-monsterCosts[ofType]);
-
-		// income!
+		// earn income!
+		this.income += monsterValues[ofType];
 	}
 
 	this.killedMonster = function(ofType) {

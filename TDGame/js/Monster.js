@@ -1,16 +1,17 @@
 // monster movement
 const MONSTER_HEALTH_BAR_HEIGHT = 5;
 var MONSTER_ID = [0, 0];
-var monsterHealths = [10, 20, 40, 80];
-var monsterSpeeds = [10, 5, 3, 3];
-var monsterValues = [2, 1, 2, 6];
-var monsterCosts = [2, 1, 2, 6]; // for now, same as values
+var monsterHealths = [20, 60, 90, 220, 10000];
+var monsterSpeeds = [10, 5, 3, 6, 7];
+var monsterValues = [1, 2, 4, 8, 100]; // how much you get for killing one
+var monsterCosts = [4, 8, 10, 35, 1000];
+var monsterNames = ["Fast & Weak", "Slow & Medium", "Slow & Strong", "Fast & Strong", "RAWR"];
 
 function MonsterClass(type, image, context) {
     // positions
-    this.x = MONSTER_START.col * TILE_W;
-    this.y = MONSTER_START.row * TILE_H;
-    this.currTile = MONSTER_START;
+    this.x = MONSTER_START[context].col * TILE_W;
+    this.y = MONSTER_START[context].row * TILE_H;
+    this.currTile = MONSTER_START[context];
 
     this.img = image;
     this.context = context; // where to draw itself
@@ -23,24 +24,21 @@ function MonsterClass(type, image, context) {
     this.speed = monsterSpeeds[type];
     this.invulnerable = false;
     this.immobile = false;
+    this.value = monsterValues[type];
 
     this.classType = "monster";
 
     this.reset = function() {
-        this.x = MONSTER_START.col * TILE_W;
-        this.y = MONSTER_START.row * TILE_H;
-        this.currTile = MONSTER_START;
+        this.x = MONSTER_START[this.context].col * TILE_W;
+        this.y = MONSTER_START[this.context].row * TILE_H;
+        this.currTile = MONSTER_START[this.context];
     }
 
     this.move = function() {
         if(this.immobile) return;
-        if(this.pathPosition < monsterPath.length) {
+        if(this.pathPosition < monsterPath[this.context].length) {
             if(this.visible) {
-                var nextGoal = monsterPath[this.pathPosition];
-                var a = pixelToGrid(nextGoal.x, nextGoal.y);
-                // console.log("going to " + nextGoal.x + ", " + nextGoal.y + " from " + this.x + ", " + this.y);
-
-
+                var nextGoal = monsterPath[this.context][this.pathPosition];
                 var changeX = nextGoal.x - this.x;
                 var changeY = nextGoal.y - this.y;
 
@@ -55,7 +53,6 @@ function MonsterClass(type, image, context) {
 
                 // since it moved, it must notify tiles if changed
                 var newTile = pixelToGrid(this.x, this.y);
-                // console.log(this.x, this.y);
                 if(newTile.col != this.currTile.col || newTile.row != this.currTile.row) {
                     // notify old & new tile
                     StateController.currLevel.tiles[this.context][this.currTile.row][this.currTile.col].notifyMonsterDepart(this.id);
@@ -65,7 +62,8 @@ function MonsterClass(type, image, context) {
             }
         } else {
             // reached the end: take a life
-            player.loseLife();
+            queueMessage("-1", this.x, this.y, this.context);
+            StateController.notifyLifeLost(this.context);
             this.die(false);
         }
     }
@@ -124,19 +122,19 @@ function Queue() {
     }
 }
 
-function calculateMonsterPath() {
+function calculateMonsterPath(context) {
     // BFS from TILE_MONSTER_START to TILE_MONSTER_END
     // NOTE: for now, the tiles are the same, so the path is the same
     var currTile, finish;
     for(var row = 0; row < TILE_ROWS; row++) {
         for(var col = 0; col < TILE_COLS; col++) {
-            if(StateController.currLevel.tiles[PLAYER][row][col].type == TILE_MONSTER_START) {
-                currTile = StateController.currLevel.tiles[PLAYER][row][col];
+            if(StateController.currLevel.tiles[context][row][col].type == TILE_MONSTER_START) {
+                currTile = StateController.currLevel.tiles[context][row][col];
             }
         }
     }
     
-    if(!currTile) {
+    if(currTile == undefined) {
         return;
     }
 
@@ -155,7 +153,7 @@ function calculateMonsterPath() {
         for(var rowOffset = -1; rowOffset <= 1; rowOffset++) {
             if(rowOffset == 0) continue;
             if(gridInRange(currTile.row + rowOffset, currTile.col)) {
-                var tile = StateController.currLevel.tiles[PLAYER][currTile.row + rowOffset][currTile.col];
+                var tile = StateController.currLevel.tiles[context][currTile.row + rowOffset][currTile.col];
 
                 if((tile.type == TILE_GROUND || tile.type == TILE_MONSTER_END) && !tile.visited) {
                     // add this to path
@@ -167,7 +165,7 @@ function calculateMonsterPath() {
         for(var colOffset = -1; colOffset <= 1; colOffset++) {
             if(colOffset == 0) continue;
             if(gridInRange(currTile.row, currTile.col + colOffset)) {
-                var tile = StateController.currLevel.tiles[PLAYER][currTile.row][currTile.col + colOffset];
+                var tile = StateController.currLevel.tiles[context][currTile.row][currTile.col + colOffset];
                 if((tile.type == TILE_GROUND || tile.type == TILE_MONSTER_END) && !tile.visited) {
                     // add this to path
                     tile.parent = currTile;
@@ -177,23 +175,23 @@ function calculateMonsterPath() {
         }
     }
 
-    var startPos = gridToPixel(MONSTER_START.row, MONSTER_START.col);
+    var startPos = gridToPixel(MONSTER_START[context].row, MONSTER_START[context].col);
     var prevX = startPos.x, prevY = startPos.y;
 
     while(finish.parent) {
         var pixelPos = gridToPixel(finish.row, finish.col);
-        if(monsterPath[0] != undefined) {
-            if(pixelPos.x != monsterPath[0].x && pixelPos.y != monsterPath[0].y) {
+        if(monsterPath[context][0] != undefined) {
+            if(pixelPos.x != monsterPath[context][0].x && pixelPos.y != monsterPath[context][0].y) {
                 // changing direction: add previous
-                monsterPath.unshift({x: prevX, y: prevY});
+                monsterPath[context].unshift({x: prevX, y: prevY});
             }
             prevX = pixelPos.x;
             prevY = pixelPos.y;
         } else {
-            monsterPath.unshift(pixelPos);
+            monsterPath[context].unshift(pixelPos);
         }
         var tilePos = pixelToGrid(pixelPos.x, pixelPos.y);
-        fullMonsterPath.push(tilePos); // this one goes last-first for easy tower traversal
+        fullMonsterPath[context].push(tilePos); // this one goes last-first for easy tower traversal
         finish = finish.parent;
     }
 }

@@ -27,7 +27,11 @@ function StateControllerClass(startLevel) {
             player.buyTower(tower.type);
         } else {
             enemy.buyTower(tower.type);
+            upgradeableTowers.push(tower.id);
         }
+
+        // display cost loss onscreen
+        queueMessage("-" + towerCosts[tower.type], tower.x, tower.y, onSide);
     }
 
     this.sendMonster = function(ofType, toSide) {
@@ -41,6 +45,44 @@ function StateControllerClass(startLevel) {
             enemy.sendMonster(ofType);
         } else {
             player.sendMonster(ofType);
+        }
+
+        // display cost loss onscreen
+        if(toSide == ENEMY) {
+            // player sent: display message over the selection tile
+            queueMessage("-" + monsterCosts[monster.type], mouseX, mouseY, toSide);
+
+        }
+    }
+
+    // isPlayer = true if player is upgrading, in which case display error on fail (otherwise don't)
+    this.upgradeTower = function(tower, upgradeType, isPlayer) {
+        // some generalization to avoid having separate functions for each property
+        var properties = [tower.damageUpgrade, tower.rangeUpgrade, tower.attackSpeedUpgrade];
+        var property = properties[upgradeType];
+
+        if(properties[upgradeType] + 1 >= upgrade_costs[upgradeType].length) return false; // no more upgrades
+        var object = tower.context == PLAYER ? player : enemy;
+
+        if(object.gold >= upgrade_costs[upgradeType][property + 1]) {
+            var xPos, yPos;
+            if(isPlayer) {
+                xPos = mouseX;
+                yPos = mouseY;
+            } else {
+                xPos = tower.x;
+                yPos = tower.y
+            }
+            queueMessage("-" + upgrade_costs[upgradeType][property + 1], xPos, yPos, tower.context);
+            tower.upgradeProperty(upgradeType);
+            object.gainGold(-upgrade_costs[upgradeType][property + 1]);
+            return true;
+        } else {
+            if(isPlayer) {
+                queueMessage("Insufficient gold!", mouseX, mouseY, tower.context);
+            } else {
+                return false;
+            }
         }
     }
 
@@ -71,14 +113,32 @@ function StateControllerClass(startLevel) {
 	                monsterSelections[i + MONSTER_OFFSET_NUM] = 0;
 	            }
 	            break;
+            case STATE_PLAY:
+                infoPane.initButtons();
+                break;
 	        default:
 	            return;
 	    }
 	}
 
     this.drawLevel = function(context) {
-        console.log(context);
         this.currLevel.draw(context);
+    }
+
+    this.notifyLifeLost = function(context) {
+        if(context == PLAYER) {
+            player.loseLife();
+        } else if(context == ENEMY) {
+            enemy.loseLife();
+        }
+    }
+
+    this.endGame = function(loser) {
+        if(loser == PLAYER) {
+            gameLost = true;
+        } else {
+            gameWon = true;
+        }
     }
 }
 

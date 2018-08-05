@@ -1,3 +1,12 @@
+// tooltip
+const TOOLTIP_BOX_HEIGHT = 15;
+const TOOLTIP_PADDING = 5;
+var tooltip = null; 
+
+function setTooltip(text, x, y, context) {
+    tooltip = {text: text, x: x, y: y, ctx: context};
+}
+
 function drawBitmapCenteredWithRotation(useBitmap, atX, atY, withAngle, context) {
     ctx[context].save();
     ctx[context].translate(atX, atY);

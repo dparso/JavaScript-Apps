@@ -2,7 +2,6 @@ const LEVEL_START = 0;
 const LEVEL_TRACK = 1;
 const LEVEL_SELECT = 2;
 
-
 function LevelClass(levelType, levelGrids, drawFunction, loadFunction) {
 	this.grids = levelGrids;
 	this.type = levelType;
@@ -23,7 +22,6 @@ function LevelClass(levelType, levelGrids, drawFunction, loadFunction) {
 	            var isTransparent = tileTypeHasTransparency(type);
 	            var isTransparent2 = tileTypeHasTransparency(type2);
 
-	            // for now, make two identical tiles for two distinct (memory-wise) sets of tiles
 	            var tile = new TileClass({row: row, col: col}, type, tilePics[type], isTransparent);
 	            var tile2 = new TileClass({row: row, col: col}, type2, tilePics[type2], isTransparent2);
 
@@ -35,16 +33,24 @@ function LevelClass(levelType, levelGrids, drawFunction, loadFunction) {
 	            	availableTowerLocations.push({row: row, col: col});
 	            }
 
-	            if(type == TILE_MONSTER_START) { // for now, these are shared between grids
-	                MONSTER_START = {row: row, col: col};
+	            // set monster starts (could be cleaner)
+	            if(type == TILE_MONSTER_START) {
+	                MONSTER_START[PLAYER] = {row: row, col: col};
 	            } else if(type == TILE_MONSTER_END) {
-	                MONSTER_END = {row: row, col: col};
+	                MONSTER_END[PLAYER] = {row: row, col: col};
+	            }
+
+	            if(type2 == TILE_MONSTER_START) {
+	                MONSTER_START[ENEMY] = {row: row, col: col};
+	            } else if(type2 == TILE_MONSTER_END) {
+	                MONSTER_END[ENEMY] = {row: row, col: col};
 	            }
 	        }
 	    }
 
 	    if(this.type == LEVEL_TRACK) {
-	    	calculateMonsterPath();
+	    	calculateMonsterPath(PLAYER);
+	    	calculateMonsterPath(ENEMY);
 	    }
 	}
 

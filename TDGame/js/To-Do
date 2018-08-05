@@ -11,13 +11,7 @@ Targeting system: walk backwards through the path and attack the first one there
 
 Tower type: line directly to monster, damages per second
 
-
-Deselect tower upon drag & drop
-github html?
-
-Scrolling -5 text for tower purchase
-
-sendMonster(ofType, toSide) function for easy monster adding
+Explosion animation for cannon shots
 
 Press keys to select a tower type to buy/monster type to send (press 1 means tower type 1 appears at mouseX, mouseY if enough gold)
 
@@ -31,3 +25,37 @@ Income from sending monsters
 Increase tower building probability the more monsters are on screen
 
 Money if monster reaches end (lives?)
+
+Tower targeting: update if a monster passes their target
+
+Info pane is constant on the right side, changes context based on what's selected
+
+Highlight tower & monster different color if you can afford
+
+
+If this turns into a bigger game, can have two campaign paths: first you do normal TD, then you do sending monsters, then you get the combined mode
+
+Tower keeps firing at monster after it gets to end
+
+Sell button
+
+Customize enemy probabilities based on difficulty
+
+Find a way to prioritize tower placement to the middle
+
+Calculate some sort of "safety" ratio for the enemy. The more safe it feels, the more likely it is to perform offensive actions
+
+Select from one tower to another
+
+Consider highlighting drag & drop all white or red based on whether current tile is valid
+
+Increase efficiency of random selection: instead of while(1000), pick a spot randomly and iterate across the list until found -- better worst case, similar average
+
+
+Fix snapping at corners during monster movement
+
+Enemy starts off with some towers? (prevents rushes)
+
+
+Notes:
+Cannon explosion animation from https://www.photopea.com/, select region with lasso, move with V -- make sure specific layer is selected

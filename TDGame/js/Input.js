@@ -45,6 +45,25 @@ function calculateMousePos(evt) {
         }
     }
 
+    if(StateController.state == STATE_PLAY) {
+        // display tooltips for purchases
+        var hoverTile = pixelToGrid(mouseX, mouseY);
+        var tile = StateController.currLevel.tiles[currCanvas][hoverTile.row][hoverTile.col];
+        if(typeIsTower(tile.type)) {
+            var index = tile.type - TOWER_OFFSET_NUM;
+            var text = towerNames[index] + ": " + towerCosts[index];
+        } else if(typeIsMonster(tile.type)) {
+            var index = tile.type - MONSTER_OFFSET_NUM;
+            var text = monsterNames[index] + ": " + monsterCosts[index];
+        } else {
+            tooltip = null;
+        }
+
+        if(index != undefined) {
+            setTooltip(text, mouseX + 5, mouseY + 10, currCanvas);
+        }
+    }
+
     return {
         x: mouseX,
         y: mouseY
@@ -53,7 +72,7 @@ function calculateMousePos(evt) {
 
 function handleMouseDown(evt) {
     if(gameWon || gameLost) {
-        restartGame();
+        restartGame(STATE_START, welcomeScreen);
         return;
     }
 
@@ -70,8 +89,9 @@ function handleMouseDown(evt) {
             if(mouseX > START_IMAGE.x - START_IMAGE.img.width / 2 && mouseX < START_IMAGE.x + START_IMAGE.img.width / 2) {
                 if(mouseY > START_IMAGE.y && mouseY < START_IMAGE.y + START_IMAGE.img.height) {
                     // clicked start!
-                    fadeOut(STATE_SELECT, selectScreen, currCanvas);
                     clearInterval(timerId);
+                    // fadeOut(STATE_SELECT, selectScreen, currCanvas);
+                    fadeOut(STATE_PLAY, levelOne, PLAYER);
                     return;
                 }
             }
@@ -82,8 +102,8 @@ function handleMouseDown(evt) {
             if(mouseX > CLICK_CONTINUE_IMAGE.x - CLICK_CONTINUE_IMAGE.img.width / 2 && mouseX < CLICK_CONTINUE_IMAGE.x + CLICK_CONTINUE_IMAGE.img.width / 2) {
                 if(mouseY > CLICK_CONTINUE_IMAGE.y && mouseY < CLICK_CONTINUE_IMAGE.y + CLICK_CONTINUE_IMAGE.img.height) {
                     // clicked start!
-                    fadeOut(STATE_PLAY, levelOne, currCanvas);
                     clearInterval(timerId);
+                    fadeOut(STATE_PLAY, levelOne, currCanvas);
                     return;
                 }
             }
@@ -98,24 +118,41 @@ function handleMouseDown(evt) {
         case STATE_PLAY:
             if(currCanvas == PLAYER) { // tower
                 if(!isDragging) {
-                    // selected a tower to build
-                    var tile = StateController.currLevel.tiles[currCanvas][tileClicked.row][tileClicked.col];
-                    if(tile.type == TILE_TOWER_1 || tile.type == TILE_TOWER_2) {
-                        if(player.gold < towerCosts[tile.type - TOWER_OFFSET_NUM]) {
-                            queueErrorMessage("Insufficient gold!");
+                    if(pixelIsWithinObject(mouseX, mouseY, infoPane)) {
+                        if(selection[currCanvas] != null) {
+                            // check if clicked button!
+                            for(var button = 0; button < infoPane.buttons.length; button++) {
+                                if(pixelIsWithinObject(mouseX, mouseY, infoPane.buttons[button][currCanvas])) {
+                                    // click the button!
+                                    infoPane.buttons[button][currCanvas].click(button);
+                                    break;
+                                }
+                            }
+
                         } else {
-                            dragObject[currCanvas] = new DraggableClass(tile.type, mouseX, mouseY, currCanvas, "tower");
-                            dragObject[currCanvas].range = towerRanges[tile.type - TOWER_OFFSET_NUM];
-                        }
-                    } else if(tile.hasTower()) {
-                        // selected a tower
-                        if(selection[currCanvas] == tile.towerOnTile) {
-                            selection[currCanvas] = null; // deselect
-                        } else {
-                            selection[currCanvas] = tile.towerOnTile;
+                            selection[currCanvas] = null;
                         }
                     } else {
-                        selection[currCanvas] = null; // clicked on empty square: clear selection
+                        // selected a tower to build
+                        var tile = StateController.currLevel.tiles[currCanvas][tileClicked.row][tileClicked.col];
+                        if(typeIsTower(tile.type)) {
+                            if(player.gold < towerCosts[tile.type - TOWER_OFFSET_NUM]) {
+                                queueMessage("Insufficient gold!", mouseX, mouseY, currCanvas);
+                            } else {
+                                dragObject[currCanvas] = new DraggableClass(tile.type, mouseX, mouseY, currCanvas, "tower");
+                                dragObject[currCanvas].range = towerRanges[tile.type - TOWER_OFFSET_NUM];
+                            }
+                            selection[currCanvas] = null; // clear selection
+                        } else if(tile.hasTower()) {
+                            // selected a tower to view
+                            if(selection[currCanvas] == tile.towerOnTile) {
+                                selection[currCanvas] = null; // deselect
+                            } else {
+                                selection[currCanvas] = tile.towerOnTile;
+                            }
+                        } else {
+                            selection[currCanvas] = null; // clicked on empty square: clear selection
+                        }
                     }
                 }
             } else { // send monster
@@ -124,7 +161,7 @@ function handleMouseDown(evt) {
                 if(tile.type >= MONSTER_OFFSET_NUM && tile.type <= MONSTER_OFFSET_NUM + NUM_MONSTERS) {
                     // sending a monster
                     if(player.gold < monsterCosts[tile.type - MONSTER_OFFSET_NUM]) {
-                        queueErrorMessage("Insufficient gold!");
+                        queueMessage("Insufficient gold!", mouseX, mouseY, currCanvas);
                     } else {
                         StateController.sendMonster(tile.type - MONSTER_OFFSET_NUM, ENEMY);
                     }

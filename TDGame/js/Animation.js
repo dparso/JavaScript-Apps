@@ -1,9 +1,8 @@
 var fadeId = 0;
-var time = 0.0;
 var fadeAlpha = 1.0;
 var delta = -0.04;
 
-function fadeIn(context){
+function fadeIn() {
     fadeAlpha += delta;
     if(fadeAlpha >= 1) {
         // reset for next transition
@@ -13,14 +12,17 @@ function fadeIn(context){
         timerId = setInterval(updateAll, 1000 / fps); // restart gameplay
     } else {
         // draw black background with full alpha, then set new and re-draw
-        ctx[context].globalAlpha = 1.0;
-        drawRect(0, 0, canvas[context].width, canvas[context].height, 'black', context);
+        // both canvases!
+        for(var who = 0; who <= 1; who++) {
+            ctx[who].globalAlpha = 1.0;
+            drawRect(0, 0, canvas[who].width, canvas[who].height, 'black', who);
+            ctx[who].globalAlpha = fadeAlpha;
+            drawAll(who);
 
-        ctx[context].globalAlpha = fadeAlpha;
-        drawAll();
+        }
 
         requestAnimationFrame(function() {
-            fadeIn(context);
+            fadeIn();
         }); // loop fade in
     }
 }
@@ -31,14 +33,15 @@ function fadeOut(toState, toLevel, context) {
         delta *= -1;
         StateController.changeState(toState, toLevel);
         clearInterval(fadeId); // stop fade out
-        fadeIn(context);
+        fadeIn();
     } else {
         // draw black background with full alpha, then set new and re-draw
-        ctx[context].globalAlpha = 1.0;
-        drawRect(0, 0, canvas[context].width, canvas[context].height, 'black', context);
-
-        ctx[context].globalAlpha = fadeAlpha;
-        drawAll();
+        for(var who = 0; who <= 1; who++) {
+            ctx[who].globalAlpha = 1.0;
+            drawRect(0, 0, canvas[who].width, canvas[who].height, 'black', who);
+            ctx[who].globalAlpha = fadeAlpha;
+            drawAll(who);
+        }
 
         requestAnimationFrame(function() {
             fadeOut(toState, toLevel, context);
@@ -46,13 +49,13 @@ function fadeOut(toState, toLevel, context) {
     }
 }
 
-var errorMessages = [];
-function queueErrorMessage(message) {
-    errorMessages.push(message);
+var messages = [];
+function queueMessage(message, x, y, context) {
+    messages.push({text: message, x: x, y: y, ctx: context});
 }
 
 // message scrolls up as it fades out
-function drawErrorMessage(message, alpha, delta, x, y, context) {
+function drawMessage(message, alpha, delta, x, y, context) {
     ctx[context].fillStyle = 'red';
     ctx[context].globalAlpha = alpha;
 
@@ -64,7 +67,17 @@ function drawErrorMessage(message, alpha, delta, x, y, context) {
 
     if(alpha >= 0.2) {
         requestAnimationFrame(function() {
-            drawErrorMessage(message, alpha + delta, delta, x, y - 0.9, context);
+            drawMessage(message, alpha + delta, delta, x, y - 0.9, context);
         });
+    }
+}
+
+function makeAnimation(type, x, y, index, context) {
+    var img = animationPics[type][index];
+    ctx[context].drawImage(img, x - img.width / 2, y - img.height / 2);
+    if(index < animationPics[type].length - 1) {
+        requestAnimationFrame(function() {
+            makeAnimation(type, x, y, index + 1, context);
+        });        
     }
 }
