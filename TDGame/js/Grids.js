@@ -20,8 +20,10 @@ const TILE_MONSTER_2 = 7;
 const TILE_MONSTER_3 = 8;
 const TILE_MONSTER_4 = 9;
 const TILE_MONSTER_5 = 10;
-const NUM_MONSTERS = 5;
+const TILE_MONSTER_6 = 11;
+const NUM_MONSTERS = 6;
 const A = TILE_MONSTER_5;
+const B = TILE_MONSTER_6;
 var MONSTER_START = [null, null]; // useful to have a level-by-level class with this information
 var MONSTER_END = [null, null];
 
@@ -29,9 +31,13 @@ var MONSTER_END = [null, null];
 const TOWER_OFFSET_NUM = 20;
 const TILE_TOWER_1 = 20;
 const TILE_TOWER_2 = 21;
+const TILE_TOWER_3 = 22;
+const TILE_TOWER_4 = 23;
 const a = TILE_TOWER_1; // these allow for single-character representation in the bitmap for better drawing
 const b = TILE_TOWER_2;
-const NUM_TOWERS = 2;
+const c = TILE_TOWER_3;
+const d = TILE_TOWER_4;
+const NUM_TOWERS = 4;
 
 var selectScreenGrid =
    [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -61,8 +67,8 @@ var levelOneGrid_player =
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
     [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, a, 0],
     [1, 0, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, b, 0],
-    [1, 0, 3, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 0],
-    [1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0],
+    [1, 0, 3, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, c, 0],
+    [1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, d, 0],
     [1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1],
     [1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1],
     [1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 3, 3],
@@ -82,7 +88,7 @@ var levelOneGrid_enemy =
     [3, 3, 3, 3, 2, 2, 2, 2, 2, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2],
     [3, 3, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
     [6, A, 2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 2],
-    [7, 0, 2, 0, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 2],
+    [7, B, 2, 0, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 2],
     [8, 0, 2, 0, 3, 2, 2, 2, 2, 0, 0, 0, 2, 2, 0, 0, 0, 2, 0, 2],
     [9, 0, 2, 0, 2, 2, 2, 2, 2, 0, 2, 0, 0, 2, 0, 2, 0, 2, 0, 2],
     [3, 3, 2, 0, 2, 0, 0, 0, 2, 0, 2, 2, 0, 2, 0, 2, 0, 2, 0, 2],

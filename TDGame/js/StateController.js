@@ -40,31 +40,22 @@ function StateControllerClass(startLevel) {
         monster.reset();
         monsterList[toSide][monster.id] = monster;
         StateController.monstersWaiting[toSide].push(monster);
-
+        // toSide is the resulting side, but the opposite side sent it
         if(toSide == PLAYER) {
             enemy.sendMonster(ofType);
         } else {
             player.sendMonster(ofType);
-        }
-
-        // display cost loss onscreen
-        if(toSide == ENEMY) {
             // player sent: display message over the selection tile
             queueMessage("-" + monsterCosts[monster.type], mouseX, mouseY, toSide);
-
         }
     }
 
     // isPlayer = true if player is upgrading, in which case display error on fail (otherwise don't)
     this.upgradeTower = function(tower, upgradeType, isPlayer) {
-        // some generalization to avoid having separate functions for each property
-        var properties = [tower.damageUpgrade, tower.rangeUpgrade, tower.attackSpeedUpgrade];
-        var property = properties[upgradeType];
-
-        if(properties[upgradeType] + 1 >= upgrade_costs[upgradeType].length) return false; // no more upgrades
+        if(tower.tier + 1 >= tier_costs.length) return false; // no more upgrades
         var object = tower.context == PLAYER ? player : enemy;
 
-        if(object.gold >= upgrade_costs[upgradeType][property + 1]) {
+        if(object.gold >= tier_costs[tower.tier + 1]) {
             var xPos, yPos;
             if(isPlayer) {
                 xPos = mouseX;
@@ -73,9 +64,9 @@ function StateControllerClass(startLevel) {
                 xPos = tower.x;
                 yPos = tower.y
             }
-            queueMessage("-" + upgrade_costs[upgradeType][property + 1], xPos, yPos, tower.context);
-            tower.upgradeProperty(upgradeType);
-            object.gainGold(-upgrade_costs[upgradeType][property + 1]);
+            queueMessage("-" + tier_costs[tower.tier + 1], xPos, yPos, tower.context);
+            tower.upgradeTier(upgradeType);
+            object.gainGold(-tier_costs[tower.tier]);
             return true;
         } else {
             if(isPlayer) {
@@ -84,6 +75,19 @@ function StateControllerClass(startLevel) {
                 return false;
             }
         }
+    }
+
+    this.sellTower = function(towerId, context) {
+        // remove from tile
+        var tile = towerList[context][towerId].currTile;
+        this.currLevel.tiles[context][tile.row][tile.col].notifyTowerRemoved();
+        // clear selection
+        selection[context] = null;
+        // grant gold
+        var obj = context == PLAYER ? player : enemy;
+        obj.gainGold(towerList[context][towerId].value);
+
+        delete towerList[context][towerId];
     }
 
     this.changeState = function(newState, newLevel) {
@@ -133,11 +137,46 @@ function StateControllerClass(startLevel) {
         }
     }
 
+    this.notifyTowerKilledMonster = function(towerId, context, monsterType) {
+        if(towerList[context][towerId] != undefined) { // tower could have been sold
+            towerList[context][towerId].notifyKilledMonster(monsterType);
+        }
+    }
+
     this.endGame = function(loser) {
         if(loser == PLAYER) {
             gameLost = true;
         } else {
             gameWon = true;
+        }
+    }
+
+    this.hotkey = function(code, shift, context) {
+        if(this.state != STATE_PLAY) return;
+
+        var type = code - KEY_NUM_OFFSET - 1;
+        if(shift) {
+            // monster
+            if(type > 5) {
+                console.log("Not yet!");
+                return;
+            }
+            if(player.gold >= monsterCosts[type]) {
+                this.sendMonster(type, ENEMY);
+            } else {
+                queueMessage("Insufficient gold!", mouseX, mouseY, currCanvas);
+            }
+        } else if(context == PLAYER) {
+            // tower
+            if(type > 3) {
+                console.log("Not yet!");
+                return;
+            }
+            if(player.gold >= towerCosts[type]) {
+                setDrag(type + TOWER_OFFSET_NUM, mouseX, mouseY);
+            } else {
+                queueMessage("Insufficient gold!", mouseX, mouseY, currCanvas);
+            }
         }
     }
 }

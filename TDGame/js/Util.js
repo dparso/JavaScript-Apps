@@ -35,6 +35,10 @@ var selectScreen = new LevelClass(LEVEL_SELECT, [selectScreenGrid, selectScreenG
 var levelOne = new LevelClass(LEVEL_TRACK, [levelOneGrid_player, levelOneGrid_enemy], function(context) {
     this.tilesDraw(context);
 
+    for(id in projectileList[context]) {
+      projectileList[context][id].draw();
+    }
+
     for(id in monsterList[context]) {
       monsterList[context][id].draw();
     }
@@ -43,9 +47,6 @@ var levelOne = new LevelClass(LEVEL_TRACK, [levelOneGrid_player, levelOneGrid_en
       towerList[context][id].draw();
     }
 
-    for(id in projectileList[context]) {
-      projectileList[context][id].draw();
-    }
 
     // drag object
     if(dragObject[context]) {

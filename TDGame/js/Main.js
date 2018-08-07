@@ -45,8 +45,9 @@ function loadingDoneStartGame() {
     // monsterSelections[TILE_MONSTER_2] = 1;
     // monsterSelections[TILE_MONSTER_1] = 1;
 
-    StateController.changeState(STATE_START, welcomeScreen);
-    // StateController.changeState(STATE_PLAY, levelOne);
+    // StateController.changeState(STATE_START, welcomeScreen);
+    StateController.changeState(STATE_PLAY, levelOne);
+    StateController.placeTower(2, PLAYER, {row: 5, col: 5});
 
 }
 
@@ -114,18 +115,18 @@ function playerIncome() {
     timeSinceLastIncome++;
 }
 
-var timeSinceLastRelease = 0;
+var timeSinceLastRelease = [0, 0];
 function monsterUpdate(context) {
     var len = StateController.monstersWaiting[context].length;
     if(len > 0) {
-        if(timeSinceLastRelease > 0.1 * fps) { // once per second
+        if(timeSinceLastRelease[context] > 0.05 * fps) {
             var monster = StateController.monstersWaiting[context].pop();
             monster.visible = true;
-            timeSinceLastRelease = 0;
+            timeSinceLastRelease[context] = 0;
         }
     }
 
-    timeSinceLastRelease++;
+    timeSinceLastRelease[context]++;
 }
 
 function moveAll(context) {
@@ -163,8 +164,8 @@ function drawSelection(context) {
     var objectTile = tower.currTile;
     highlightTile(objectTile.row, objectTile.col, 'white', 0.4, tower.context);
     // highlight tiles in range
-    for(var row = objectTile.row - tower.range; row <= objectTile.row + tower.range; row++) {
-        for(var col = objectTile.col - tower.range; col <= objectTile.col + tower.range; col++) {
+    for(var row = objectTile.row - tower.properties[RANGE]; row <= objectTile.row + tower.properties[RANGE]; row++) {
+        for(var col = objectTile.col - tower.properties[RANGE]; col <= objectTile.col + tower.properties[RANGE]; col++) {
             if(gridInRange(row, col)) { // in bounds
                 var tile = StateController.currLevel.tiles[context][row][col];
                 highlightTile(row, col, 'white', 0.3, context);
@@ -249,12 +250,15 @@ function restartGame(toState, toLevel) {
     monsterPath = [[], []];
     fullMonsterPath = [[], []];
     selection = [null, null];
+    StateController.monstersWaiting = [[], []];
 
     timeSinceLastIncome = 0;
-    timeSinceLastRelease = 0;
+    timeSinceLastRelease = [0, 0];
+    timeSinceAction = 0;
 
     player = new PlayerClass(PLAYER);
     enemy = new PlayerClass(ENEMY);
+    prepareEnemy();
 
     infoPane = new InfoPaneClass();
 

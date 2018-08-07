@@ -1,11 +1,11 @@
 // monster movement
 const MONSTER_HEALTH_BAR_HEIGHT = 5;
 var MONSTER_ID = [0, 0];
-var monsterHealths = [20, 60, 90, 220, 10000];
-var monsterSpeeds = [10, 5, 3, 6, 7];
-var monsterValues = [1, 2, 4, 8, 100]; // how much you get for killing one
-var monsterCosts = [4, 8, 10, 35, 1000];
-var monsterNames = ["Fast & Weak", "Slow & Medium", "Slow & Strong", "Fast & Strong", "RAWR"];
+var monsterHealths = [20, 60, 90, 220, 10000, 1000000];
+var monsterSpeeds = [10, 5, 3, 6, 7, 2];
+var monsterValues = [1, 2, 4, 8, 200, 5000]; // how much you get for killing one
+var monsterCosts = [4, 8, 10, 35, 1000, 10000];
+var monsterNames = ["Spook", "Fright", "Fear", "Dread", "Nightmare", "Terror"]; // horror, panic
 
 function MonsterClass(type, image, context) {
     // positions
@@ -90,6 +90,7 @@ function MonsterClass(type, image, context) {
     }
 
     this.die = function(killed) {
+        this.health = 0; // towers don't attack anymore
         if(killed) {
             // only reward player if it was killed (also dies at end)
             if(this.context == PLAYER) {

@@ -74,7 +74,9 @@ function drawMessage(message, alpha, delta, x, y, context) {
 
 function makeAnimation(type, x, y, index, context) {
     var img = animationPics[type][index];
-    ctx[context].drawImage(img, x - img.width / 2, y - img.height / 2);
+
+    drawBitmapCenteredWithRotation(img, x, y, Math.random() * 360, context); // randomize angle
+
     if(index < animationPics[type].length - 1) {
         requestAnimationFrame(function() {
             makeAnimation(type, x, y, index + 1, context);

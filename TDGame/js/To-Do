@@ -1,26 +1,18 @@
 To-Do:
 
-One tower per tile (upon drag & drop, tower snaps to be placed in the middle)
-Show range of towers on click & drag
+Draw mini-sized pictures for tower & monster selections so they fit
+
+Debug button for delete all monsters/towers
 
 As it stands, monsters can't be attacked in their original square, as they haven't yet notified the tile of their presence
 
 Objects like tower and monster should have their row, col as properties, rather than having to calculate it every frame
 
-Targeting system: walk backwards through the path and attack the first one there!
-
 Tower type: line directly to monster, damages per second
-
-Explosion animation for cannon shots
 
 Press keys to select a tower type to buy/monster type to send (press 1 means tower type 1 appears at mouseX, mouseY if enough gold)
 
 Note: if maps change, BFS code must perform separate searches for each context
-
-When drawing a dragged tower, don't make an actual tower object, too much -- just need the image, object is created if necessary when placed
-
-
-Income from sending monsters
 
 Increase tower building probability the more monsters are on screen
 
@@ -34,8 +26,6 @@ Highlight tower & monster different color if you can afford
 
 
 If this turns into a bigger game, can have two campaign paths: first you do normal TD, then you do sending monsters, then you get the combined mode
-
-Tower keeps firing at monster after it gets to end
 
 Sell button
 
@@ -51,10 +41,25 @@ Consider highlighting drag & drop all white or red based on whether current tile
 
 Increase efficiency of random selection: instead of while(1000), pick a spot randomly and iterate across the list until found -- better worst case, similar average
 
+Change tower upgrades into a single upgrade that improves various aspects -- tiers
 
 Fix snapping at corners during monster movement
 
 Enemy starts off with some towers? (prevents rushes)
+
+Only draw explosion animation if tower is upgraded to splash
+
+Alternate enemy behaviour: randomly choose something to do, and save up enough money to do it!
+
+Prioritize towers less as you have more
+
+Some sort of "leading" for the non-tracking projectiles (otherwise they lag)
+
+Target priorities! Last, first, close, strong
+
+Ideas for tier trees: single target, AOE, and support (e.g., hits do not more damage, but slow run speed or increase damage taken from other sources)
+
+If you want to be really fancy, instead of highlighting the square a tower is on, overlay a shade onto the image itself
 
 
 Notes:

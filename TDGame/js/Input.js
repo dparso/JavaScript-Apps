@@ -17,6 +17,8 @@ var dragDelay = 0;
 var dragWait = 10;
 var dragObject = [null, null];
 
+var KEY_NUM_OFFSET = 48; // 0 code is 0 + 48, 1 is 1 + 48, etc
+
 var currCanvas;
 
 /* order of drag & drop for tower:
@@ -34,7 +36,6 @@ function calculateMousePos(evt) {
         // delay allows clicking without dragging
         if(dragDelay > dragWait) {
             isDragging = true;
-
             if(dragObject[currCanvas]) {
                 dragObject[currCanvas].x = mouseX;
                 dragObject[currCanvas].y = mouseY;
@@ -51,10 +52,37 @@ function calculateMousePos(evt) {
         var tile = StateController.currLevel.tiles[currCanvas][hoverTile.row][hoverTile.col];
         if(typeIsTower(tile.type)) {
             var index = tile.type - TOWER_OFFSET_NUM;
-            var text = towerNames[index] + ": " + towerCosts[index];
+            var text = towerNames[index] + ": " + towerCosts[index] + " (" + (index + 1) + ")";
         } else if(typeIsMonster(tile.type)) {
             var index = tile.type - MONSTER_OFFSET_NUM;
-            var text = monsterNames[index] + ": " + monsterCosts[index];
+            var text = monsterNames[index] + ": " + monsterCosts[index] + " (shift + " + (index + 1) + ")";
+        } else if(pixelIsWithinObject(mouseX, mouseY, infoPane)) {
+            if(selection[currCanvas] != null) {
+                // check if hovering over button!
+                var found = false;
+                for(var button = 0; button < infoPane.buttons.length; button++) {
+                    if(pixelIsWithinObject(mouseX, mouseY, infoPane.buttons[button][currCanvas])) {
+                        if(button == 0) {
+                            // display button as tooltip
+                            var tower = towerList[currCanvas][selection[currCanvas]];
+                            var text;
+                            if(tower.tier >= tier_costs.length - 1) {
+                                text = "No more upgrades!";
+                            } else {
+                                text = "Cost: " + tier_costs[tower.tier + 1];
+                            }
+                            setTooltip(text, mouseX + 5, mouseY + 10, currCanvas);
+                            found = true;
+                        } // end of upgrade buttons
+                    } // end of mouse within object
+                } // end of for buttons
+                if(!found) {
+                    tooltip = null;
+                }
+
+            } else {
+                selection[currCanvas] = null;
+            } // end of if selection != null
         } else {
             tooltip = null;
         }
@@ -139,10 +167,8 @@ function handleMouseDown(evt) {
                             if(player.gold < towerCosts[tile.type - TOWER_OFFSET_NUM]) {
                                 queueMessage("Insufficient gold!", mouseX, mouseY, currCanvas);
                             } else {
-                                dragObject[currCanvas] = new DraggableClass(tile.type, mouseX, mouseY, currCanvas, "tower");
-                                dragObject[currCanvas].range = towerRanges[tile.type - TOWER_OFFSET_NUM];
+                                setDrag(tile.type, mouseX, mouseY);
                             }
-                            selection[currCanvas] = null; // clear selection
                         } else if(tile.hasTower()) {
                             // selected a tower to view
                             if(selection[currCanvas] == tile.towerOnTile) {
@@ -203,6 +229,16 @@ function handleMouseUp(evt) {
     return;
 }
 
+function setDrag(towerType, x, y) {
+    dragObject[currCanvas] = new DraggableClass(towerType, x, y, currCanvas, "tower");
+    dragObject[currCanvas].range = towerRanges[towerType - TOWER_OFFSET_NUM];
+    dragObject[currCanvas].visible = true;
+
+    selection[currCanvas] = null; // clear selection
+    isDown = true;
+    isDragging = true;
+}
+
 function setupInput() {
     canvas[PLAYER].addEventListener('mousemove', function(evt) {
         // easy swapping: only listen on the canvas they're moused over
@@ -242,25 +278,20 @@ function setupInput() {
     initButtons();
 }
 
+// key presses
+var shiftHeld = false;
+var pressingNum = false;
 function keySet(evt, setTo) {
-    // switch(evt.keyCode) {
-    //     case tower.controlKeyLeft:
-    //         tower.keyHeld_TurnLeft = setTo;
-    //         evt.preventDefault();
-    //         break;
-    //     case tower.controlKeyUp:
-    //         tower.keyHeld_Gas = setTo;
-    //         evt.preventDefault();
-    //         break;
-    //     case tower.controlKeyRight:
-    //         tower.keyHeld_TurnRight = setTo;
-    //         evt.preventDefault();
-    //         break;
-    //     case tower.controlKeyDown:
-    //         tower.keyHeld_Reverse = setTo;
-    //         evt.preventDefault();
-    //         break;
-    // }    
+    if(evt.keyCode == 16) {
+        shiftHeld = setTo;
+    } else if(evt.keyCode > KEY_NUM_OFFSET && evt.keyCode <= KEY_NUM_OFFSET + 8) {
+        // tower/monster hotkey!
+        if((shiftHeld || !pressingNum) && setTo) {
+            // allow multiple presses before release (press & hold monster)
+            StateController.hotkey(evt.keyCode, shiftHeld, currCanvas);
+        }   
+        pressingNum = setTo;
+    }
 }
 
 function keyPressed(evt) {
@@ -271,12 +302,13 @@ function keyPressed(evt) {
     if(evt.keyCode == 27) {
         // escape: cancel tower placement
         pressEscape();
-    }
-    // keySet(evt, true);
+    } else {
+        keySet(evt, true);
+    } 
 }
 
 function keyReleased(evt) {
-    // keySet(evt, false);
+    keySet(evt, false);
 }
 
 function pressEscape() {
