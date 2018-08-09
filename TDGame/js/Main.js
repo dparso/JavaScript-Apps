@@ -14,12 +14,15 @@ var monsterSelections = {}; // these things should be moved elsewhere!
 var monsterPath = [[], []]; // the pixel coords for monsters to follow
 var fullMonsterPath = [[], []]; // the tile coords for towers to track for first targeting
 var selection = [null, null];
+var waitingToStart = true;
+var started = false;
 
 var player = new PlayerClass(PLAYER);
 var enemy = new PlayerClass(ENEMY);
+// enemy.gold = 250;
 
 var StateController = new StateControllerClass(welcomeScreen);
-var infoPane = new InfoPaneClass();
+var infoPane = [new InfoPaneClass(PLAYER), new InfoPaneClass(ENEMY)];
 
 window.onload = function() {
     canvas[PLAYER] = document.getElementById('gameCanvas');
@@ -28,27 +31,35 @@ window.onload = function() {
     ctx[PLAYER] = canvas[PLAYER].getContext('2d');
     ctx[ENEMY] = canvas[ENEMY].getContext('2d');
 
+    // disable right click
+    $('body').on('contextmenu', '#gameCanvas', function(e){ return false; });
+    $('body').on('contextmenu', '#enemyCanvas', function(e){ return false; });
+
     currCanvas = PLAYER;
     loadImages();
 }
 
-function loadingDoneStartGame() { 
-    prepareEnemy();
+function loadingDoneStartGame() {
+    waitingToStart = false;
+    if(started) {
+        startGame();
+    }
+}
+
+function startGame() {
+    started = true;
+    if(waitingToStart) return;
+    $('#container').fadeIn(1500);
+    document.getElementById('container').removeAttribute('hidden');
+    document.getElementById('container').removeAttribute('hidden');
+    $('#userinfopane').hide();
+    $('#enemyinfopane').hide();
 
     timerId = setInterval(updateAll, 1000 / fps);
-
     setupInput();
-    // monsterSelections[TILE_MONSTER_1] = 50;
-    // monsterSelections[TILE_MONSTER_4] = 3;
-    // monsterSelections[TILE_MONSTER_3] = 1;
-
-    // monsterSelections[TILE_MONSTER_2] = 1;
-    // monsterSelections[TILE_MONSTER_1] = 1;
 
     // StateController.changeState(STATE_START, welcomeScreen);
     StateController.changeState(STATE_PLAY, levelOne);
-    StateController.placeTower(2, PLAYER, {row: 5, col: 5});
-
 }
 
 function updateAll() {
@@ -88,6 +99,8 @@ function updateAll() {
 
     drawAll(PLAYER);
     drawAll(ENEMY);
+    drawTooltip();
+
 }
 
 var timeScale = 0;
@@ -148,17 +161,11 @@ function drawAll(context) {
     // draw tower selection
     if(selection[context] != null) {
         drawSelection(context);
-        infoPane.draw(selection[context], context);
     }
-
-    var string = "";
-    for(var key in monsterSelections) {
-        string += "Type " + (key - MONSTER_OFFSET_NUM) + ": " + monsterSelections[key] + "<br>";
-    }
-    document.getElementById("monsterText").innerHTML = string;
 }
 
 function drawSelection(context) {
+    infoPane[context].show();
     var tower = towerList[context][selection[context]];
 
     var objectTile = tower.currTile;
@@ -175,65 +182,82 @@ function drawSelection(context) {
 }
 
 function textDraw(context) {
-    if(StateController.state == STATE_PLAY) {
-        ctx[PLAYER].fillStyle = "rgb(250, 250, 250)";
-        ctx[PLAYER].font = "20px Helvetica";
-        ctx[PLAYER].textAlign = "left";
-        ctx[PLAYER].textBaseline = "top";
-        ctx[PLAYER].fillText("Lives: " + player.lives, 570, 10);
-        ctx[PLAYER].fillText("Gold: " + player.gold, 570, 30);
-        ctx[PLAYER].fillText("Income: " + player.income, 570, 50);
-        ctx[PLAYER].fillText("Time until income: " + (INCOME_RATE - Math.floor(timeSinceLastIncome * fps / 1000)), 330, 40);
+    // if(StateController.state == STATE_PLAY) {
+    //     ctx[PLAYER].fillStyle = "rgb(250, 250, 250)";
+    //     ctx[PLAYER].font = "20px Helvetica";
+    //     ctx[PLAYER].textAlign = "left";
+    //     ctx[PLAYER].textBaseline = "top";
+    //     ctx[PLAYER].fillText("Lives: " + player.lives, 540, 5);
+    //     ctx[PLAYER].fillText("Gold: " + player.gold, 540, 25);
+    //     ctx[PLAYER].fillText("Income: " + player.income, 540, 45);
+    //     ctx[PLAYER].fillText("Time until income: " + (INCOME_RATE - Math.floor(timeSinceLastIncome * fps / 1000)), 330, 45);
 
-        ctx[ENEMY].fillStyle = "rgb(250, 250, 250)";
-        ctx[ENEMY].font = "20px Helvetica";
-        ctx[ENEMY].textAlign = "left";
-        ctx[ENEMY].textBaseline = "top";
-        ctx[ENEMY].fillText("Lives: " + enemy.lives, 570, 10);
-        ctx[ENEMY].fillText("Gold: " + enemy.gold, 570, 30);
-        ctx[ENEMY].fillText("Income: " + enemy.income, 570, 50);
+    //     ctx[ENEMY].fillStyle = "rgb(250, 250, 250)";
+    //     ctx[ENEMY].font = "20px Helvetica";
+    //     ctx[ENEMY].textAlign = "left";
+    //     ctx[ENEMY].textBaseline = "top";
+    //     ctx[ENEMY].fillText("Lives: " + enemy.lives, 570, 10);
+    //     ctx[ENEMY].fillText("Gold: " + enemy.gold, 570, 30);
+    //     ctx[ENEMY].fillText("Income: " + enemy.income, 570, 50);
 
-        var tile = pixelToGrid(mouseX, mouseY);
-        ctx[currCanvas].fillStyle = 'white';
+        // var tile = pixelToGrid(mouseX, mouseY);
+        // ctx[currCanvas].fillStyle = 'white';
         // ctx[currCanvas].fillText(mouseX + ", " + mouseY, mouseX, mouseY);
         // ctx[currCanvas].fillText(tile.row + ", " + tile.col, mouseX, mouseY);
 
-        // draw all queued messages
-        while(messages.length > 0) {
-            var message = messages.shift();
-            var textWidth = ctx[message.ctx].measureText(message.text).width;
-            var xPos = message.x
-            if(xPos + textWidth > canvas[message.ctx].width) {
-                xPos = canvas[message.ctx].width - textWidth;
-            }
-            drawMessage(message.text, 1.0, -0.008, xPos, message.y, message.ctx);
+    // draw all queued messages
+    while(messages.length > 0) {
+        var message = messages.shift();
+        var textWidth = ctx[message.ctx].measureText(message.text).width;
+        var xPos = message.x
+        if(xPos + textWidth > canvas[message.ctx].width) {
+            xPos = canvas[message.ctx].width - textWidth;
         }
+        drawMessage(message.text, 1.0, -0.008, xPos, message.y, message.color, message.ctx);
     }
-    drawTooltip();
+
+    var time = (INCOME_RATE - Math.floor(timeSinceLastIncome * fps / 1000));
+    document.getElementById('incometext').innerHTML = "Income: " + player.income;
+    document.getElementById('timetext').innerHTML = "Time until income: " + time;
+    document.getElementById('livestext').innerHTML = "Lives: " + player.lives;
+    document.getElementById('goldtext').innerHTML = "Gold: " + player.gold;
+
+    document.getElementById('enemyincometext').innerHTML = "Income: " + enemy.income;
+    document.getElementById('enemytimetext').innerHTML = "Time until income: " + time;
+    document.getElementById('enemylivestext').innerHTML = "Lives: " + enemy.lives;
+    document.getElementById('enemygoldtext').innerHTML = "Gold: " + enemy.gold;
 }
 
 function drawTooltip() {
     if(tooltip != null) {
         var text = tooltip.text;
+        var color = "rgb(122, 68, 20)";
+
         ctx[tooltip.ctx].font = "12px Helvetica"; // set font first for accurate measuring
+        ctx[tooltip.ctx].fillStyle = color;
+        ctx[tooltip.ctx].textAlign = "left";
+        ctx[tooltip.ctx].textBaseline = "top";
+        ctx[tooltip.ctx].globalAlpha = 1.0;
 
         var width = ctx[tooltip.ctx].measureText(text).width + TOOLTIP_PADDING * 2;
-        var color = "rgb(122, 68, 20)";
-        var xOffset = 0, yOffset = 0;
-        if(tooltip.x + width > canvas[tooltip.ctx].width) {
-            // shift to keep on screen
-            xOffset = canvas[tooltip.ctx].width - (tooltip.x + width);
-        }
+        var yOffset = 0;
 
         if(tooltip.y + TOOLTIP_BOX_HEIGHT > canvas[tooltip.ctx].height) {
             // shift to keep on screen
             yOffset = canvas[tooltip.ctx].height - (tooltip.y + TOOLTIP_BOX_HEIGHT);
         }
 
-        drawRect(tooltip.x + xOffset, tooltip.y + yOffset, width, TOOLTIP_BOX_HEIGHT, color, tooltip.ctx);
+        var xPos;
+        if(tooltip.ctx == PLAYER) {
+            xPos = 620 - width;
+        } else {
+            xPos = 70;
+        }
+
+        drawRect(xPos, tooltip.y + yOffset, width, TOOLTIP_BOX_HEIGHT, color, tooltip.ctx);
 
         ctx[tooltip.ctx].fillStyle = "white";
-        ctx[tooltip.ctx].fillText(text, tooltip.x + TOOLTIP_PADDING + xOffset, tooltip.y + yOffset);
+        ctx[tooltip.ctx].fillText(text, xPos + TOOLTIP_PADDING, tooltip.y + yOffset);
     }
 }
 
@@ -251,6 +275,8 @@ function restartGame(toState, toLevel) {
     fullMonsterPath = [[], []];
     selection = [null, null];
     StateController.monstersWaiting = [[], []];
+    availableTowerLocations = [];
+    upgradeableTowers = [];
 
     timeSinceLastIncome = 0;
     timeSinceLastRelease = [0, 0];
@@ -260,7 +286,7 @@ function restartGame(toState, toLevel) {
     enemy = new PlayerClass(ENEMY);
     prepareEnemy();
 
-    infoPane = new InfoPaneClass();
+    infoPane = [new InfoPaneClass(PLAYER), new InfoPaneClass(ENEMY)];
 
     clearInterval(timerId);
     fadeOut(toState, toLevel, PLAYER);

@@ -1,8 +1,28 @@
 To-Do:
 
-Draw mini-sized pictures for tower & monster selections so they fit
+You get more from sending monsters than you do from killing them
+
+Tab to cycle towers
+
+Add text showing how much will be added when upgrade button hovers
+
+Animate monster movement (can just be shifting between tilts), tower attacks? 
+
+Color upgrade color based on if you have enough
+
+Stronger monsters take more lives
+
+Player classes: attacker, defender, neutral, get certain bonuses to that specialization (monster speed, health, tower price, etc.), and some special unlockable only for that class -- a tier 6 of towers, a monster boss, etc.
+
+Cannon top tier is slower, huge, big splash, ginormous explosion
+
+Define tower-specific upgrades by giving each class its own upgrade array
+
+Try to design the monster on the front page as a boss!
 
 Debug button for delete all monsters/towers
+
+Modify lightning code for awesome looking laser beam (red)! Turn maxDifference down
 
 As it stands, monsters can't be attacked in their original square, as they haven't yet notified the tile of their presence
 
@@ -12,7 +32,7 @@ Tower type: line directly to monster, damages per second
 
 Press keys to select a tower type to buy/monster type to send (press 1 means tower type 1 appears at mouseX, mouseY if enough gold)
 
-Note: if maps change, BFS code must perform separate searches for each context
+Wizard can attack #tier targets
 
 Increase tower building probability the more monsters are on screen
 
@@ -26,8 +46,6 @@ Highlight tower & monster different color if you can afford
 
 
 If this turns into a bigger game, can have two campaign paths: first you do normal TD, then you do sending monsters, then you get the combined mode
-
-Sell button
 
 Customize enemy probabilities based on difficulty
 
@@ -51,6 +69,8 @@ Only draw explosion animation if tower is upgraded to splash
 
 Alternate enemy behaviour: randomly choose something to do, and save up enough money to do it!
 
+Format numbers to have commas
+
 Prioritize towers less as you have more
 
 Some sort of "leading" for the non-tracking projectiles (otherwise they lag)
@@ -59,8 +79,38 @@ Target priorities! Last, first, close, strong
 
 Ideas for tier trees: single target, AOE, and support (e.g., hits do not more damage, but slow run speed or increase damage taken from other sources)
 
-If you want to be really fancy, instead of highlighting the square a tower is on, overlay a shade onto the image itself
+If I were a rich man:
+	Tower tiers look different
+	Instead of highlighting the square a tower is on, overlay a shade onto the image itself
+
+	Ready... set... go!
+
+	Ctrl-1 cycles through towers of type 1, etc.
+
+	Play around with cos & sin of straight projectile trajectories 
+	(this.x += Math.sin(this.time) * 10;
+	 this.y += Math.cos(this.time) * 10;)
+	    for some crazy storms and patterns
+
+	Animate monster health bar reductions (speed proportional to health lost)
+
+
+Notes for reducing lag:
+	Reduce lightning height & strength (how many times render runs)
+	Reduce the number of times each tower checks targets
+	Reduce attack speeds, increase projectile velocities (fewer on screen at once)
+
+Sabotage ideas:
+	Enemy towers disabled for x seconds
+	Monster speed up
+	Monster health booster
+Powerup ideas:
+	Tower damage boost
 
 
 Notes:
 Cannon explosion animation from https://www.photopea.com/, select region with lasso, move with V -- make sure specific layer is selected
+
+Images:
+http://silhouettesfree.com/s.php?silhouette=Monster
+http://www.stickpng.com/img/games/evolve/evolve-monster-side-view

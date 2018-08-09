@@ -1,122 +1,97 @@
+var showAddText = false;
+
 // info pane
-function InfoPaneClass() {
-	this.x = 70;
-	this.y = 540;
-	this.width = 500;
-	this.height = 100;
-	this.background_color = "rgb(122, 68, 20)";
-	this.padding = 5;
-	this.col_width = 130;
-	this.upgrade_button_width = 70;
-	this.upgrade_button_height = 18;
+function InfoPaneClass(context) {
+	this.showing = false;
+	this.context = context;
 
-	// panel buttons
-	this.damageButton = [null, null];
-	this.rangeButton = [null, null];
-	this.attackSpeedButton = [null, null];
-	this.sellButton = [null, null];
-	this.changeTargetButton = [null, null];
-	this.buttons = [this.damageButton, this.rangeButton, this.attackSpeedButton, this.changeTargetButton, this.sellButton];
-
-	this.draw = function(objectId, context) {
-		this.updateButtons(objectId, context);
-
-	    var tower = towerList[context][objectId];
-
-	    // draw background
-	    drawRect(this.x, this.y, this.width, this.height, this.background_color, tower.context);
-
-	    var nameText = "Name: " + towerNames[tower.type];
-	    var costText = "Cost: " + towerCosts[tower.type];
-	    var rangeText = "Range: " + tower.properties[RANGE];
-	    var damageText = "Damage: " + Math.floor(tower.properties[DAMAGE] * 100) / 100; // round to 100th place
-	    var attackSpeedText = "Attack Speed: " + Math.floor(tower.properties[ATTACK_SPEED] * 100) / 100;
-	    var killText = "Kills: " + tower.killCount;
-	    var upgradeText = "Upgrades:";
-
-	    var cols = [[nameText, costText, rangeText, damageText], [attackSpeedText, killText], [upgradeText]];
-
-	    ctx[tower.context].fillStyle = "white";
-	    ctx[tower.context].font = "14px Helvetica";
-	    
-	    // draw info
-	    var vertPadding = this.height / cols[0].length;
-	    for(var col = 0; col < cols.length; col++) {
-	        for(var row = 0; row < cols[col].length; row++) {
-	            ctx[tower.context].fillText(cols[col][row], this.x + this.padding + this.col_width * col, this.y + this.padding + row * vertPadding);
-	        }
-	    }
-
-	    // draw buttons
-	    for(var button = 0; button < this.buttons.length; button++) {
-	        this.buttons[button][context].draw();
-	    }
-
-	    // draw tower image in top right corner
-	    ctx[tower.context].drawImage(tower.img, this.x + this.width - tower.img.width - this.padding, this.y + this.padding);
-	}
-
-	this.updateButtons = function(objectId, context) {
-		// note: please convert these to adhere to new tower.upgrades property
-		var tower = towerList[context][objectId];
-		this.damageButton[context].text = "Tier (" + (tower.tier + 1) + "/" + tier_costs.length + ")";
-		// this.rangeButton[context].text = "Range (" + (tower.tier + 1) + "/" + rng_upgrade_costs.length + ")";
-		// this.attackSpeedButton[context].text = "Fire Rate (" + (tower.tier + 1) + "/" + atk_upgrade_costs.length + ")";
-		this.rangeButton[context].text = "Empty Button";
-		this.attackSpeedButton[context].text = "Empty Button";
-		this.sellButton[context].text = "Sell: " + tower.value;
-		this.changeTargetButton[context].text = "Target: " + PRIORITY_NAMES[tower.targetPriority];
-	}
-
-	this.initButtons = function() {
-		var upgradeFn = function(val) { // parameter given in Input.js
-			StateController.upgradeTower(towerList[this.context][selection[this.context]], val, true);
-		}; // note: this.context is NOT the info pane's, but the calling button's
-
-		var sellFn = function() {
-			StateController.sellTower(selection[this.context], this.context);
-		};
-
-		var changeTargetFn = function() {
-			towerList[this.context][selection[this.context]].cyclePriority();
-		};
-
-		var blankFn = function(val) {
-
-		};
-
-		// var fxns = [upgradeFn, changeTargetFn, sellFn];
-		var fxns = [upgradeFn, changeTargetFn, sellFn, blankFn];
-		// var fxnChoices = [0, 1, 2];
-		var fxnChoices = [0, 3, 3, 1, 2];
-		// var buttonColors = ['rgb(196, 125, 45)', 'rgb(196, 125, 45)', 'rgb(210, 0, 0)'];
-		var buttonColors = ['rgb(196, 125, 45)', 'rgb(196, 125, 45)', 'rgb(196, 125, 45)', 'rgb(196, 125, 45)', 'rgb(210, 0, 0)'];
-		var buttonWidths = [this.col_width, this.col_width, this.col_width, 6 * this.col_width / 10, 6 * this.col_width / 10];
-
-		var xPos, yPos;
-		
-		// for(var button = 0; button < this.buttons.length; button++) {
-		// 	xPos = this.x + this.padding + this.col_width * 2;
-		// 	yPos = this.y + this.padding * (1 + button) + this.upgrade_button_height * (button + 1); // reset y every 3
-
-		// 	for(var who = 0; who <= 1; who++) {
-		// 		var btn = new ButtonClass(xPos, yPos, this.col_width, this.upgrade_button_height, buttonColors[button], "", who);
-		// 		btn.click = fxns[fxnChoices[button]];
-		// 		this.buttons[button][who] = btn;
-		// 	}
-		// }
-
-		for(var button = 0; button < this.buttons.length; button++) {
-			var mult = Math.floor(button / 3);
-			// some careful positioning
-			xPos = this.x + this.padding * (1 + mult) + this.col_width * (2 + mult);
-			yPos = this.y + this.padding * (1 + mult + button % 3) + this.upgrade_button_height * ((button % 3) + 1 + mult); // reset y every 3
-
-			for(var who = 0; who <= 1; who++) {
-				var btn = new ButtonClass(xPos, yPos, buttonWidths[button], this.upgrade_button_height, buttonColors[button], "", who);
-				btn.click = fxns[fxnChoices[button]];
-				this.buttons[button][who] = btn;
+	this.show = function() {
+		if(!this.showing) {
+			if(this.context == PLAYER) {
+				$('#userinfopane').fadeIn('fast');
+			} else {
+				$('#enemyinfopane').fadeIn('fast');
 			}
 		}
+		this.showing = true;
+
+		// update text of the HTML table
+		var tower = towerList[context][selection[context]];
+		var dmgText = "", rngText = "", atkText = "";
+
+		if(showAddText && tower.tier < NUM_TIERS - 1) {
+			// dmgText = "<font color='#12ad0f'>+" + (Math.floor(10 * (tower.properties[DAMAGE] * upgrade_effects[DAMAGE][tower.type][tower.tier + 1] - tower.properties[DAMAGE])) / 10) + "</font>";
+			// rngText = "<font color='#12ad0f'>+" + upgrade_effects[RANGE][tower.type][tower.tier + 1] + "</font>";
+			// atkText = "<font color='#12ad0f'>+" + (Math.floor(10 * (tower.properties[ATTACK_SPEED] * upgrade_effects[ATTACK_SPEED][tower.type][tower.tier + 1] - tower.properties[ATTACK_SPEED])) / 10) + "</font>";
+			dmgText = "<font color='#12ad0f'>&times" + upgrade_effects[DAMAGE][tower.type][tower.tier + 1] + "</font>";
+			rngText = "<font color='#12ad0f'> +" + upgrade_effects[RANGE][tower.type][tower.tier + 1] + "</font>";
+			atkText = "<font color='#12ad0f'>&times" + upgrade_effects[ATTACK_SPEED][tower.type][tower.tier + 1] + "</font>";
+		}
+
+		if(this.context == PLAYER) {
+			document.getElementById('nametext').innerHTML = "Name: " + towerNames[tower.type];
+			document.getElementById('costtext').innerHTML = "Cost: " + towerCosts[tower.type];
+			document.getElementById('rangetext').innerHTML = "Range: " + tower.properties[RANGE] + rngText;
+			document.getElementById('damagetext').innerHTML = "Damage: " + Math.floor(tower.properties[DAMAGE]) + dmgText;
+			document.getElementById('atktext').innerHTML = "Attack Speed: " + Math.floor(tower.properties[ATTACK_SPEED]) + atkText;
+			document.getElementById('killtext').innerHTML = "Kills: " + tower.killCount;
+			document.getElementById('infopaneicon').src = "images/" + imageList[tower.type + TOWER_OFFSET_NUM];
+
+			document.getElementById('tierbutton').innerHTML = "Tier (" + (tower.tier + 1) + "/" + tier_costs[tower.type].length + ") [u] <span class='tooltiptext' id='upgradecosttext'>Blank!</span>";
+			document.getElementById('sellbutton').innerHTML = "Sell: " + tower.value + " [s]";
+			document.getElementById('targetbutton').innerHTML = "Target: " + PRIORITY_NAMES[tower.targetPriority] + " [t]";
+			
+		} else {
+			document.getElementById('enemynametext').innerHTML = "Name: " + towerNames[tower.type];
+			document.getElementById('enemycosttext').innerHTML = "Cost: " + towerCosts[tower.type];
+			document.getElementById('enemyrangetext').innerHTML = "Range: " + tower.properties[RANGE];
+			document.getElementById('enemydamagetext').innerHTML = "Damage: " + Math.floor(tower.properties[DAMAGE]);
+			document.getElementById('enemyatktext').innerHTML = "Attack Speed: " + Math.floor(tower.properties[ATTACK_SPEED]);
+			document.getElementById('enemykilltext').innerHTML = "Kills: " + tower.killCount;
+			document.getElementById('enemyinfopaneicon').src = "images/" + imageList[tower.type + TOWER_OFFSET_NUM];
+			document.getElementById('enemytierbutton').innerHTML = "Tier (" + (tower.tier + 1) + "/" + tier_costs[tower.type].length + ")";
+		}
+
+		var text;
+		if(tower.tier + 1 == tier_costs[tower.type].length) {
+			text = "No more upgrades!";
+		} else {
+			text = "Cost: " + tier_costs[tower.type][tower.tier + 1];
+		}
+		document.getElementById('upgradecosttext').innerHTML = text;
 	}
+
+	this.hide = function() {
+		if(this.context == PLAYER) {
+			$('#userinfopane').fadeOut('fast');
+		} else {
+			$('#enemyinfopane').fadeOut('fast');
+		}
+		this.showing = false;
+	}
+}
+
+function showPlayerTierText() {
+	if(selection[PLAYER] != null) {
+		if(towerList[PLAYER][selection[PLAYER]].tier < NUM_TIERS - 1) {
+			showAddText = true;
+		}
+	}
+}
+
+function hidePlayerTierText() {
+	showAddText = false;
+}
+
+function upgradePressed() {
+	StateController.upgradeTower(towerList[PLAYER][selection[PLAYER]], 0, true);
+}
+
+function targetPressed() {
+	towerList[PLAYER][selection[PLAYER]].cyclePriority();
+
+}
+
+function sellPressed() {
+	StateController.sellTower(selection[PLAYER], PLAYER);
 }

@@ -1,11 +1,11 @@
 // monster movement
 const MONSTER_HEALTH_BAR_HEIGHT = 5;
 var MONSTER_ID = [0, 0];
-var monsterHealths = [20, 60, 90, 220, 10000, 1000000];
-var monsterSpeeds = [10, 5, 3, 6, 7, 2];
-var monsterValues = [1, 2, 4, 8, 200, 5000]; // how much you get for killing one
-var monsterCosts = [4, 8, 10, 35, 1000, 10000];
-var monsterNames = ["Spook", "Fright", "Fear", "Dread", "Nightmare", "Terror"]; // horror, panic
+var monsterHealths = [15, 100, 300, 2000, 10000, 1000000, 50000000, 5000000000];
+var monsterSpeeds = [10, 5, 4, 6, 7, 2.5, 3, 2];
+var monsterValues = [1, 8, 15, 70, 300, 1000, 30000, 100000]; // how much you get for killing one
+var monsterCosts = [4, 20, 40, 200, 1000, 10000, 200000, 1000000];
+var monsterNames = ["Spook", "Fright", "Fear", "Dread", "Nightmare", "Terror", "Horror", "Chaos"]; // horror, panic
 
 function MonsterClass(type, image, context) {
     // positions
@@ -70,11 +70,18 @@ function MonsterClass(type, image, context) {
 
     this.draw = function() {
         if(this.visible) {
-            ctx[this.context].drawImage(this.img, this.x, this.y);
+            var xOff = 0, yOff = 0;
+            if(this.img.width > TILE_W) {
+                xOff = -(this.img.width - TILE_W) / 2.0;
+            }
+            if(this.img.height > TILE_H) {
+                yOff = -(this.img.height - TILE_H) / 2.0;
+            }
+            ctx[this.context].drawImage(this.img, this.x + xOff, this.y + yOff);
 
             // health bar
             var widthLimit = this.health / monsterHealths[this.type];
-            drawRect(this.x, this.y - 5, this.img.width * widthLimit, MONSTER_HEALTH_BAR_HEIGHT, 'red', this.context);
+            drawRect(this.x + xOff, this.y - 5 + yOff, this.img.width * widthLimit, MONSTER_HEALTH_BAR_HEIGHT, 'red', this.context);
         }
     }
 
@@ -93,11 +100,9 @@ function MonsterClass(type, image, context) {
         this.health = 0; // towers don't attack anymore
         if(killed) {
             // only reward player if it was killed (also dies at end)
-            if(this.context == PLAYER) {
-                player.killedMonster(this.type);
-            } else {
-                enemy.killedMonster(this.type);
-            }
+            var obj = this.context == PLAYER ? player : enemy;
+            obj.killedMonster(this.type);
+            queueMessage("+" + monsterValues[this.type], this.x, this.y, this.context, 'green');
         }
 
         StateController.currLevel.tiles[this.context][this.currTile.row][this.currTile.col].notifyMonsterDepart(this.id);

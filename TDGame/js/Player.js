@@ -1,5 +1,5 @@
 const STARTING_LIVES = 5;
-const STARTING_GOLD = 1000;
+const STARTING_GOLD = 50000000;
 const STARTING_INCOME = 5;
 const INCOME_RATE = 10; // interval is x seconds
 
@@ -8,6 +8,7 @@ function PlayerClass(context) {
 	this.gold = STARTING_GOLD;
 	this.income = STARTING_INCOME;
 	this.context = context;
+	this.numTowers = 0;
 
 	this.loseLife = function() {
 		if(--this.lives == 0) {
@@ -28,6 +29,7 @@ function PlayerClass(context) {
 
 	this.buyTower = function(ofType) {
 		this.gainGold(-towerCosts[ofType]);
+		this.numTowers++;
 	}
 
 	this.sendMonster = function(ofType) {

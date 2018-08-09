@@ -64,14 +64,17 @@ function LevelClass(levelType, levelGrids, drawFunction, loadFunction) {
 	            var currTile = this.tiles[context][row][col];
 	            if(currTile.transparent) {
             		ctx[context].drawImage(tilePics[TILE_GROUND], drawTileX, drawTileY);
+	            } else {
+	            	ctx[context].drawImage(currTile.img, drawTileX, drawTileY);
 	            }
 
-	            if(currTile.type >= TOWER_OFFSET_NUM) {
-	                // draw with rotation
-	                drawBitmapCenteredWithRotation(currTile.img, drawTileX + currTile.img.width / 2, drawTileY + currTile.img.height / 2, 0, context);
-	            } else {
-	                ctx[context].drawImage(currTile.img, drawTileX, drawTileY);
-	            }
+	            // if(currTile.type >= TOWER_OFFSET_NUM) {
+	            //     // draw with rotation
+	            //     drawBitmapCenteredWithRotation(currTile.img, drawTileX + currTile.img.width / 2, drawTileY + currTile.img.height / 2, 0, context);
+	            // } else {
+	            //     ctx[context].drawImage(currTile.img, drawTileX, drawTileY);
+	            // }
+	            
 	            drawTileX += TILE_W;
 	        }
 	        drawTileY += TILE_H;

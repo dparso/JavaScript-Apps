@@ -14,7 +14,7 @@ const KEY_D = 68;
 var isDown = false;
 var isDragging = false; // maybe not necessary, implied by isDown + dragDelay?
 var dragDelay = 0;
-var dragWait = 10;
+var dragWait = 6;
 var dragObject = [null, null];
 
 var KEY_NUM_OFFSET = 48; // 0 code is 0 + 48, 1 is 1 + 48, etc
@@ -52,43 +52,16 @@ function calculateMousePos(evt) {
         var tile = StateController.currLevel.tiles[currCanvas][hoverTile.row][hoverTile.col];
         if(typeIsTower(tile.type)) {
             var index = tile.type - TOWER_OFFSET_NUM;
-            var text = towerNames[index] + ": " + towerCosts[index] + " (" + (index + 1) + ")";
+            var text = towerNames[index] + ": " + towerCosts[index] + " [" + (index + 1) + "]";
         } else if(typeIsMonster(tile.type)) {
             var index = tile.type - MONSTER_OFFSET_NUM;
-            var text = monsterNames[index] + ": " + monsterCosts[index] + " (shift + " + (index + 1) + ")";
-        } else if(pixelIsWithinObject(mouseX, mouseY, infoPane)) {
-            if(selection[currCanvas] != null) {
-                // check if hovering over button!
-                var found = false;
-                for(var button = 0; button < infoPane.buttons.length; button++) {
-                    if(pixelIsWithinObject(mouseX, mouseY, infoPane.buttons[button][currCanvas])) {
-                        if(button == 0) {
-                            // display button as tooltip
-                            var tower = towerList[currCanvas][selection[currCanvas]];
-                            var text;
-                            if(tower.tier >= tier_costs.length - 1) {
-                                text = "No more upgrades!";
-                            } else {
-                                text = "Cost: " + tier_costs[tower.tier + 1];
-                            }
-                            setTooltip(text, mouseX + 5, mouseY + 10, currCanvas);
-                            found = true;
-                        } // end of upgrade buttons
-                    } // end of mouse within object
-                } // end of for buttons
-                if(!found) {
-                    tooltip = null;
-                }
-
-            } else {
-                selection[currCanvas] = null;
-            } // end of if selection != null
+            var text = monsterNames[index] + ": " + monsterCosts[index] + " [shift + " + (index + 1) + "]";
         } else {
             tooltip = null;
         }
 
         if(index != undefined) {
-            setTooltip(text, mouseX + 5, mouseY + 10, currCanvas);
+            setTooltip(text, mouseX + 5, mouseY - 10, currCanvas);
         }
     }
 
@@ -146,39 +119,24 @@ function handleMouseDown(evt) {
         case STATE_PLAY:
             if(currCanvas == PLAYER) { // tower
                 if(!isDragging) {
-                    if(pixelIsWithinObject(mouseX, mouseY, infoPane)) {
-                        if(selection[currCanvas] != null) {
-                            // check if clicked button!
-                            for(var button = 0; button < infoPane.buttons.length; button++) {
-                                if(pixelIsWithinObject(mouseX, mouseY, infoPane.buttons[button][currCanvas])) {
-                                    // click the button!
-                                    infoPane.buttons[button][currCanvas].click(button);
-                                    break;
-                                }
-                            }
-
+                    // selected a tower to build
+                    var tile = StateController.currLevel.tiles[currCanvas][tileClicked.row][tileClicked.col];
+                    if(typeIsTower(tile.type)) {
+                        if(player.gold < towerCosts[tile.type - TOWER_OFFSET_NUM]) {
+                            queueMessage("Insufficient gold!", mouseX, mouseY, currCanvas);
                         } else {
-                            selection[currCanvas] = null;
+                            setDrag(tile.type, mouseX, mouseY, false);
+                        }
+                    } else if(tile.hasTower()) {
+                        // selected a tower to view
+                        if(selection[currCanvas] == tile.towerOnTile) {
+                            clearSelection(currCanvas);
+                        } else {
+                            selection[currCanvas] = tile.towerOnTile;
+                            infoPane[currCanvas].show();
                         }
                     } else {
-                        // selected a tower to build
-                        var tile = StateController.currLevel.tiles[currCanvas][tileClicked.row][tileClicked.col];
-                        if(typeIsTower(tile.type)) {
-                            if(player.gold < towerCosts[tile.type - TOWER_OFFSET_NUM]) {
-                                queueMessage("Insufficient gold!", mouseX, mouseY, currCanvas);
-                            } else {
-                                setDrag(tile.type, mouseX, mouseY);
-                            }
-                        } else if(tile.hasTower()) {
-                            // selected a tower to view
-                            if(selection[currCanvas] == tile.towerOnTile) {
-                                selection[currCanvas] = null; // deselect
-                            } else {
-                                selection[currCanvas] = tile.towerOnTile;
-                            }
-                        } else {
-                            selection[currCanvas] = null; // clicked on empty square: clear selection
-                        }
+                        clearSelection(currCanvas);
                     }
                 }
             } else { // send monster
@@ -194,12 +152,12 @@ function handleMouseDown(evt) {
                 } else if(tile.hasTower()) {
                     // selecting an opponent's tower
                     if(selection[currCanvas] == tile.towerOnTile) {
-                        selection[currCanvas] = null; // deselect
+                        clearSelection(currCanvas); // deselect
                     } else {
                         selection[currCanvas] = tile.towerOnTile;
                     }
                 } else {
-                    selection[currCanvas] = null; // clicked on empty square: clear selection
+                    clearSelection(currCanvas); // clicked on empty square: clear selection
                 }
             }
             break;
@@ -229,12 +187,12 @@ function handleMouseUp(evt) {
     return;
 }
 
-function setDrag(towerType, x, y) {
+function setDrag(towerType, x, y, visible) {
     dragObject[currCanvas] = new DraggableClass(towerType, x, y, currCanvas, "tower");
     dragObject[currCanvas].range = towerRanges[towerType - TOWER_OFFSET_NUM];
-    dragObject[currCanvas].visible = true;
+    dragObject[currCanvas].visible = visible;
 
-    selection[currCanvas] = null; // clear selection
+    clearSelection(currCanvas); // clear selection
     isDown = true;
     isDragging = true;
 }
@@ -278,13 +236,38 @@ function setupInput() {
     initButtons();
 }
 
+function clearSelection(context) {
+    selection[context] = null;
+    infoPane[context].hide();
+}
+
 // key presses
 var shiftHeld = false;
 var pressingNum = false;
 function keySet(evt, setTo) {
-    if(evt.keyCode == 16) {
-        shiftHeld = setTo;
-    } else if(evt.keyCode > KEY_NUM_OFFSET && evt.keyCode <= KEY_NUM_OFFSET + 8) {
+    switch(evt.keyCode) {
+        case 16: // shift
+            shiftHeld = setTo;
+            return;
+        case 85:
+            if(selection[PLAYER] != null && setTo) {
+                // u: upgrade selection
+                upgradePressed();
+            }
+            return;
+        case 84: // t: cycle target
+            if(selection[PLAYER] != null && setTo) {
+                targetPressed();
+            }
+            return;
+        case 83: // s: sell selection
+            if(selection[PLAYER] != null && setTo) {
+                sellPressed();
+            }
+            return;
+    }
+
+    if(evt.keyCode > KEY_NUM_OFFSET && evt.keyCode <= KEY_NUM_OFFSET + 8) {
         // tower/monster hotkey!
         if((shiftHeld || !pressingNum) && setTo) {
             // allow multiple presses before release (press & hold monster)
@@ -312,7 +295,10 @@ function keyReleased(evt) {
 }
 
 function pressEscape() {
-    if(dragObject[currCanvas]) {
+    if(dragObject[currCanvas] != null) {
         dragObject[currCanvas] = null;
+    }
+    if(selection[currCanvas] != null) {
+        clearSelection(currCanvas);
     }
 }

@@ -51,22 +51,24 @@ var levelOne = new LevelClass(LEVEL_TRACK, [levelOneGrid_player, levelOneGrid_en
     // drag object
     if(dragObject[context]) {
         dragObject[context].draw();
-        var objectTile = pixelToGrid(dragObject[context].x, dragObject[context].y);
+        if(dragObject[context].visible) {
+            var objectTile = pixelToGrid(dragObject[context].x, dragObject[context].y);
 
-        // highlight the tile it'll be placed on
-        highlightTile(objectTile.row, objectTile.col, 'white', 0.4, context);
+            // highlight the tile it'll be placed on
+            highlightTile(objectTile.row, objectTile.col, 'white', 0.4, context);
 
-        if(dragObject[context].classType == "tower") {
-            // highlight tiles in range
-            for(var row = objectTile.row - dragObject[context].range; row <= objectTile.row + dragObject[context].range; row++) {
-                for(var col = objectTile.col - dragObject[context].range; col <= objectTile.col + dragObject[context].range; col++) {
-                    if(gridInRange(row, col)) { // in bounds
-                        var tile = StateController.currLevel.tiles[context][row][col];
-                        if(tile.type != TILE_WALL || tile.hasTower()) {
-                            // color red
-                            highlightTile(row, col, 'red', 0.5, context);                      
-                        } else {
-                            highlightTile(row, col, 'white', 0.3, context);
+            if(dragObject[context].classType == "tower") {
+                // highlight tiles in range
+                for(var row = objectTile.row - dragObject[context].range; row <= objectTile.row + dragObject[context].range; row++) {
+                    for(var col = objectTile.col - dragObject[context].range; col <= objectTile.col + dragObject[context].range; col++) {
+                        if(gridInRange(row, col)) { // in bounds
+                            var tile = StateController.currLevel.tiles[context][row][col];
+                            if(tile.type != TILE_WALL || tile.hasTower()) {
+                                // color red
+                                highlightTile(row, col, 'red', 0.5, context);                      
+                            } else {
+                                highlightTile(row, col, 'white', 0.3, context);
+                            }
                         }
                     }
                 }

@@ -1,10 +1,11 @@
 // handles enemy behaviour
 const ENEMY_ACTION_RATE = 1.0;
+const ENEMY_TOWER_PROB = 0.5;
 var timeSinceAction = 0;
 var enemyActionRate = ENEMY_ACTION_RATE; // one action every x seconds
 var enemyActionProbability = 0.75; // likelihood enemy will perform an action when given the chance (greater is higher)
-var enemyTowerProbability = 0.4; // likelihood to buy a tower instead of a monster
-var enemyUpgradeProbability = 0.35;
+var enemyTowerProbability = ENEMY_TOWER_PROB; // likelihood to buy a tower instead of a monster
+var enemyUpgradeProbability = 0.3;
 var minTowerCost = Number.MAX_SAFE_INTEGER;
 var minMonsterCost = Number.MAX_SAFE_INTEGER;
 
@@ -20,12 +21,16 @@ function prepareEnemy() {
 	for (var i = 0; i < towerCosts.length; i++) {
 		minTowerCost = Math.min(minTowerCost, towerCosts[i]);
 	}
-	availableTowerLocations = [];
-	upgradeableTowers = [];
+
+	// add some towers beforehand
+	// careful, these are still in availableTowerLocations
+	StateController.placeTower(CANNON, ENEMY, {row: 4, col: 5});
+	StateController.placeTower(SHOOTER, ENEMY, {row: 6, col: 10});
 }
 
 function enemyActions() {
-	enemyActionRate = ENEMY_ACTION_RATE - (enemy.gold / 2000); // slightly increase with gold excess -- don't sit around, spend money!
+	enemyTowerProbability = ENEMY_TOWER_PROB * (1 - enemy.numTowers / 30.0); // 30 towers is enough!
+	enemyActionRate = ENEMY_ACTION_RATE - (enemy.gold / 50000); // slightly increase with gold excess -- don't sit around, spend money!
 
 	if(StateController.state != STATE_PLAY) return;
 	if(timeSinceAction > (1000 / fps) * enemyActionRate) {
@@ -72,11 +77,8 @@ function buyUpgrade() {
 	var type = Math.floor(Math.random() * tier_costs.length);
 	var tower = towerList[ENEMY][towerId];
 
-	for(var up = type; up < type + tier_costs.length; up++) {
-		// try different upgrades
-		if(StateController.upgradeTower(tower, type, false)) {
-			return true;
-		}
+	if(StateController.upgradeTower(tower, type, false)) {
+		return true;
 	}
 
 	return false;
@@ -88,6 +90,7 @@ function buyTower() {
 	if(enemy.gold < minTowerCost) {
 		return false;
 	}
+
 	// are there available positions?
 	if(availableTowerLocations.length > 0) {
 		// which one to buy?

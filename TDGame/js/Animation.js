@@ -50,13 +50,13 @@ function fadeOut(toState, toLevel, context) {
 }
 
 var messages = [];
-function queueMessage(message, x, y, context) {
-    messages.push({text: message, x: x, y: y, ctx: context});
+function queueMessage(message, x, y, context, color = 'red') {
+    messages.push({text: message, x: x, y: y, ctx: context, color: color});
 }
 
 // message scrolls up as it fades out
-function drawMessage(message, alpha, delta, x, y, context) {
-    ctx[context].fillStyle = 'red';
+function drawMessage(message, alpha, delta, x, y, color, context) {
+    ctx[context].fillStyle = color;
     ctx[context].globalAlpha = alpha;
 
     ctx[context].font = "16px Helvetica";
@@ -67,7 +67,7 @@ function drawMessage(message, alpha, delta, x, y, context) {
 
     if(alpha >= 0.2) {
         requestAnimationFrame(function() {
-            drawMessage(message, alpha + delta, delta, x, y - 0.9, context);
+            drawMessage(message, alpha + delta, delta, x, y - 0.9, color, context);
         });
     }
 }
