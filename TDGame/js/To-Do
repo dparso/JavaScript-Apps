@@ -1,5 +1,27 @@
 To-Do:
 
+Reduce clutter by not sending lower cost monsters (can be done just by walking down the monster list by price and buying as many as possible of the most expensive before running out)
+
+Pause: stop rotations & hovering
+
+Color in start & end
+
+Draw arrow indicating monster path
+
+Blur monsters out with shadowColor white
+
+Setting shadow color and blur on the whole canvas is actually awesome for tiles!
+
+https://thorbjorn.itch.io/tiled
+
+Water tile
+
+Can always draw boss with shadow effects!
+
+At top tier, conduit mouse controls stream, damages on tile
+
+x-flip monster based on direction
+
 You get more from sending monsters than you do from killing them
 
 Tab to cycle towers
@@ -94,11 +116,15 @@ If I were a rich man:
 
 	Animate monster health bar reductions (speed proportional to health lost)
 
+	Sides have light & dark, so towers and monsters from each side are shadowed differently
+
 
 Notes for reducing lag:
 	Reduce lightning height & strength (how many times render runs)
 	Reduce the number of times each tower checks targets
+	Calculate tower range for each tower, only check in that range
 	Reduce attack speeds, increase projectile velocities (fewer on screen at once)
+	Remove shadow, movement, & rotation effects from monsters, towers, projectiles
 
 Sabotage ideas:
 	Enemy towers disabled for x seconds
@@ -107,6 +133,33 @@ Sabotage ideas:
 Powerup ideas:
 	Tower damage boost
 
+Tower ideas:
+	Light:
+		Javelin thrower, thin arrow with white light blur, javelin disappears from hand when thrown until next throw
+	Dark:
+		http://www.pinsdaddy.com/grim-reaper-hood_Q0Hz1ZcdFMIu1PaxpXR%7CF*DN4hGca3DLqKaC0yVKwso/
+		Grim reaper: scythe
+
+	Reaper & some sort of God/Archon/Angel are the 'heroes' of their side, only 1, top tier
+		OR, always there, and *lots* of custom upgrades for them along campaign
+		Like a commander as you fight the battle -- always in the battle, but start off fairly weak
+		You don't upgrade them during the fight, but between battles as you earn experience
+
+Monster ideas:
+	Hounds -- the beasts of the Reaper
+
+Steps to creating a new tower:
+	Add new costs and upgrade effects in Tower.js
+	Add const name in Tower.js (e.g., const NEW_TOWER = x;)
+	Add new projectile speed & splash in Projectile.js
+	Add TILE_TOWER_X in Grid.js
+	Increment NUM_TOWERS in Grid.js
+	Add the tower to grids in Grid.js
+	If desired, create new class to specially override functions
+	Update StateController's placeTower to include the option for new tower with class if applicable
+	Add image in ImageLoading.js
+	If new projectile image, add that to images as well
+	Show image in the towerselections HTML table
 
 Notes:
 Cannon explosion animation from https://www.photopea.com/, select region with lasso, move with V -- make sure specific layer is selected

@@ -1,6 +1,6 @@
 const STARTING_LIVES = 5;
-const STARTING_GOLD = 50000000;
-const STARTING_INCOME = 5;
+const STARTING_GOLD = 30000000.0;
+const STARTING_INCOME = 5.0;
 const INCOME_RATE = 10; // interval is x seconds
 
 function PlayerClass(context) {

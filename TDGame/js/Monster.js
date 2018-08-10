@@ -1,19 +1,26 @@
 // monster movement
 const MONSTER_HEALTH_BAR_HEIGHT = 5;
 var MONSTER_ID = [0, 0];
-var monsterHealths = [15, 100, 300, 2000, 10000, 1000000, 50000000, 5000000000];
+var monsterHealths = [1.5, 10.0, 30.0, 200.0, 1000.0, 100000.0, 10000000.0, 2000000000.0];
 var monsterSpeeds = [10, 5, 4, 6, 7, 2.5, 3, 2];
-var monsterValues = [1, 8, 15, 70, 300, 1000, 30000, 100000]; // how much you get for killing one
-var monsterCosts = [4, 20, 40, 200, 1000, 10000, 200000, 1000000];
-var monsterNames = ["Spook", "Fright", "Fear", "Dread", "Nightmare", "Terror", "Horror", "Chaos"]; // horror, panic
+var monsterValues = [0.2, 0.8, 2.5, 7.0, 30.0, 100.0, 3000.0, 10000.0]; // how much you get for killing one
+var monsterCosts = [0.5, 2.0, 8.0, 20.0, 100.0, 1000.0, 20000.0, 100000.0];
+var monsterNames = ["Spook", "Fright", "Fear", "Dread", "Nightmare", "Terror", "Horror", "Chaos"]; // panic, despair, jitters, concern, creep, anguish, gloom, misery, desperation
 
-function MonsterClass(type, image, context) {
+const LEFT = 0;
+const RIGHT = 1;
+
+function MonsterClass(type, context) {
     // positions
     this.x = MONSTER_START[context].col * TILE_W;
     this.y = MONSTER_START[context].row * TILE_H;
     this.currTile = MONSTER_START[context];
 
-    this.img = image;
+    this.imgs = monsterPics[type];
+    this.imgIndex = 0; // which point in walk animation
+    this.walkTimer = 0;
+    this.direction = RIGHT;
+
     this.context = context; // where to draw itself
     this.id = MONSTER_ID[this.context]++;
 
@@ -25,6 +32,9 @@ function MonsterClass(type, image, context) {
     this.invulnerable = false;
     this.immobile = false;
     this.value = monsterValues[type];
+
+    this.animationTime = 100 / this.speed;
+    this.animationStage = this.animationTime;
 
     this.classType = "monster";
 
@@ -41,6 +51,11 @@ function MonsterClass(type, image, context) {
                 var nextGoal = monsterPath[this.context][this.pathPosition];
                 var changeX = nextGoal.x - this.x;
                 var changeY = nextGoal.y - this.y;
+                if(changeX < 0) {
+                    this.direction = LEFT;
+                } else if(changeX > 0) {
+                    this.direction = RIGHT;
+                }
 
                 this.x += Math.sign(changeX) * this.speed;
                 this.y += Math.sign(changeY) * this.speed;
@@ -66,22 +81,63 @@ function MonsterClass(type, image, context) {
             StateController.notifyLifeLost(this.context);
             this.die(false);
         }
+
+        this.walkTimer++;
     }
 
     this.draw = function() {
         if(this.visible) {
-            var xOff = 0, yOff = 0;
-            if(this.img.width > TILE_W) {
-                xOff = -(this.img.width - TILE_W) / 2.0;
+            if(this.walkTimer > (50.0 / this.speed)) {
+                this.imgIndex++;
+                this.imgIndex %= this.imgs.length;
+                this.walkTimer = 0;
             }
-            if(this.img.height > TILE_H) {
-                yOff = -(this.img.height - TILE_H) / 2.0;
+            if(this.direction >= this.imgs[this.imgIndex].length) {
+                this.direction = 0; // won't need this for long, supports only 1 direction
             }
-            ctx[this.context].drawImage(this.img, this.x + xOff, this.y + yOff);
+            var img = this.imgs[this.imgIndex][this.direction];
+            var color;
+            if(this.context == PLAYER) {
+                color = 'black';
+            } else {
+                color = 'white';
+            }
+            if(this.animationStage > 0) {
+                ctx[this.context].save();
+                ctx[this.context].translate(this.x + TILE_W / 2, this.y + TILE_H / 2);
+                var scale = 1 - (this.animationStage / this.animationTime);
+                ctx[this.context].scale(scale, scale);
+                ctx[this.context].shadowBlur = 30;
+                ctx[this.context].shadowColor = color;
+                ctx[this.context].globalAlpha = scale;
 
-            // health bar
-            var widthLimit = this.health / monsterHealths[this.type];
-            drawRect(this.x + xOff, this.y - 5 + yOff, this.img.width * widthLimit, MONSTER_HEALTH_BAR_HEIGHT, 'red', this.context);
+                ctx[this.context].drawImage(img, (-img.width) / 2, (-img.height) / 2);
+                ctx[this.context].restore();
+
+                this.animationStage--;
+            } else {
+                var xOff = 0, yOff = 0;
+                if(img.width > TILE_W) {
+                    xOff = -(img.width - TILE_W) / 2.0;
+                }
+                if(img.height > TILE_H) {
+                    yOff = -(img.height - TILE_H) / 2.0;
+                }
+
+                if(this.type > 4) {
+                    ctx[this.context].save();
+                    ctx[this.context].shadowColor = color;
+                    ctx[this.context].shadowBlur = 30;
+
+                }
+                ctx[this.context].drawImage(img, this.x + xOff, this.y + yOff);
+
+                // health bar
+                var widthLimit = this.health / monsterHealths[this.type];
+                drawRect(this.x + xOff, this.y - 5 + yOff, img.width * widthLimit, MONSTER_HEALTH_BAR_HEIGHT, 'red', this.context);
+                if(this.type > 4) ctx[this.context].restore();
+            }
+
         }
     }
 
@@ -102,7 +158,7 @@ function MonsterClass(type, image, context) {
             // only reward player if it was killed (also dies at end)
             var obj = this.context == PLAYER ? player : enemy;
             obj.killedMonster(this.type);
-            queueMessage("+" + monsterValues[this.type], this.x, this.y, this.context, 'green');
+            queueMessage("+" + monsterValues[this.type].toLocaleString(), this.x, this.y, this.context, 'green');
         }
 
         StateController.currLevel.tiles[this.context][this.currTile.row][this.currTile.col].notifyMonsterDepart(this.id);

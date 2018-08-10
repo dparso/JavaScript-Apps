@@ -24,11 +24,12 @@ function prepareEnemy() {
 
 	// add some towers beforehand
 	// careful, these are still in availableTowerLocations
-	StateController.placeTower(CANNON, ENEMY, {row: 4, col: 5});
+	StateController.placeTower(CANNON, ENEMY, {row: 4, col: 6});
 	StateController.placeTower(SHOOTER, ENEMY, {row: 6, col: 10});
 }
 
 function enemyActions() {
+	return;
 	enemyTowerProbability = ENEMY_TOWER_PROB * (1 - enemy.numTowers / 30.0); // 30 towers is enough!
 	enemyActionRate = ENEMY_ACTION_RATE - (enemy.gold / 50000); // slightly increase with gold excess -- don't sit around, spend money!
 

@@ -1,50 +1,62 @@
 // tower properties
 var TOWER_ID = [0, 0];
 
-var SHOOTER = 0;
-var CANNON = 1;
-var GLAIVE = 2;
-var WIZARD = 3;
-var CONDUIT = 4;
+const SHOOTER = 0;
+const CANNON = 1;
+const GLAIVE = 2;
+const WIZARD = 3;
+const CONDUIT = 4;
+const JUROR = 5;
+const REAPER = 6;
 
 const NUM_TIERS = 6;
-const tier_costs = [[100, 250, 500, 1500, 3000, 35000],
-                    [150, 400, 1000, 4000, 8000, 60000],
-                    [250, 600, 1200, 8000, 30000, 80000],
-                    [400, 800, 2500, 20000, 80000, 140000],
-                    [400, 800, 2000, 20000, 100000, 250000]];
+const tier_costs = [[10.0, 25.0, 50.0, 150.0, 300.0, 3500.0],
+                    [15.0, 40.0, 100.0, 400.0, 800.0, 6000.0],
+                    [25.0, 60.0, 120.0, 800.0, 3000.0, 8000.0],
+                    [40.0, 80.0, 250.0, 2000.0, 8000.0, 14000.0],
+                    [40.0, 80.0, 200.0, 2000.0, 10000.0, 25000.0],
+                    [40.0, 80.0, 200.0, 2000.0, 10000.0, 25000.0],
+                    [1000.0, 4000.0, 10000.0, 22000.0, 50000.0, 15000000.0]];
 
 // if changing these, make sure that the info pane doesn't resize from the text size on the upgrade button hover
 const dmg_upgrade_effects = [[5.0, 2.5, 1.75, 3.0, 1.25, 25.0],
                              [2.5, 3.0, 3.0, 4.5, 20.0, 200.0],
                              [1.5, 1.5, 2.0, 2.5, 2.5, 10.0],
                              [1.5, 1.5, 2.5, 3.0, 3.5, 20.0],
-                             [1.5, 2.0, 4.0, 3.0, 5.0, 200.0]];
+                             [1.5, 2.0, 4.0, 3.0, 5.0, 200.0],
+                             [1.5, 2.0, 4.0, 3.0, 5.0, 200.0],
+                             [3.5, 4.0, 6.0, 10.0, 15.0, 150.0]];
 
 const rng_upgrade_effects = [[1, 0, 1, 0, 2, 1],
                              [1, 0, 1, 0, 1, 0],
                              [0, 1, 0, 1, 0, 0],
                              [1, 1, 0, 1, 0, 2],
-                             [1, 1, 0, 0, 0, 2]];
+                             [1, 1, 0, 0, 0, 2],
+                             [1, 1, 0, 0, 0, 2],
+                             [1, 1, 0, 0, 0, 0]];
 
 const atk_upgrade_effects = [[1.5, 1.5, 2.0, 2.5, 1.5, 1.5],
                              [1.1, 1.1, 1.1, 1.1, 1.2, 2.0],
                              [1.5, 1.5, 2.0, 2.5, 2.5, 4.0],
                              [1.5, 1.5, 1.5, 2.5, 3.0, 3.0],
-                             [1.5, 1.5, 1.5, 2.5, 3.5, 2.0]];
+                             [1.5, 1.5, 1.5, 2.5, 3.5, 2.0],
+                             [1.5, 1.5, 1.5, 2.5, 3.5, 2.0],
+                             [1.5, 1.5, 1.5, 1.5, 1.5, 2.0]];
 
 const upgrade_effects = [dmg_upgrade_effects, rng_upgrade_effects, atk_upgrade_effects];
 
-var towerRanges = [3, 3, 2, 4, 1];
-var towerDamages = [1.5, 10.0, 10.0, 20.0, 25.0];
-var towerAttackSpeeds = [6, 1, 3, 5, 3];
-var towerCosts = [12, 20, 50, 100, 120];
-var towerNames = ["Shooter", "Cannon", "Glaive", "Wizard", "Conduit"];
+var towerRanges = [3, 3, 2, 4, 1, 4, 2];
+var towerDamages = [0.15, 1.0, 1.0, 2.0, 2.5, 3.0, 100.0];
+var towerAttackSpeeds = [6, 1, 3, 5, 3, 2, 1];
+var towerCosts = [1.2, 2.0, 5.0, 10.0, 12.0, 20.0, 200.0];
+var towerNames = ["Shooter", "Cannon", "Glaive", "Wizard", "Conduit", "Juror", "Reaper"];
 
 var lightning_strengths = [2, 2, 3, 3, 3, 3, 4];
 var lightning_jump_dist = [2, 4, 8, 15, 30, 100, 200];
 var lightning_jumps = [1, 3, 8, 15, 40, 100, 200];
 const MAX_LIGHTNING_DIFFERENCE = 60;
+
+var scythe_speeds = [0.1, 0.2, 0.2, 0.3, 0.3, 0.4, 0.4];
 
 const TARGET_FIRST = 0;
 const TARGET_LAST = 1;
@@ -84,6 +96,7 @@ function TowerClass(type, context) {
     this.value = towerCosts[type] / 2;
     this.targets = [];
     this.targetPriority = TARGET_FIRST;
+    this.tilesInRange = [];
 
     this.classType = "tower";
 
@@ -91,6 +104,17 @@ function TowerClass(type, context) {
 }
 
 // TowerClass methods
+TowerClass.prototype.calculateTilesInRange = function() {
+    // get all the tiles in fullMonsterPath that are in range, for attack checking
+    this.tilesInRange = [];
+    for(var tileNum = 0; tileNum < fullMonsterPath[this.context].length; tileNum++) {
+        var tilePos = fullMonsterPath[this.context][tileNum];
+        if(this.inRange(tilePos.row, tilePos.col)) {
+            this.tilesInRange.push(tilePos);
+        }
+    }
+}
+
 TowerClass.prototype.reset = function() {
     this.currTile = pixelToGrid(this.x, this.y);
     this.findTarget();
@@ -99,8 +123,8 @@ TowerClass.prototype.reset = function() {
 
 TowerClass.prototype.getFirstTarget = function(toIndex) {
     // follow the path, end -> start, and attack the first monster in range
-    for(var tileNum = 0; tileNum < fullMonsterPath[this.context].length; tileNum++) {
-        var tilePos = fullMonsterPath[this.context][tileNum];
+    for(var tileNum = 0; tileNum < this.tilesInRange.length; tileNum++) {
+        var tilePos = this.tilesInRange[tileNum];
         if(this.inRange(tilePos.row, tilePos.col)) {
             var tile = StateController.currLevel.tiles[this.context][tilePos.row][tilePos.col];
             if(tile.hasMonsters()) {
@@ -114,8 +138,8 @@ TowerClass.prototype.getFirstTarget = function(toIndex) {
 
 TowerClass.prototype.getLastTarget = function(toIndex) {
     // last
-    for(var tileNum = fullMonsterPath[this.context].length - 1; tileNum > 0; tileNum--) {
-        var tilePos = fullMonsterPath[this.context][tileNum];
+    for(var tileNum = this.tilesInRange.length - 1; tileNum > 0; tileNum--) {
+        var tilePos = this.tilesInRange[tileNum];
         if(this.inRange(tilePos.row, tilePos.col)) {
             var tile = StateController.currLevel.tiles[this.context][tilePos.row][tilePos.col];
             if(tile.hasMonsters()) {
@@ -181,8 +205,9 @@ TowerClass.prototype.attack = function() {
         var diff = dmg * atk / fps - dmg;
         dmg += diff;
     }
+
     for(var target = 0; target < this.targets.length; target++) {
-        var projectile = new ProjectileClass({x: this.x, y: this.y}, this.targets[target], projectilePics[this.type][0], this.type, dmg, projectileSpeeds[this.type], this.tier, this.id, this.context);
+        var projectile = new ProjectileClass({x: this.x, y: this.y}, this.targets[target], projectilePics[this.type][0], this.type, dmg, projectileSpeeds[this.type], this.tier, true, this.id, this.context);
         projectileList[this.context][projectile.id] = projectile;            
     }
 }
@@ -193,10 +218,19 @@ TowerClass.prototype.draw = function() {
         if(!towerRotates(this.type)) {
             angle = 0;
         }
-        drawBitmapCenteredWithRotation(this.img, this.x, this.y, angle, this.context);
+        var xOff = 0, yOff = 0;
+        // if(this.img.width > TILE_W) {
+        //     xOff = (TILE_W - this.img.width) / 2;
+        // }
+
+        if(this.img.height > TILE_H) {
+            yOff = (TILE_H - this.img.height) / 2;
+        }
+
+        drawBitmapCenteredWithRotation(this.img, this.x + xOff, this.y + yOff, angle, this.context);
         if(this.type == 3) {
             // wizard: draw fireball on staff
-            drawBitmapCenteredWithRotation(animationPics[FIRE][0], this.x + 12, this.y - 5, this.fireAngle++, this.context);
+            drawBitmapCenteredWithRotation(animationPics[FIRE][0], this.x + 12, this.y - 13, this.fireAngle++, this.context);
             this.fireAngle %= 360;
         }
     }
@@ -236,6 +270,10 @@ TowerClass.prototype.upgradeTier = function(prop) {
     this.properties[ATTACK_SPEED] *= upgrade_effects[ATTACK_SPEED][this.type][this.tier];
     // add
     this.properties[RANGE] += upgrade_effects[RANGE][this.type][this.tier];
+    if(upgrade_effects[RANGE][this.type][this.tier] > 0) {
+        // range has changed: recalculate tiles in range
+        this.calculateTilesInRange();
+    }
 }
 
 TowerClass.prototype.cyclePriority = function() {
@@ -271,11 +309,11 @@ ShooterClass.prototype.attack = function() {
                 var rad = degree * (Math.PI / 180) + this.angle;
                 var xOff = Math.cos(rad) * 1000; 
                 var yOff = Math.sin(rad) * 1000;
-                var pro = new StraightProjectileClass({x: this.x, y: this.y}, {x: this.x + xOff, y: this.y + yOff}, projectilePics[this.type][0], this.type, dmg / 2.0, projectileSpeeds[this.type], 1, this.tier, this.id, this.context);
+                var pro = new StraightProjectileClass({x: this.x, y: this.y}, {x: this.x + xOff, y: this.y + yOff}, projectilePics[this.type][0], this.type, dmg / 2.0, projectileSpeeds[this.type], 1, this.tier, false, this.id, this.context);
                 projectileList[this.context][pro.id] = pro; 
             }
         }
-        var projectile = new ProjectileClass({x: this.x, y: this.y}, this.targets[target], projectilePics[this.type][0], this.type, dmg, projectileSpeeds[this.type], this.tier, this.id, this.context);
+        var projectile = new ProjectileClass({x: this.x, y: this.y}, this.targets[target], projectilePics[this.type][0], this.type, dmg, projectileSpeeds[this.type], this.tier, false, this.id, this.context);
         projectileList[this.context][projectile.id] = projectile;            
     }
 }
@@ -306,7 +344,7 @@ CannonClass.prototype.attack = function() {
             img = projectilePics[this.type][1]; // big bomb!
             speed /= 2;
         }
-        var projectile = new ProjectileClass({x: this.x, y: this.y}, this.targets[target], img, this.type, dmg, speed, this.tier, this.id, this.context);
+        var projectile = new ProjectileClass({x: this.x, y: this.y}, this.targets[target], img, this.type, dmg, speed, this.tier, true, this.id, this.context);
         projectileList[this.context][projectile.id] = projectile;            
     }
 }
@@ -337,7 +375,7 @@ GlaiveClass.prototype.attack = function() {
     speed -= speed * this.tier / tier_costs[this.type].length; // approaches 1
     var hits = glaive_strengths[this.tier + 1];
     for(var target = 0; target < this.targets.length; target++) {
-        var projectile = new StraightProjectileClass({x: this.x, y: this.y}, this.targets[target], projectilePics[this.type][0], this.type, dmg, speed, hits, this.tier, this.id, this.context);
+        var projectile = new StraightProjectileClass({x: this.x, y: this.y}, this.targets[target], projectilePics[this.type][0], this.type, dmg, speed, hits, this.tier, true, this.id, this.context);
         projectileList[this.context][projectile.id] = projectile;            
     }
 }
@@ -407,8 +445,8 @@ ConduitClass.prototype.findChainTargets = function(fromTile, toIndex) {
 
 ConduitClass.prototype.getFirstTarget = function(toIndex) {
     // follow the path, end -> start, and attack the first monster in range
-    for(var tileNum = 0; tileNum < fullMonsterPath[this.context].length; tileNum++) {
-        var tilePos = fullMonsterPath[this.context][tileNum];
+    for(var tileNum = 0; tileNum < this.tilesInRange.length; tileNum++) {
+        var tilePos = this.tilesInRange[tileNum];
         if(this.inRange(tilePos.row, tilePos.col)) {
             var tile = StateController.currLevel.tiles[this.context][tilePos.row][tilePos.col];
             if(tile.hasMonsters()) {
@@ -422,8 +460,8 @@ ConduitClass.prototype.getFirstTarget = function(toIndex) {
 }
 
 ConduitClass.prototype.getLastTarget = function(toIndex) {
-    for(var tileNum = fullMonsterPath[this.context].length - 1; tileNum > 0; tileNum--) {
-        var tilePos = fullMonsterPath[this.context][tileNum];
+    for(var tileNum = this.tilesInRange.length - 1; tileNum > 0; tileNum--) {
+        var tilePos = this.tilesInRange[tileNum];
         if(this.inRange(tilePos.row, tilePos.col)) {
             var tile = StateController.currLevel.tiles[this.context][tilePos.row][tilePos.col];
             if(tile.hasMonsters()) {
@@ -436,7 +474,7 @@ ConduitClass.prototype.getLastTarget = function(toIndex) {
 }
 
 ConduitClass.prototype.move = function() {
-    this.drawLightning({x: this.x, y: this.y}, {x: mouseX, y: mouseY}, 80, 5);
+    // this.drawLightning({x: this.x, y: this.y}, {x: mouseX, y: mouseY}, 80, 5);
 
     if(!this.active) {
         return;
@@ -570,3 +608,93 @@ function createLightning(source, target, direction, maxDifference, segmentHeight
     }
     return lightning;
 }
+
+// juror
+function JurorClass(type, context) {
+    TowerClass.call(this, type, context);
+}
+
+JurorClass.prototype = Object.create(TowerClass.prototype);  
+JurorClass.prototype.constructor = JurorClass; 
+
+JurorClass.prototype.attack = function() {
+    var dmg = this.properties[DAMAGE];
+    var atk = this.properties[ATTACK_SPEED];
+    if(atk > fps) {
+        // could put this elsewhere to avoid computation every shot
+        // maximum shots per second is fps, so allow greater firing speed by adjusting damage
+        // solve for diff: dmg * atk = (dmg + diff) * fps
+        var diff = dmg * atk / fps - dmg;
+        dmg += diff;
+    }
+    for(var target = 0; target < this.targets.length; target++) {
+        var projectile = new ProjectileClass({x: this.x, y: this.y}, this.targets[target], projectilePics[this.type][0], this.type, dmg, projectileSpeeds[this.type], this.tier, false, this.id, this.context);
+        projectileList[this.context][projectile.id] = projectile;            
+    }
+}
+
+// juror
+function ReaperClass(type, context) {
+    TowerClass.call(this, type, context);
+    this.floatY = 0;
+    this.floatX = 0;
+    this.float = 0;
+    this.maxFloatX = 15.0;
+    this.maxFloatY = 5.0;
+    this.floatXSpeed = 0.1;
+    this.floatYSpeed = 0.15;
+    this.floatXDirection = 1;
+    this.floatYDirection = 1;
+}
+
+ReaperClass.prototype = Object.create(TowerClass.prototype);  
+ReaperClass.prototype.constructor = ReaperClass; 
+
+ReaperClass.prototype.attack = function() {
+    var dmg = this.properties[DAMAGE];
+    var atk = this.properties[ATTACK_SPEED];
+    if(atk > fps) {
+        // could put this elsewhere to avoid computation every shot
+        // maximum shots per second is fps, so allow greater firing speed by adjusting damage
+        // solve for diff: dmg * atk = (dmg + diff) * fps
+        var diff = dmg * atk / fps - dmg;
+        dmg += diff;
+    }
+    scytheAnimation(this.x, this.y, 0, scythe_speeds[this.tier + 1], this.context);
+    for(var tile = 0; tile < this.tilesInRange.length; tile++) {
+        var t = this.tilesInRange[tile];
+        var targetTile = StateController.currLevel.tiles[this.context][t.row][t.col];
+        // apply to all monsters on that tile
+        if(targetTile.hasMonsters()) {
+            targetTile.monstersOnTile.forEach(
+                ((monster) => {
+                    var obj = monsterList[this.context][monster];
+                    if(obj.hitWithProjectile(dmg)) {
+                        StateController.notifyTowerKilledMonster(this.id, this.context, obj.type);
+                    }
+                })
+            );
+        }
+    }
+    // for(var target = 0; target < this.targets.length; target++) {
+    //     var projectile = new ProjectileClass({x: this.x, y: this.y}, this.targets[target], projectilePics[this.type][0], this.type, dmg, projectileSpeeds[this.type], this.tier, false, this.id, this.context);
+    //     projectileList[this.context][projectile.id] = projectile;            
+    // }
+}
+
+ReaperClass.prototype.draw = function() {
+    if(this.visible) {
+        ctx[this.context].save();
+        ctx[this.context].shadowColor = 'black';
+        ctx[this.context].shadowBlur = 35;
+
+        this.floatX += this.floatXSpeed;
+        this.floatY += this.floatYSpeed;
+        this.x += Math.cos(this.floatX) / 4;
+        this.y += Math.sin(this.floatY) / 4;
+
+        ctx[this.context].drawImage(this.img, this.x - this.img.width / 2, this.y - this.img.height / 2);
+        ctx[this.context].restore();
+    }
+}
+

@@ -1,73 +1,173 @@
 <!DOCTYPE html>
 <html>
+<title>Dark TD</title>
 
 <head>
 	<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
 	<meta content="utf-8" http-equiv="encoding">
-	<style>
-		body {
-		    font-family: Arial;
-		    color: white;
-		}
+	<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 
-		.split {
-		    height: 100%;
-		    width: 50%;
-		    position: fixed;
-		    z-index: 1;
-		    top: 0;
-		    overflow-x: hidden;
-		    padding-top: 20px;
-		}
-
-		.left {
-		    left: 0;
-		    /*padding-right: 10px;*/
-		    background-color: #111;
-		}
-
-		.right {
-		    right: 0;
-		    /*padding-left: 10px;*/
-		    background-color: #111;
-		}
-
-		.centered {
-		    position: absolute;
-		    top: 50%;
-		    left: 50%;
-		    transform: translate(-50%, -50%);
-		    text-align: center;
-		}
-
-		.centered canvas {
-		    /*width: 600px;*/
-		    border-radius: 1%; /* rounded corners */
-		    /*padding-right: 10px;*/
-		}
-	</style>
+	<link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-
-<div class="split left">
-	<div class="centered">
-		<canvas id="gameCanvas" width="700" height="700"></canvas>
+	<div id="start">
+		<ul>
+			<li><button class="button" onclick="startGame()">Play</button></li>
+			<li><button class="button">Options</button></li>
+		</ul>
 	</div>
-</div>
+	<div hidden id="container">
+		<div class="split left">
+			<canvas id="gameCanvas" width="700" height="700"></canvas>
+			<div>
+				<table class="infotext">
+					<col width="90">
+					<col width="80">
+					<col width="50">
+					<tr>
+						<td id="incometext">Income:</td>
+						<td id="livestext">Lives:</td>
+					</tr>
+					<tr>
+						<td id="timetext">Time until income:</td>
+						<td id="goldtext">Gold:</td>
+					</tr>
+				</table>
+			</div>
 
-<div class="split right">
-	<div class="centered">
-		<canvas id="enemyCanvas" width="700" height="700"></canvas>
+			<img id="pausebutton" onclick="pauseGame()" src="images/pause.png">
+			<img id="fastforwardbutton" onclick="fastGame()" src="images/fast-forward.png">
+
+			<div>
+				<table class="iconrow" id="towerselections">
+					<tr>
+						<th><img src="images/Towers/gunner.png" class="selecticon" alt="icon"></th>
+						<th><img src="images/Towers/cannon.png" class="selecticon" alt="icon"></th>
+					</tr>
+					<tr>
+						<th><img src="images/Towers/glaive.png" class="selecticon" alt="icon"></th>
+						<th><img src="images/Towers/wizard.png" class="selecticon" alt="icon"></th>
+					</tr>
+					<tr>
+						<th><img src="images/Towers/conduit.png" class="selecticon" alt="icon"></th>
+						<th><img src="images/Towers/juror.png" class="selecticon" alt="icon"></th>
+					</tr>
+					<tr>
+						<th><img src="images/Towers/reaper.png" class="selecticon" alt="icon"></th>
+						<th></th>
+					</tr>
+				</table>
+			</div>
+
+			<button id="killmonsters" onclick="killMonsters()" class="button">Kill monsters!</button>
+			<button id="destroytowers" onclick="destroyTowers()" class="button">Destroy towers!</button>
+
+			<table id="userinfopane" class="infopane">
+				<col width="140">
+				<col width="120">
+				<col width="90">
+				<col width="60">
+				<tr>
+					<th id="nametext">Name:</th>
+					<th id="atktext">Attack Speed:</th>
+					<th><center>Upgrades:</center></th>
+					<th><img class="icon" src="images/Towers/gunner.png" alt="icon" id="infopaneicon"></th>
+				</tr>
+				<tr>
+					<th id="costtext">Cost:</th>
+					<th id="killtext">Kills:</th>
+					<th><button id="tierbutton" onmouseover="showPlayerTierText()" onmouseout="hidePlayerTierText()" class="infobutton hoverbutton tooltip" onclick="upgradePressed()">Tier (0/5) [t]<span class="tooltiptext" id="upgradecosttext">Blank!</span></button></th>
+					<th></th>
+				</tr>
+				<tr>
+					<th id="rangetext">Range:</th>
+					<th></th>
+					<th><button class="infobutton hoverbutton">Empty</button></th>
+					<th><button id="targetbutton" class="infobutton hoverbutton" style="text-align:left" onclick="targetPressed()">Target: first</button></th>
+				</tr>
+				<tr>
+					<th id="damagetext">Damage:</th>
+					<th></th>
+					<th><button class="infobutton hoverbutton">Empty</button></th>
+					<th><button id="sellbutton" class="sellbutton" onclick="sellPressed()">Sell: [s]</button></th>
+				</tr>
+			</table>
+		</div>
+		
+		<div class="split right">
+				<canvas id="enemyCanvas" width="700" height="700"></canvas>
+				<div>
+					<table class="infotext">
+						<col width="90">
+						<col width="80">
+						<tr>
+							<td id="enemyincometext">Income:</td>
+							<td id="enemylivestext">Lives:</td>
+						</tr>
+						<tr>
+							<td id="enemytimetext">Time until income:</td>
+							<td id="enemygoldtext">Gold:</td>
+						</tr>
+					</table>
+				</div>
+				<table id="enemyinfopane" class="infopane">
+					<col width="140">
+					<col width="120">
+					<col width="90">
+					<col width="60">
+					<tr>
+						<th id="enemynametext">Name:</th>
+						<th id="enemyatktext">Attack Speed:</th>
+						<th><center>Upgrades:</center></th>
+						<th><img class="icon" src="images/Towers/gunner.png" alt="icon" id="enemyinfopaneicon"></th>
+					</tr>
+					<tr>
+						<th id="enemycosttext">Cost:</th>
+						<th id="enemykilltext">Kills:</th>
+						<th><button id="enemytierbutton" class="infobutton">Tier (0/5) [t]</button></th>
+						<th></th>
+					</tr>
+					<tr>
+						<th id="enemyrangetext">Range:</th>
+						<th></th>
+						<th><button class="infobutton">Empty</button></th>
+						<th></th>
+					</tr>
+					<tr>
+						<th id="enemydamagetext">Damage:</th>
+						<th></th>
+						<th><button class="infobutton">Empty</button></th>
+						<th></th>
+					</tr>
+				</table>
+				<div>
+					<table class="iconrow" id="monsterselections">
+						<tr>
+							<th><img src="images/Monsters/monster_1/monster_1.png" class="selecticon" alt="icon"></th>
+							<th><img src="images/Monsters/monster_2/monster_2_right.png" class="selecticon" alt="icon"></th>
+						</tr>
+						<tr>
+							<th><img src="images/Monsters/monster_3/monster_3.png" class="selecticon" alt="icon"></th>
+							<th><img src="images/Monsters/monster_4/monster_4_right.png" class="selecticon" alt="icon"></th>
+						</tr>
+						<tr>
+							<th><img src="images/Monsters/monster_5/monster_5.png" class="selecticon" alt="icon"></th>
+							<th><img src="images/Monsters/monster_6/monster_6_right.png" class="selecticon" alt="icon"></th>
+						</tr>
+
+						<tr>
+							<th><img src="images/Monsters/monster_7/monster_7_right.png" class="selecticon" alt="icon"></th>
+							<th><img src="images/Monsters/monster_8/monster_8_walk_1_left.png" class="selecticon" alt="icon"></th>
+						</tr>
+					</table>
+				</div>
+		</div>
 	</div>
-</div>
 
-
-<p id="monsterText"></p>
-
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="js/Animation.js"></script>
 <script src="js/Level.js"></script>
 <script src="js/Player.js"></script>
-<script src="js/Upgrades.js"></script>
 <script src="js/Enemy.js"></script>
 <script src="js/Grids.js"></script>
 <script src="js/InfoPane.js"></script>
@@ -84,4 +184,5 @@
 <script src="js/StateController.js"></script>
 <script src="js/Main.js"></script>
 
+</body>
 </html>

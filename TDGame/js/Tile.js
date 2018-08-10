@@ -62,7 +62,7 @@ function tileTypeHasTransparency(tileType) {
     //     default:
     //         return false;
     // }
-    return tileType > 5;
+    return tileType > 3;
     // return false;
 }
 

@@ -1,0 +1,264 @@
+
+#start {
+    position: absolute;
+    left: 160px;
+    bottom: 120px;
+    user-select: none;
+}
+
+#container {
+  height: 700px;
+  position: relative;
+  width: 700px;
+  display: 'none';
+  user-select: none; /* no highlight for buttons */
+}
+
+#gameCanvas {
+    left: 20px;
+    /* meet at the middle edges */
+    border-top-left-radius: 1%;
+    border-bottom-left-radius: 1%;
+}
+
+#enemyCanvas {
+    right: 20px;
+    border-top-right-radius: 1%;
+    border-bottom-right-radius: 1%;
+}
+
+#towerselections {
+    top: 145px;
+    right: 0px;
+}
+
+#monsterselections {
+    top: 145px;
+    left: 0px;
+}
+
+#killmonsters {
+    position: absolute;
+    top: 40px;
+    left: 20px;
+}
+
+#destroytowers {
+    position: absolute;
+    top: 40px;
+    left: 160px;
+}
+
+#pausebutton {
+    position: absolute;
+    right:20px;
+    top: 40px;
+    width: 50px;
+    height: 50px;
+}
+
+#fastforwardbutton {
+    position: absolute;
+    right: 3px;
+    top: 90px;
+    width: 55px;
+    height: 35px;
+}
+
+.split {
+    height: 100%;
+    width: 50%;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    overflow-x: hidden;
+    padding-top: 20px;
+}
+
+.left {
+    left: 0;
+    /*padding-right: 10px;*/
+    background-color: #111;
+}
+
+.right {
+    right: 0;
+    /*padding-left: 10px;*/
+    background-color: #111;
+}
+
+.infotext {
+    table-layout: fixed;
+    position: absolute;
+    top: 40px;
+    right: 0px;
+    width: 55%;
+    font-weight: 900;
+    pointer-events: none;
+    /*border: 1px solid white;*/
+}
+
+.icon {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    position: absolute;
+    right: 12px;
+    top: 0px;
+    max-width: 40px;
+    max-height: 40px;
+}
+
+.infopane {
+	top: 575px;
+	right: 90px;
+	position: absolute;
+	width: 75%;
+	height: 100px;
+  	background-color: #7a4414;
+	font-size: 13px;
+	text-align: left;
+	border: 5px solid #7a4414;
+}
+
+.button {
+	display: block;
+	width: 130px;
+	margin: 0 auto;
+	height: 30px;
+	/*line-height: 30px;*/
+	border: 1px solid #293342;
+	border-radius: 5px;
+	background: linear-gradient(#152030, #54637a);
+	color: black;
+	font-weight: 900;
+}
+
+button:focus, input[type="button"]:focus {
+    outline: none;
+}
+
+.button:hover {
+    /*background: linear-gradient(#4a6287, #5f7ead);*/
+    background: linear-gradient(#242a33, #424a56);
+}
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+    /*border-bottom: 1px dotted black;*/
+}
+
+.testtext {
+    visibility: hidden;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: #e08c1f;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -60px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.tooltip .tooltiptext::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #555 transparent transparent transparent;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+    /*background: #111;*/
+}
+
+.infobutton {
+	display: block;
+	width: 120px;
+	margin: 0 auto;
+	height: 25px;
+	/*line-height: 30px;*/
+	border: 1px solid #c47d2d;
+	border-radius: 1px;
+	background: linear-gradient(#c47d2d, #c47d2d);
+	color: white;
+	font-weight: 900;
+	font-size: 13px;
+}
+
+.hoverbutton:hover {
+    visibility: visible;
+	background: #e29034;
+}
+
+.sellbutton {
+	display: block;
+	width: 120px;
+	margin: 0 auto;
+	height: 25px;
+	/*line-height: 30px;*/
+	border: 1px solid #d20000;
+	border-radius: 1px;
+	background: #d20000;
+	color: white;
+	font-weight: 900;
+	font-size: 12px;
+}
+
+.sellbutton:hover {
+	background: #ef0000;
+}
+
+.iconrow {
+    position: absolute;
+    pointer-events: none;
+}
+
+.selecticon {
+    max-width: 30px;
+    max-height: 35px;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+ul {
+	list-style: none;
+	padding: 0;
+	margin: 0
+}
+
+li {
+	padding: 5px;
+}
+
+body {
+    font-family: Arial;
+    font-variant: small-caps;
+    color: white;
+    background-color: black;
+    background-image: url("images/monster.jpg");
+}
+
+canvas {
+    /*padding-right: 10px;*/
+    position: absolute;
+    top: 40px;
+}

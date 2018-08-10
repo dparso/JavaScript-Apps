@@ -52,10 +52,10 @@ function calculateMousePos(evt) {
         var tile = StateController.currLevel.tiles[currCanvas][hoverTile.row][hoverTile.col];
         if(typeIsTower(tile.type)) {
             var index = tile.type - TOWER_OFFSET_NUM;
-            var text = towerNames[index] + ": " + towerCosts[index] + " [" + (index + 1) + "]";
+            var text = towerNames[index] + ": " + towerCosts[index].toLocaleString() + " [" + (index + 1) + "]";
         } else if(typeIsMonster(tile.type)) {
             var index = tile.type - MONSTER_OFFSET_NUM;
-            var text = monsterNames[index] + ": " + monsterCosts[index] + " [shift + " + (index + 1) + "]";
+            var text = monsterNames[index] + ": " + monsterCosts[index].toLocaleString() + " [shift + " + (index + 1) + "]";
         } else {
             tooltip = null;
         }
@@ -73,7 +73,7 @@ function calculateMousePos(evt) {
 
 function handleMouseDown(evt) {
     if(gameWon || gameLost) {
-        restartGame(STATE_START, welcomeScreen);
+        nextLevel();
         return;
     }
 
@@ -278,13 +278,47 @@ function keySet(evt, setTo) {
 }
 
 function keyPressed(evt) {
+    // console.log(evt.keyCode);
     if(gameWon) {
         return;
     }
 
-    if(evt.keyCode == 27) {
+    if(evt.keyCode == 9) {
+        // tab: cycle tower selection
+        var keys = Object.keys(towerList[currCanvas]);
+        if(selection[currCanvas] != null) {
+            var index;
+            if(shiftHeld) {
+                // cycle backwards
+                index = keys.indexOf(String(selection[currCanvas])) - 1;
+                if(index < 0) index += keys.length;
+            } else {
+                index = keys.indexOf(String(selection[currCanvas])) + 1;
+                index %= keys.length;
+            }
+
+            selection[currCanvas] = keys[index];
+        } else if(keys.length > 0) {
+            if(shiftHeld) {
+                selection[currCanvas] = Object.keys(towerList[currCanvas])[keys.length - 1];
+            } else {
+                selection[currCanvas] = Object.keys(towerList[currCanvas])[0];
+            }
+        }
+
+        evt.preventDefault();
+    } else if(evt.keyCode == 27) {
         // escape: cancel tower placement
         pressEscape();
+        evt.preventDefault();
+    } else if(evt.keyCode == 80) {
+        // pause
+        pauseGame();
+        evt.preventDefault();
+    } else if(evt.keyCode == 70) {
+        // fast forward
+        fastGame();
+        evt.preventDefault();
     } else {
         keySet(evt, true);
     } 

@@ -6,6 +6,8 @@ var gameWon = false;
 var gameLost = false;
 var fps = 30;
 var timerId = 0; // interval counter
+var game_paused = false;
+var game_speed = 1;
 
 var monsterList = [{}, {}];
 var towerList = [{}, {}];
@@ -59,7 +61,7 @@ function startGame() {
     setupInput();
 
     // StateController.changeState(STATE_START, welcomeScreen);
-    StateController.changeState(STATE_PLAY, levelOne);
+    StateController.changeState(STATE_PLAY, LEVELS[0]);
 }
 
 function updateAll() {
@@ -85,17 +87,18 @@ function updateAll() {
         return;
     }
 
-    playerIncome();
+    if(!game_paused) {
+        playerIncome();
+        enemyActions();
 
-    enemyActions();
+        // scale();
 
-    // scale();
+        monsterUpdate(PLAYER);
+        monsterUpdate(ENEMY);
 
-    monsterUpdate(PLAYER);
-    monsterUpdate(ENEMY);
-
-    moveAll(PLAYER);
-    moveAll(ENEMY);
+        moveAll(PLAYER);
+        moveAll(ENEMY);
+    }
 
     drawAll(PLAYER);
     drawAll(ENEMY);
@@ -156,12 +159,22 @@ function moveAll(context) {
     }
 }
 
+var spiralRotate = 0;
 function drawAll(context) {
     StateController.drawLevel(context);
     // draw tower selection
     if(selection[context] != null) {
         drawSelection(context);
     }
+
+    // draw start and end spirals
+    var strt = gridToPixel(MONSTER_START[context].row, MONSTER_START[context].col);
+    var end = gridToPixel(MONSTER_END[context].row, MONSTER_END[context].col);
+
+    drawBitmapCenteredWithRotation(tilePics[TILE_MONSTER_START], strt.x + TILE_W / 2, strt.y + TILE_H / 2, spiralRotate, context);
+    drawBitmapCenteredWithRotation(tilePics[TILE_MONSTER_END], end.x + TILE_W / 2, end.y + TILE_H / 2, spiralRotate, context);
+
+    spiralRotate -= 0.1;
 }
 
 function drawSelection(context) {
@@ -177,33 +190,16 @@ function drawSelection(context) {
                 var tile = StateController.currLevel.tiles[context][row][col];
                 highlightTile(row, col, 'white', 0.3, context);
             }
+
         }
     }
 }
 
 function textDraw(context) {
-    // if(StateController.state == STATE_PLAY) {
-    //     ctx[PLAYER].fillStyle = "rgb(250, 250, 250)";
-    //     ctx[PLAYER].font = "20px Helvetica";
-    //     ctx[PLAYER].textAlign = "left";
-    //     ctx[PLAYER].textBaseline = "top";
-    //     ctx[PLAYER].fillText("Lives: " + player.lives, 540, 5);
-    //     ctx[PLAYER].fillText("Gold: " + player.gold, 540, 25);
-    //     ctx[PLAYER].fillText("Income: " + player.income, 540, 45);
-    //     ctx[PLAYER].fillText("Time until income: " + (INCOME_RATE - Math.floor(timeSinceLastIncome * fps / 1000)), 330, 45);
-
-    //     ctx[ENEMY].fillStyle = "rgb(250, 250, 250)";
-    //     ctx[ENEMY].font = "20px Helvetica";
-    //     ctx[ENEMY].textAlign = "left";
-    //     ctx[ENEMY].textBaseline = "top";
-    //     ctx[ENEMY].fillText("Lives: " + enemy.lives, 570, 10);
-    //     ctx[ENEMY].fillText("Gold: " + enemy.gold, 570, 30);
-    //     ctx[ENEMY].fillText("Income: " + enemy.income, 570, 50);
-
-        // var tile = pixelToGrid(mouseX, mouseY);
-        // ctx[currCanvas].fillStyle = 'white';
-        // ctx[currCanvas].fillText(mouseX + ", " + mouseY, mouseX, mouseY);
-        // ctx[currCanvas].fillText(tile.row + ", " + tile.col, mouseX, mouseY);
+    // var tile = pixelToGrid(mouseX, mouseY);
+    // ctx[currCanvas].fillStyle = 'white';
+    // ctx[currCanvas].fillText(mouseX + ", " + mouseY, mouseX, mouseY);
+    // ctx[currCanvas].fillText(tile.row + ", " + tile.col, mouseX, mouseY);
 
     // draw all queued messages
     while(messages.length > 0) {
@@ -217,15 +213,15 @@ function textDraw(context) {
     }
 
     var time = (INCOME_RATE - Math.floor(timeSinceLastIncome * fps / 1000));
-    document.getElementById('incometext').innerHTML = "Income: " + player.income;
+    document.getElementById('incometext').innerHTML = "Income: " + player.income.toLocaleString();
     document.getElementById('timetext').innerHTML = "Time until income: " + time;
     document.getElementById('livestext').innerHTML = "Lives: " + player.lives;
-    document.getElementById('goldtext').innerHTML = "Gold: " + player.gold;
+    document.getElementById('goldtext').innerHTML = "Gold: " + Math.floor(player.gold).toLocaleString();
 
-    document.getElementById('enemyincometext').innerHTML = "Income: " + enemy.income;
+    document.getElementById('enemyincometext').innerHTML = "Income: " + enemy.income.toLocaleString();
     document.getElementById('enemytimetext').innerHTML = "Time until income: " + time;
     document.getElementById('enemylivestext').innerHTML = "Lives: " + enemy.lives;
-    document.getElementById('enemygoldtext').innerHTML = "Gold: " + enemy.gold;
+    document.getElementById('enemygoldtext').innerHTML = "Gold: " + Math.floor(enemy.gold).toLocaleString();
 }
 
 function drawTooltip() {
@@ -261,11 +257,16 @@ function drawTooltip() {
     }
 }
 
-function restartGame(toState, toLevel) {
-    // reset variables & objects
-
+function nextLevel() {
     gameWon = false;
     gameLost = false;
+
+    StateController.levelNum++;
+    if(StateController.levelNum > LEVELS.length - 1) {
+        console.log("No more levels!");
+        restartGame();
+        return;
+    }
 
     monsterList = [{}, {}];
     towerList = [{}, {}];
@@ -289,5 +290,88 @@ function restartGame(toState, toLevel) {
     infoPane = [new InfoPaneClass(PLAYER), new InfoPaneClass(ENEMY)];
 
     clearInterval(timerId);
-    fadeOut(toState, toLevel, PLAYER);
+    fadeOut(STATE_PLAY, LEVELS[StateController.levelNum], PLAYER);
+}
+
+function restartGame() {
+    // reset variables & objects
+
+    gameWon = false;
+    gameLost = false;
+
+    StateController.levelNum = 1;
+
+    monsterList = [{}, {}];
+    towerList = [{}, {}];
+    projectileList = [{}, {}];
+    monsterSelections = {};
+    monsterPath = [[], []];
+    fullMonsterPath = [[], []];
+    selection = [null, null];
+    StateController.monstersWaiting = [[], []];
+    availableTowerLocations = [];
+    upgradeableTowers = [];
+
+    timeSinceLastIncome = 0;
+    timeSinceLastRelease = [0, 0];
+    timeSinceAction = 0;
+
+    player = new PlayerClass(PLAYER);
+    enemy = new PlayerClass(ENEMY);
+    prepareEnemy();
+
+    infoPane = [new InfoPaneClass(PLAYER), new InfoPaneClass(ENEMY)];
+
+    clearInterval(timerId);
+    fadeOut(STATE_PLAY, LEVELS[0], PLAYER);
+}
+
+// HTML button functions
+
+function pauseGame() {
+    if(!game_paused) {
+        document.getElementById('pausebutton').src = "images/play.png";
+        game_paused = true;
+    } else {
+        document.getElementById('pausebutton').src = "images/pause.png";
+        game_paused = false;
+    }
+}
+
+function fastGame() {
+    if(game_speed == 1) {
+        // speed up
+        clearInterval(timerId);
+        timerId = setInterval(updateAll, 1000 / fps / 2);
+        game_speed = 2;
+
+        document.getElementById('fastforwardbutton').src = "images/fast-fast-forward.png";
+    } else {
+        // slow down
+        clearInterval(timerId);
+        timerId = setInterval(updateAll, 1000 / fps);
+        game_speed = 1;
+
+        document.getElementById('fastforwardbutton').src = "images/fast-forward.png";
+    }
+}
+
+function killMonsters() {
+    for(var context = 0; context <= 1; context++) {
+        for(monster in monsterList[context]) {
+            monsterList[context][monster].die(true);
+        }
+    }
+}
+
+function destroyTowers() {
+    for(var context = 0; context <= 1; context++) {
+        for(tower in towerList[context]) {
+            StateController.sellTower(tower, context);
+        }
+    }
+    upgradeableTowers = [];
+
+    clearSelection(PLAYER);
+    clearSelection(ENEMY);
 }

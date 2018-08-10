@@ -5,13 +5,15 @@ const PROJECTILE_TYPE_4 = 3;
 
 var PROJECTILE_ID = [0, 0];
 
-// [shooter, cannon, glaive, wizard]
-var projectileSpeeds = [25, 15, 10, 10, 5]; // note: faster speeds means less reliable hitboxes in hitTarget()
-var splashes = [0, 1, 0, 1, 0]; // does it deal splash
+// [shooter, cannon, glaive, wizard, conduit, juror]
+var projectileSpeeds = [25, 15, 10, 10, 5, 20, 10]; // note: faster speeds means less reliable hitboxes in hitTarget()
+var splashes = [0, 1, 0, 1, 0, 0, 0]; // does it deal splash
 var splashRatios = [[0, 0, 0, 0, 0, 0, 0],
                     [0.3, 0.3, 0.3, 0.3, 0.3, 0.6, 0.9],
                     [0, 0, 0, 0, 0, 0, 0],
                     [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+                    [0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0]]; // how much of original damage does it deal
 
 
@@ -20,12 +22,14 @@ var splashRanges = [[0, 0, 0, 0, 0, 0, 0],
                    [0, 0, 0, 0, 0, 0, 0],
                    [0, 0, 0, 0, 0, 0, 0],
                    [2, 2, 2, 2, 2, 2, 3],
+                   [0, 0, 0, 0, 0, 0, 0],
+                   [0, 0, 0, 0, 0, 0, 0],
                    [0, 0, 0, 0, 0, 0, 0]]; // how many tiles does it cover
 
 // glaive properties
 var glaive_strengths = [40, 60, 80, 120, 400, 800, 1200];
 
-function ProjectileClass(start, target, img, type, damage, speed, tier, parent, context) {
+function ProjectileClass(start, target, img, type, damage, speed, tier, rotates, parent, context) {
     // positions
     this.start = start;
     this.x = start.x;
@@ -40,13 +44,11 @@ function ProjectileClass(start, target, img, type, damage, speed, tier, parent, 
     this.visible = true;
     this.damage = damage;
     this.speed = speed;
+    this.rotates = rotates;
 
     this.splashRange = splashRanges[type][tier + 1];
     this.splashRatio = splashRatios[type][tier + 1];
-    // console.log(splashRatios.length + ", " + splashRatios[0].length);
-    // console.log(type + ", " + (tier + 1));
-    // console.log(this.splashRange + ", " + this.splashRatio);
-    
+
     this.img = img;
     this.classType = "projectile"; // really don't need this
 }
@@ -54,7 +56,9 @@ function ProjectileClass(start, target, img, type, damage, speed, tier, parent, 
 ProjectileClass.prototype.move = function() {
     if(this.visible) {
         // change angle
-        // this.track({x: this.target.x, y: this.target.y});
+        if(this.type == JUROR) {
+            this.track({x: this.target.x + TILE_W / 2, y: this.target.y + TILE_H / 2});
+        }
 
         // move closer
         // this will track (to not track, calculate a velocity to start, and stick with it)
@@ -78,9 +82,7 @@ ProjectileClass.prototype.move = function() {
                     StateController.notifyTowerKilledMonster(this.parentId, this.context, this.target.type);
                 }
             }
-            console.log(splashes[this.type]);
             if(splashes[this.type]) {
-                console.log(this.splashRange + ", " + this.splashRatio);
                 var thisTile = pixelToGrid(this.x, this.y);
 
                 // apply splash to every nearby tile
@@ -109,15 +111,22 @@ ProjectileClass.prototype.move = function() {
     } // end of visible
 } // end of move()
 
+ProjectileClass.prototype.track = function(point) {
+    this.angle = Math.atan2(point.y - this.y, point.x - this.x);     
+    // would like to lead the target a bit, but simply adding to this angle in the direction
+    // of change doesn't work 
+}
+
 ProjectileClass.prototype.hitTarget = function() {
     return Math.abs((this.target.y + TILE_H / 2) - this.y) < 30 && Math.abs((this.target.x + TILE_W / 2) - this.x) < 30;
 }
 
 ProjectileClass.prototype.draw = function() {
     if(this.visible) {
-        // ctx[this.context].drawImage(this.img, this.x, this.y);
-        drawBitmapCenteredWithRotation(this.img, this.x, this.y, this.angle % 360, this.context); // randomize angle
-        this.angle += 1;
+        drawBitmapCenteredWithRotation(this.img, this.x, this.y, this.angle, this.context); // randomize angle
+        if(this.rotates) {
+            this.angle += 1;
+        }
     }
 }
 
@@ -129,8 +138,8 @@ ProjectileClass.prototype.die = function() {
     delete projectileList[this.context][this.id];
 }
 
-function StraightProjectileClass(start, target, img, type, damage, speed, hits, tier, parent, context) {
-    ProjectileClass.call(this, start, target, img, type, damage, speed, tier, parent, context);
+function StraightProjectileClass(start, target, img, type, damage, speed, hits, tier, rotates, parent, context) {
+    ProjectileClass.call(this, start, target, img, type, damage, speed, tier, rotates, parent, context);
     this.hits = hits;
     this.xVel = null, this.yVel = null;
 }
@@ -152,8 +161,8 @@ StraightProjectileClass.prototype.move = function() {
 
     this.x += this.xVel * this.speed;
     this.y += this.yVel * this.speed;
-    // this.x += Math.cos(this.angle) * this.speed;
-    // this.y += Math.sin(this.angle) * this.speed;
+    // this.x += Math.cos(this.angle) * 10;
+    // this.y += Math.cos(this.angle) * 10;
 
     var tilePos = pixelToGrid(this.x, this.y);
 
@@ -183,8 +192,8 @@ StraightProjectileClass.prototype.move = function() {
     }
 }
 
-function FlowProjectileClass(start, target, img, type, damage, speed, parent, context) {
-    ProjectileClass.call(this, start, target, img, type, damage, speed, parent, context);
+function FlowProjectileClass(start, target, img, type, damage, speed, rotates, parent, context) {
+    ProjectileClass.call(this, start, target, img, type, damage, speed, rotates, parent, context);
     this.time = 0;
 }
 

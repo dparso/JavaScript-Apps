@@ -10,9 +10,7 @@ const TEXT_CLICK_CONTINUE = 41;
 var START_IMAGE;
 var CLICK_CONTINUE_IMAGE;
 
-// misc
-var levelCounter = 0;
-
+// levels
 var welcomeScreen = new LevelClass(LEVEL_START, [], function() {
     drawRect(0, 0, canvas[PLAYER].width, canvas[PLAYER].height, 'black', PLAYER);
     drawRect(0, 0, canvas[ENEMY].width, canvas[ENEMY].height, 'black', ENEMY);
@@ -21,7 +19,7 @@ var welcomeScreen = new LevelClass(LEVEL_START, [], function() {
     textDraw(PLAYER);
 });
 
-var selectScreen = new LevelClass(LEVEL_SELECT, [selectScreenGrid, selectScreenGrid], function(context) {
+var selectScreen = new LevelClass(LEVEL_SELECT, [selectScreenGrid, selectScreenGrid], function(level, context) {
     if(context == ENEMY) {
         drawRect(0, 0, canvas[context].width, canvas[context].height, 'black', context);
         return;
@@ -32,8 +30,19 @@ var selectScreen = new LevelClass(LEVEL_SELECT, [selectScreenGrid, selectScreenG
     ctx[context].drawImage(CLICK_CONTINUE_IMAGE.img, CLICK_CONTINUE_IMAGE.x - CLICK_CONTINUE_IMAGE.img.width / 2, CLICK_CONTINUE_IMAGE.y);
 });
 
-var levelOne = new LevelClass(LEVEL_TRACK, [levelOneGrid_player, levelOneGrid_enemy], function(context) {
-    this.tilesDraw(context);
+var levelOne = new LevelClass(LEVEL_TRACK, [levelOneGrid_player, levelOneGrid_enemy], function(level, context) {
+    drawGridLevel(level, context);
+});
+
+var levelTwo = new LevelClass(LEVEL_TRACK, [levelTwoGrid_player, levelTwoGrid_enemy], function(level, context) {
+    drawGridLevel(level, context);
+});
+
+const LEVELS = [levelOne, levelTwo];
+
+// generalized function for drawing a playable level
+function drawGridLevel(level, context) {
+    level.tilesDraw(context);
 
     for(id in projectileList[context]) {
       projectileList[context][id].draw();
@@ -77,7 +86,7 @@ var levelOne = new LevelClass(LEVEL_TRACK, [levelOneGrid_player, levelOneGrid_en
     }
 
     textDraw(context);
-});
+}
 
 function highlightTile(row, col, color, opacity, context) {
     var pixel = gridToPixel(row, col);

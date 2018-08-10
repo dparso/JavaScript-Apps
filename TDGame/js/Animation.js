@@ -83,3 +83,22 @@ function makeAnimation(type, x, y, index, context) {
         });        
     }
 }
+
+function scytheAnimation(x, y, angle, speed, context) {
+    ctx[context].save();
+    ctx[context].translate(x, y);
+    ctx[context].rotate(angle);
+    ctx[context].shadowBlur = 50;
+    ctx[context].shadowColor = 'black';
+    var img = projectilePics[REAPER][0];
+    ctx[context].drawImage(img, img.width / 8, img.height / 8);
+    ctx[context].restore();
+
+    if(angle <= 2 * Math.PI) {
+        requestAnimationFrame(function() {
+            scytheAnimation(x, y, angle + speed, speed, context);
+        });
+    }
+}
+
+

@@ -2,6 +2,7 @@
 function StateControllerClass(startLevel) {
     this.state;
     this.currLevel = startLevel;
+    this.levelNum = 0;
 
     this.monstersWaiting = [[], []];
 
@@ -23,6 +24,11 @@ function StateControllerClass(startLevel) {
             case CONDUIT:
                 tower = new ConduitClass(ofType, onSide);
                 break;
+            case JUROR:
+                tower = new JurorClass(ofType, onSide);
+                break;
+            case REAPER:
+                tower = new ReaperClass(ofType, onSide);
         }
 
         var pixelPos = gridToPixel(atGrid.row, atGrid.col);
@@ -33,6 +39,7 @@ function StateControllerClass(startLevel) {
         tower.currTile = atGrid;
         tower.active = true;
         tower.visible = true;
+        tower.calculateTilesInRange();
 
         towerList[onSide][tower.id] = tower;
 
@@ -50,12 +57,12 @@ function StateControllerClass(startLevel) {
 
 
         // display cost loss onscreen
-        queueMessage("-" + towerCosts[tower.type], tower.x, tower.y, onSide);
+        queueMessage("-" + towerCosts[tower.type].toLocaleString(), tower.x, tower.y, onSide);
     }
 
     this.sendMonster = function(ofType, toSide, usedHotkey = false) {
-        var img = tilePics[ofType + MONSTER_OFFSET_NUM];
-        var monster = new MonsterClass(ofType, img, toSide);
+        toSide = PLAYER;
+        var monster = new MonsterClass(ofType, toSide);
         monster.reset();
         monsterList[toSide][monster.id] = monster;
         StateController.monstersWaiting[toSide].push(monster);
@@ -69,7 +76,7 @@ function StateControllerClass(startLevel) {
             if(usedHotkey) {
                 side = currCanvas;
             }
-            queueMessage("-" + monsterCosts[monster.type], mouseX, mouseY, side);
+            queueMessage("-" + monsterCosts[monster.type].toLocaleString(), mouseX, mouseY, side);
         }
     }
 
@@ -87,7 +94,7 @@ function StateControllerClass(startLevel) {
                 xPos = tower.x;
                 yPos = tower.y
             }
-            queueMessage("-" + tier_costs[tower.type][tower.tier + 1], xPos, yPos, tower.context);
+            queueMessage("-" + tier_costs[tower.type][tower.tier + 1].toLocaleString(), xPos, yPos, tower.context);
             tower.upgradeTier(upgradeType);
             object.gainGold(-tier_costs[tower.type][tower.tier]);
             return true;
@@ -112,8 +119,7 @@ function StateControllerClass(startLevel) {
         obj.numTowers--;
         obj.gainGold(towerList[context][towerId].value);
 
-
-        queueMessage("+" + tower.value, tower.x, tower.y, tower.context, 'green');
+        queueMessage("+" + tower.value.toLocaleString(), tower.x, tower.y, tower.context, 'green');
 
         delete towerList[context][towerId];
     }
@@ -151,7 +157,7 @@ function StateControllerClass(startLevel) {
 	// }
 
     this.drawLevel = function(context) {
-        this.currLevel.draw(context);
+        this.currLevel.draw(this.currLevel, context);
     }
 
     this.notifyLifeLost = function(context) {
@@ -193,7 +199,7 @@ function StateControllerClass(startLevel) {
             }
         } else if(context == PLAYER) {
             // tower
-            if(type > 4) {
+            if(type > 6) {
                 console.log("Not yet!");
                 return;
             }
