@@ -38,24 +38,42 @@ var levelTwo = new LevelClass(LEVEL_TRACK, [levelTwoGrid_player, levelTwoGrid_en
     drawGridLevel(level, context);
 });
 
-const LEVELS = [levelOne, levelTwo];
+var levelThree = new LevelClass(LEVEL_TRACK, [levelThreeGrid_player, levelThreeGrid_enemy], function(level, context) {
+    drawGridLevel(level, context);
+});
+
+const LEVELS = [levelOne, levelTwo, levelThree];
 
 // generalized function for drawing a playable level
 function drawGridLevel(level, context) {
     level.tilesDraw(context);
 
     for(id in projectileList[context]) {
-      projectileList[context][id].draw();
+        projectileList[context][id].draw();
     }
 
     for(id in monsterList[context]) {
-      monsterList[context][id].draw();
+        monsterList[context][id].draw();
     }
 
+    var light, reaper;
     for(id in towerList[context]) {
-      towerList[context][id].draw();
+        var twr = towerList[context][id];
+        if(twr.type == LIGHT) {
+            light = twr;
+        } else if(twr.type == REAPER) {
+            reaper = twr;
+        } else {
+            towerList[context][id].draw();
+        }
     }
-
+    // don't draw any other towers over these!
+    if(reaper) {
+        reaper.draw();
+    }
+    if(light) {
+        light.draw();
+    }
 
     // drag object
     if(dragObject[context]) {
@@ -121,6 +139,10 @@ function canPlaceTower(row, col, context) {
     return false;
 }
 
+function otherPlayer(person) {
+    return Math.abs(person - 1); // 1 - 1 --> 0, 0 - 1 --> 1
+}
+
 function typeIsTower(type) {
     return type >= TOWER_OFFSET_NUM && type <= TOWER_OFFSET_NUM + NUM_TOWERS;
 }
@@ -140,4 +162,50 @@ function initButtons() {
 
     START_IMAGE = {img: img1, x: canvas[PLAYER].width / 2, y: 3 * canvas[PLAYER].height / 10};
     CLICK_CONTINUE_IMAGE = {img: img2, x: canvas[PLAYER].width / 2, y: 3 * canvas[PLAYER].height / 10};
+}
+
+function trueAngleBetweenPoints(base, point) {
+    var dX = base.x - point.x;
+    var dY = base.y - point.y;
+
+    var rad = Math.atan2(dY, dX);
+    var degrees = rad * (180 / Math.PI);
+
+    if (dX < 0 && dY > 0) { 
+        //quadrant 1
+        degrees = 180 - degrees;
+    } else if(dX > 0 && dY > 0) {
+        // quadrant 2
+        degrees = 180 - degrees;
+    } else if(dX > 0 && dY <= 0) {
+        // quadrant 3
+        degrees = -(degrees - 180);
+    } else {
+        // quadrant 4
+        degrees = -(degrees - 180)
+    }
+    return degrees;
+}
+
+function trueAngleFromRad(rad) {
+    var dX = base.x - point.x;
+    var dY = base.y - point.y;
+
+    var rad = Math.atan2(dY, dX);
+    var degrees = rad * (180 / Math.PI);
+
+    if (dX < 0 && dY > 0) { 
+        //quadrant 1
+        degrees = 180 - degrees;
+    } else if(dX > 0 && dY > 0) {
+        // quadrant 2
+        degrees = 180 - degrees;
+    } else if(dX > 0 && dY <= 0) {
+        // quadrant 3
+        degrees = -(degrees - 180);
+    } else {
+        // quadrant 4
+        degrees = -(degrees - 180)
+    }
+    return degrees;
 }

@@ -21,7 +21,9 @@ var started = false;
 
 var player = new PlayerClass(PLAYER);
 var enemy = new PlayerClass(ENEMY);
-// enemy.gold = 250;
+// enemy.gold = 40000000;
+// player.gold = 500000000000;
+// enemy.income = 0;
 
 var StateController = new StateControllerClass(welcomeScreen);
 var infoPane = [new InfoPaneClass(PLAYER), new InfoPaneClass(ENEMY)];
@@ -83,7 +85,7 @@ function updateAll() {
         ctx[PLAYER].fillStyle = 'white';
         ctx[PLAYER].font = "20px Helvetica";
         ctx[PLAYER].fillText("You lost!", 6 * canvas[PLAYER].width / 14, 2 * canvas[PLAYER].height / 4);
-        ctx[PLAYER].fillText("click to restart", 8 * canvas[PLAYER].width / 20, 18 * canvas[PLAYER].height / 32);
+        ctx[PLAYER].fillText("click to continue", 8 * canvas[PLAYER].width / 20, 18 * canvas[PLAYER].height / 32);
         return;
     }
 
@@ -174,6 +176,11 @@ function drawAll(context) {
     drawBitmapCenteredWithRotation(tilePics[TILE_MONSTER_START], strt.x + TILE_W / 2, strt.y + TILE_H / 2, spiralRotate, context);
     drawBitmapCenteredWithRotation(tilePics[TILE_MONSTER_END], end.x + TILE_W / 2, end.y + TILE_H / 2, spiralRotate, context);
 
+    // var colors = ['white', 'yellow', 'pink', 'green', 'blue', 'purple', 'gray', 'black', 'black']
+    // for(var i = 0; i < towerLocationQueue.length; i++) {
+    //     highlightTile(towerLocationQueue[i].tile.row, towerLocationQueue[i].tile.col, colors[towerLocationQueue[i].pathCount], 0.5, ENEMY);
+    // }
+
     spiralRotate -= 0.1;
 }
 
@@ -196,10 +203,10 @@ function drawSelection(context) {
 }
 
 function textDraw(context) {
-    // var tile = pixelToGrid(mouseX, mouseY);
-    // ctx[currCanvas].fillStyle = 'white';
+    var tile = pixelToGrid(mouseX, mouseY);
+    ctx[currCanvas].fillStyle = 'white';
     // ctx[currCanvas].fillText(mouseX + ", " + mouseY, mouseX, mouseY);
-    // ctx[currCanvas].fillText(tile.row + ", " + tile.col, mouseX, mouseY);
+    ctx[currCanvas].fillText(tile.row + ", " + tile.col, mouseX + 10, mouseY + 10);
 
     // draw all queued messages
     while(messages.length > 0) {
@@ -279,6 +286,8 @@ function nextLevel() {
     availableTowerLocations = [];
     upgradeableTowers = [];
 
+    REAPER_UNIQUE = [0, 0];
+
     timeSinceLastIncome = 0;
     timeSinceLastRelease = [0, 0];
     timeSinceAction = 0;
@@ -311,6 +320,8 @@ function restartGame() {
     StateController.monstersWaiting = [[], []];
     availableTowerLocations = [];
     upgradeableTowers = [];
+
+    REAPER_UNIQUE = [0, 0];
 
     timeSinceLastIncome = 0;
     timeSinceLastRelease = [0, 0];

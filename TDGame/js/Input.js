@@ -55,7 +55,7 @@ function calculateMousePos(evt) {
             var text = towerNames[index] + ": " + towerCosts[index].toLocaleString() + " [" + (index + 1) + "]";
         } else if(typeIsMonster(tile.type)) {
             var index = tile.type - MONSTER_OFFSET_NUM;
-            var text = monsterNames[index] + ": " + monsterCosts[index].toLocaleString() + " [shift + " + (index + 1) + "]";
+            var text = monsterNames[index] + ": " + (monsterCosts[PLAYER][index]).toLocaleString() + " [shift + " + (index + 1) + "]";
         } else {
             tooltip = null;
         }
@@ -144,7 +144,7 @@ function handleMouseDown(evt) {
                 
                 if(tile.type >= MONSTER_OFFSET_NUM && tile.type <= MONSTER_OFFSET_NUM + NUM_MONSTERS) {
                     // sending a monster
-                    if(player.gold < monsterCosts[tile.type - MONSTER_OFFSET_NUM]) {
+                    if(player.gold < monsterCosts[PLAYER][tile.type - MONSTER_OFFSET_NUM]) {
                         queueMessage("Insufficient gold!", mouseX, mouseY, currCanvas);
                     } else {
                         StateController.sendMonster(tile.type - MONSTER_OFFSET_NUM, ENEMY);
@@ -188,6 +188,10 @@ function handleMouseUp(evt) {
 }
 
 function setDrag(towerType, x, y, visible) {
+    if(towerType - TOWER_OFFSET_NUM == REAPER && REAPER_UNIQUE[currCanvas]) {
+        queueMessage("Maximum reapers!", mouseX, mouseY, currCanvas);
+        return;
+    }
     dragObject[currCanvas] = new DraggableClass(towerType, x, y, currCanvas, "tower");
     dragObject[currCanvas].range = towerRanges[towerType - TOWER_OFFSET_NUM];
     dragObject[currCanvas].visible = visible;
@@ -248,6 +252,10 @@ function keySet(evt, setTo) {
     switch(evt.keyCode) {
         case 16: // shift
             shiftHeld = setTo;
+            return;
+        case 32:
+            // space: presses start button again! Bad
+            evt.preventDefault();
             return;
         case 85:
             if(selection[PLAYER] != null && setTo) {

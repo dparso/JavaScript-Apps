@@ -63,7 +63,7 @@ function LevelClass(levelType, levelGrids, drawFunction, loadFunction) {
 	        for(var col = 0; col < TILE_COLS; col++) {
 	            var currTile = this.tiles[context][row][col];
 	            if(currTile.transparent) {
-            		ctx[context].drawImage(tilePics[TILE_GROUND], drawTileX, drawTileY);
+            		ctx[context].drawImage(tilePics[TILE_PATH], drawTileX, drawTileY);
 	            } else {
 	            	ctx[context].drawImage(currTile.img, drawTileX, drawTileY);
 	            }

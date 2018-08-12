@@ -1,6 +1,6 @@
 const STARTING_LIVES = 5;
-const STARTING_GOLD = 30000000.0;
-const STARTING_INCOME = 5.0;
+const STARTING_GOLD = 100000000.0;
+const STARTING_INCOME = 2.0;
 const INCOME_RATE = 10; // interval is x seconds
 
 function PlayerClass(context) {
@@ -9,6 +9,8 @@ function PlayerClass(context) {
 	this.income = STARTING_INCOME;
 	this.context = context;
 	this.numTowers = 0;
+	this.towerStrength = 0;
+	this.monsterStrength = 0;
 
 	this.loseLife = function() {
 		if(--this.lives == 0) {
@@ -33,12 +35,12 @@ function PlayerClass(context) {
 	}
 
 	this.sendMonster = function(ofType) {
-		this.gainGold(-monsterCosts[ofType]);
+		this.gainGold(-monsterCosts[this.context][ofType]);
 		// earn income!
-		this.income += monsterValues[ofType];
+		this.income += monsterCosts[this.context][ofType] * monster_send_ratio;
 	}
 
 	this.killedMonster = function(ofType) {
-		this.gainGold(monsterValues[ofType]);
+		this.gainGold(monsterCosts[otherPlayer(this.context)][ofType] * monster_kill_ratio);
 	}
 }

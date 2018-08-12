@@ -1,11 +1,16 @@
 // monster movement
 const MONSTER_HEALTH_BAR_HEIGHT = 5;
 var MONSTER_ID = [0, 0];
-var monsterHealths = [1.5, 10.0, 30.0, 200.0, 1000.0, 100000.0, 10000000.0, 2000000000.0];
-var monsterSpeeds = [10, 5, 4, 6, 7, 2.5, 3, 2];
-var monsterValues = [0.2, 0.8, 2.5, 7.0, 30.0, 100.0, 3000.0, 10000.0]; // how much you get for killing one
-var monsterCosts = [0.5, 2.0, 8.0, 20.0, 100.0, 1000.0, 20000.0, 100000.0];
+var monsterHealths = [[5.0, 30.0, 100.0, 250.0, 2000.0, 100000.0, 50000000.0, 8000000000.0], [5.0, 30.0, 100.0, 250.0, 2000.0, 100000.0, 50000000.0, 8000000000.0]];
+var monsterSpeeds = [[10, 5, 4, 6, 7, 2.5, 3, 2], [10, 5, 4, 6, 7, 2.5, 3, 2]];
+
+var monster_kill_ratio = 0.1; // gold from killing
+var monster_send_ratio = 0.3; // income from sending
+var monsterCosts = [[1.0, 2.0, 8.0, 20.0, 100.0, 1000.0, 20000.0, 100000.0], [1.0, 2.0, 8.0, 20.0, 100.0, 1000.0, 20000.0, 100000.0]];
 var monsterNames = ["Spook", "Fright", "Fear", "Dread", "Nightmare", "Terror", "Horror", "Chaos"]; // panic, despair, jitters, concern, creep, anguish, gloom, misery, desperation
+
+var monsterCounts = [[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0]];
+var monsterLevels = [[1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1]];
 
 const LEFT = 0;
 const RIGHT = 1;
@@ -27,11 +32,19 @@ function MonsterClass(type, context) {
     this.pathPosition = 0; // current goal
     this.visible = false;
     this.type = type;
-    this.health = monsterHealths[type];
-    this.speed = monsterSpeeds[type];
+    this.level = monsterLevels[otherPlayer(this.context)][this.type];
+    this.health = monsterHealths[otherPlayer(this.context)][type];
+    this.maxHealth = this.health;
+    this.speed = monsterSpeeds[otherPlayer(this.context)][type];
     this.invulnerable = false;
     this.immobile = false;
-    this.value = monsterValues[type];
+    this.value = monsterCosts[otherPlayer(this.context)][this.type] * monster_kill_ratio;
+
+    // towersWithDots is a map of towerIds to their applied dotIds
+    // towers use this to access (refresh) this.dots when attacking
+    this.dots = {}; // these two can likely be consolidated
+    this.towersWithDots = {}; // for now, each monster can only have 1 dot from each tower
+    this.reaperDot = false;
 
     this.animationTime = 100 / this.speed;
     this.animationStage = this.animationTime;
@@ -45,6 +58,11 @@ function MonsterClass(type, context) {
     }
 
     this.move = function() {
+        // apply dots to self
+        for(dotId in this.dots) {
+            this.dots[dotId].move();
+        }
+
         if(this.immobile) return;
         if(this.pathPosition < monsterPath[this.context].length) {
             if(this.visible) {
@@ -124,18 +142,19 @@ function MonsterClass(type, context) {
                     yOff = -(img.height - TILE_H) / 2.0;
                 }
 
-                if(this.type > 4) {
-                    ctx[this.context].save();
-                    ctx[this.context].shadowColor = color;
-                    ctx[this.context].shadowBlur = 30;
+                // if(this.type > 4) {
+                    // ctx[this.context].save();
+                    // ctx[this.context].shadowColor = color;
+                    // ctx[this.context].shadowBlur = 30; // too laggy!
+                // }
 
-                }
                 ctx[this.context].drawImage(img, this.x + xOff, this.y + yOff);
 
+                var color = this.reaperDot ? 'black' : 'red';
                 // health bar
-                var widthLimit = this.health / monsterHealths[this.type];
-                drawRect(this.x + xOff, this.y - 5 + yOff, img.width * widthLimit, MONSTER_HEALTH_BAR_HEIGHT, 'red', this.context);
-                if(this.type > 4) ctx[this.context].restore();
+                var widthLimit = this.health / this.maxHealth;
+                drawRect(this.x + xOff, this.y - 5 + yOff, img.width * widthLimit, MONSTER_HEALTH_BAR_HEIGHT, color, this.context);
+                // if(this.type > 4) ctx[this.context].restore();
             }
 
         }
@@ -152,14 +171,28 @@ function MonsterClass(type, context) {
         return false;
     }
 
+    this.removeDot = function(towerId, dotId) {
+        if(towerList[this.context][towerId] != undefined) {
+            // tower might have been sold
+            if(towerList[this.context][towerId].type == REAPER) {
+                this.reaperDot = false;
+            }
+        }
+        delete this.towersWithDots[towerId];
+        delete this.dots[dotId];
+    }
+
     this.die = function(killed) {
         this.health = 0; // towers don't attack anymore
+
         if(killed) {
             // only reward player if it was killed (also dies at end)
             var obj = this.context == PLAYER ? player : enemy;
             obj.killedMonster(this.type);
-            queueMessage("+" + monsterValues[this.type].toLocaleString(), this.x, this.y, this.context, 'green');
+            queueMessage("+" + this.value.toLocaleString(), this.x, this.y, this.context, 'green');
         }
+        var sender = this.context == PLAYER ? enemy : player;
+        sender.monsterStrength -= monsterCosts[otherPlayer(this.context)][this.type] * 4;
 
         StateController.currLevel.tiles[this.context][this.currTile.row][this.currTile.col].notifyMonsterDepart(this.id);
         delete monsterList[this.context][this.id];
@@ -211,13 +244,13 @@ function calculateMonsterPath(context) {
             break; // do more
         }
 
-        // add neighbors that are ground and unvisited
+        // add neighbors that are PATH and unvisited
         for(var rowOffset = -1; rowOffset <= 1; rowOffset++) {
             if(rowOffset == 0) continue;
             if(gridInRange(currTile.row + rowOffset, currTile.col)) {
                 var tile = StateController.currLevel.tiles[context][currTile.row + rowOffset][currTile.col];
 
-                if((tile.type == TILE_GROUND || tile.type == TILE_MONSTER_END) && !tile.visited) {
+                if((tile.type == TILE_PATH || tile.type == TILE_MONSTER_END) && !tile.visited) {
                     // add this to path
                     tile.parent = currTile;
                     frontier.push(tile);
@@ -228,7 +261,7 @@ function calculateMonsterPath(context) {
             if(colOffset == 0) continue;
             if(gridInRange(currTile.row, currTile.col + colOffset)) {
                 var tile = StateController.currLevel.tiles[context][currTile.row][currTile.col + colOffset];
-                if((tile.type == TILE_GROUND || tile.type == TILE_MONSTER_END) && !tile.visited) {
+                if((tile.type == TILE_PATH || tile.type == TILE_MONSTER_END) && !tile.visited) {
                     // add this to path
                     tile.parent = currTile;
                     frontier.push(tile);

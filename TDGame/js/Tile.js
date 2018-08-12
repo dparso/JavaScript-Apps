@@ -9,7 +9,7 @@ function TileClass(position, type, img, transparent) {
     this.visited = false;
     this.parent = null;
 
-    this.monstersOnTile = new Set(); // monster IDs
+    this.monstersOnTile = {}; // monster IDs
     this.towerOnTile = -1;
 
     this.getMonsters = function() {
@@ -29,16 +29,16 @@ function TileClass(position, type, img, transparent) {
     }
 
     this.hasMonsters = function () {
-        return this.monstersOnTile.size > 0;
+        return Object.keys(this.monstersOnTile).length > 0;
     }
 
     this.notifyMonsterArrive = function(monsterID) {
         // monster is an id, not a monster object
-        this.monstersOnTile.add(monsterID);
+        this.monstersOnTile[monsterID] = monsterID;
     }
 
     this.notifyMonsterDepart = function(monsterID) {
-        this.monstersOnTile.delete(monsterID);
+        delete this.monstersOnTile[monsterID];
     }
 }
 
@@ -98,7 +98,7 @@ function collisionHandling(object) {
                 return false;
             case TILE_WALL:
                 return false;
-            case TILE_GROUND:
+            case TILE_PATH:
                 return true;
             default:
                 return true;

@@ -28,11 +28,22 @@ function StateControllerClass(startLevel) {
                 tower = new JurorClass(ofType, onSide);
                 break;
             case REAPER:
+                if(REAPER_UNIQUE[onSide]) {
+                    if(onSide == PLAYER) queueMessage("Maximum reapers!", mouseX, mouseY, onSide);
+                    return false;
+                }
                 tower = new ReaperClass(ofType, onSide);
+                break;
+            case LIGHT:
+                if(LIGHT_UNIQUE[onSide]) {
+                    if(onSide == PLAYER) queueMessage("Maximum light!", mouseX, mouseY, onSide);
+                    return false;
+                }
+                tower = new LightClass(ofType, onSide);
+                break;
         }
 
         var pixelPos = gridToPixel(atGrid.row, atGrid.col);
-
         // snap to center of grid
         tower.x = pixelPos.x + TILE_W / 2;
         tower.y = pixelPos.y + TILE_H / 2;
@@ -40,6 +51,9 @@ function StateControllerClass(startLevel) {
         tower.active = true;
         tower.visible = true;
         tower.calculateTilesInRange();
+        if(ofType == LIGHT) {
+            tower.radialSort();
+        }
 
         towerList[onSide][tower.id] = tower;
 
@@ -49,43 +63,64 @@ function StateControllerClass(startLevel) {
         // player pays for it (cost checks already occurred)
         if(onSide == PLAYER) {
             player.buyTower(tower.type);
+            player.towerStrength += towerCosts[tower.type];
+            // console.log("PLACE " + player.towerStrength);
             selection[PLAYER] = tower.id;
         } else {
             enemy.buyTower(tower.type);
+            enemy.towerStrength += towerCosts[tower.type];
             upgradeableTowers.push(tower.id);
         }
 
 
         // display cost loss onscreen
         queueMessage("-" + towerCosts[tower.type].toLocaleString(), tower.x, tower.y, onSide);
+        return true;
     }
 
     this.sendMonster = function(ofType, toSide, usedHotkey = false) {
-        toSide = PLAYER;
+        // toSide = PLAYER;
+        var sender = otherPlayer(toSide);
+        monsterCounts[sender][ofType]++;
+        if(monsterCounts[sender][ofType] > 100 * monsterLevels[sender][ofType]) {
+            monsterLevels[sender][ofType]++;
+            monsterCounts[sender][ofType] = 0;
+
+            monsterCosts[sender][ofType] *= 1.5;
+            monsterHealths[sender][ofType] *= 2;
+            monsterSpeeds[sender][ofType] += (1 / monsterLevels[sender][ofType]);
+            queueMessage(monsterNames[ofType] + ": level " + monsterLevels[sender][ofType], canvas[sender].width / 2, canvas[sender].height / 2, sender, 'gold');
+        }
+
         var monster = new MonsterClass(ofType, toSide);
         monster.reset();
         monsterList[toSide][monster.id] = monster;
         StateController.monstersWaiting[toSide].push(monster);
         // toSide is the resulting side, but the opposite side sent it
+        var level = monsterLevels[toSide][ofType];
         if(toSide == PLAYER) {
             enemy.sendMonster(ofType);
+            enemy.monsterStrength += monsterCosts[sender][ofType] * 4;
         } else {
             player.sendMonster(ofType);
+            player.monsterStrength += monsterCosts[sender][ofType] * 4;
+            // console.log(player.monsterStrength);
             // player sent: display message over the selection tile
             var side = toSide;
             if(usedHotkey) {
                 side = currCanvas;
             }
-            queueMessage("-" + monsterCosts[monster.type].toLocaleString(), mouseX, mouseY, side);
+            queueMessage("-" + (monsterCosts[sender][monster.type]).toLocaleString(), mouseX, mouseY, side);
+            return true;
         }
     }
 
     // isPlayer = true if player is upgrading, in which case display error on fail (otherwise don't)
     this.upgradeTower = function(tower, upgradeType, isPlayer) {
         if(tower.tier + 1 >= tier_costs[tower.type].length) return false; // no more upgrades
-        var object = tower.context == PLAYER ? player : enemy;
+        var obj = tower.context == PLAYER ? player : enemy;
 
-        if(object.gold >= tier_costs[tower.type][tower.tier + 1]) {
+        if(obj.gold >= tier_costs[tower.type][tower.tier + 1]) {
             var xPos, yPos;
             if(isPlayer) {
                 xPos = mouseX;
@@ -96,7 +131,8 @@ function StateControllerClass(startLevel) {
             }
             queueMessage("-" + tier_costs[tower.type][tower.tier + 1].toLocaleString(), xPos, yPos, tower.context);
             tower.upgradeTier(upgradeType);
-            object.gainGold(-tier_costs[tower.type][tower.tier]);
+            obj.towerStrength += tier_costs[tower.type][tower.tier];
+            obj.gainGold(-tier_costs[tower.type][tower.tier]);
             return true;
         } else {
             if(isPlayer) {
@@ -109,6 +145,9 @@ function StateControllerClass(startLevel) {
 
     this.sellTower = function(towerId, context) {
         var tower = towerList[context][towerId];
+        if(tower.type == REAPER) REAPER_UNIQUE[context] = 0;
+        if(tower.type == LIGHT) LIGHT_UNIQUE[context] = 0;
+
         // remove from tile
         var tile = towerList[context][towerId].currTile;
         this.currLevel.tiles[context][tile.row][tile.col].notifyTowerRemoved();
@@ -117,6 +156,11 @@ function StateControllerClass(startLevel) {
         // grant gold
         var obj = context == PLAYER ? player : enemy;
         obj.numTowers--;
+
+        for(var i = tower.tier; i >= 0; i--) {
+            obj.towerStrength -= tier_costs[tower.type][i];
+        }
+        obj.towerStrength -= towerCosts[tower.type];
         obj.gainGold(towerList[context][towerId].value);
 
         queueMessage("+" + tower.value.toLocaleString(), tower.x, tower.y, tower.context, 'green');
@@ -192,16 +236,24 @@ function StateControllerClass(startLevel) {
                 console.log("Not yet!");
                 return;
             }
-            if(player.gold >= monsterCosts[type]) {
+            if(player.gold >= monsterCosts[PLAYER][type]) {
                 this.sendMonster(type, ENEMY, true);
             } else {
                 queueMessage("Insufficient gold!", mouseX, mouseY, currCanvas);
             }
         } else if(context == PLAYER) {
             // tower
-            if(type > 6) {
+            if(type > 7) {
                 console.log("Not yet!");
                 return;
+            }
+
+            if(type == REAPER && REAPER_UNIQUE[PLAYER]) {
+                queueMessage("Maximum reapers!", mouseX, mouseY, PLAYER);
+                return false;
+            } else if(type == LIGHT && LIGHT_UNIQUE[PLAYER]) {
+                queueMessage("Maximum light!", mouseX, mouseY, PLAYER);
+                return false;
             }
 
             if(dragObject[PLAYER] != null && type == dragObject[PLAYER].type - TOWER_OFFSET_NUM) {
