@@ -188,15 +188,15 @@ function handleMouseUp(evt) {
 }
 
 function setDrag(towerType, x, y, visible) {
-    if(towerType - TOWER_OFFSET_NUM == REAPER && REAPER_UNIQUE[currCanvas]) {
-        queueMessage("Maximum reapers!", mouseX, mouseY, currCanvas);
+    if(towerType - TOWER_OFFSET_NUM == REAPER && REAPER_UNIQUE[PLAYER]) {
+        queueMessage("Maximum reapers!", mouseX, mouseY, PLAYER);
         return;
     }
-    dragObject[currCanvas] = new DraggableClass(towerType, x, y, currCanvas, "tower");
-    dragObject[currCanvas].range = towerRanges[towerType - TOWER_OFFSET_NUM];
-    dragObject[currCanvas].visible = visible;
+    dragObject[PLAYER] = new DraggableClass(towerType, x, y, PLAYER, "tower");
+    dragObject[PLAYER].range = towerRanges[towerType - TOWER_OFFSET_NUM];
+    dragObject[PLAYER].visible = visible;
 
-    clearSelection(currCanvas); // clear selection
+    clearSelection(PLAYER); // clear selection
     isDown = true;
     isDragging = true;
 }

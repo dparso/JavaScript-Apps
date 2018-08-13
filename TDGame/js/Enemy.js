@@ -187,16 +187,14 @@ function enemyActions() {
 
 	evaluateComfort();
 
-	// for the first 1 second of the game, buy some towers
-	if(startOfGame < 1 * fps) {
+	// for the first 2 seconds of the game, buy some towers
+	if(startOfGame < 2 * fps) {
 		enemyTowerProbability = 1.0;
 		enemyActionProbability = 1.0;
 		startOfGame++;
 	}
 
-	enemyTowerProbability = 0.95;
-	enemyUpgradeProbability = 0.1;
-	// return;
+	return;
 	// enemyTowerProbability = ENEMY_TOWER_PROB * (1 - enemy.numTowers / 30.0); // 30 towers is enough!
 	// enemyActionRate = ENEMY_ACTION_RATE - (enemy.gold / 50000); // slightly increase with gold excess -- don't sit around, spend money!
 
@@ -221,12 +219,12 @@ function enemyActions() {
 				// 	monsterFlag = false; // already upgraded
 				// }
 			} else {
-				sendMonster();
+				sendEnemyMonster();
 			}
 			// at this point, monsterFlag is true either if tower wasn't chosen or tower failed
 			// in either case, send a monster
 			// if(monsterFlag) {
-			// 	sendMonster();
+			// 	sendEnemyMonster();
 			// }
 		}
 
@@ -303,7 +301,7 @@ function buyTower() {
 	}
 }
 
-function sendMonster() {
+function sendEnemyMonster() {
 	// enough money?
 	if(enemy.gold < minMonsterCost) {
 		return false;

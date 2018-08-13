@@ -36,8 +36,7 @@ function InfoPaneClass(context) {
 			document.getElementById('atktext').innerHTML = "Attack Speed: " + Math.floor(tower.properties[ATTACK_SPEED]).toLocaleString() + atkText;
 			document.getElementById('killtext').innerHTML = "Kills: " + tower.killCount;
 			document.getElementById('infopaneicon').src = "images/" + imageList[tower.type + TOWER_OFFSET_NUM];
-
-			document.getElementById('tierbutton').innerHTML = "Tier (" + (tower.tier + 1) + "/" + tier_costs[tower.type].length + ") [u] <span class='tooltiptext' id='upgradecosttext'>Blank!</span>";
+			document.getElementById('tierbutton').innerHTML = "Tier (" + (tower.tier + 1) + "/" + tier_costs[tower.type].length + ") [u] <span class='tooltiptext tooltip-top' id='upgradecosttext'>Blank!</span>";
 			document.getElementById('sellbutton').innerHTML = "Sell: " + tower.value.toLocaleString() + " [s]";
 			document.getElementById('targetbutton').innerHTML = "Target: " + PRIORITY_NAMES[tower.targetPriority] + " [t]";
 			

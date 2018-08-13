@@ -79,9 +79,10 @@ function StateControllerClass(startLevel) {
     }
 
     this.sendMonster = function(ofType, toSide, usedHotkey = false) {
-        // toSide = PLAYER;
+        toSide = PLAYER;
         var sender = otherPlayer(toSide);
         monsterCounts[sender][ofType]++;
+        // level up
         if(monsterCounts[sender][ofType] > 100 * monsterLevels[sender][ofType]) {
             monsterLevels[sender][ofType]++;
             monsterCounts[sender][ofType] = 0;
@@ -238,6 +239,7 @@ function StateControllerClass(startLevel) {
             }
             if(player.gold >= monsterCosts[PLAYER][type]) {
                 this.sendMonster(type, ENEMY, true);
+                this.sendMonster(type, PLAYER, true);
             } else {
                 queueMessage("Insufficient gold!", mouseX, mouseY, currCanvas);
             }

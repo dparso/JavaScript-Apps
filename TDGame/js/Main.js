@@ -21,9 +21,10 @@ var started = false;
 
 var player = new PlayerClass(PLAYER);
 var enemy = new PlayerClass(ENEMY);
-// enemy.gold = 40000000;
+enemy.gold = 20;
+enemy.income = 5.0;
+
 // player.gold = 500000000000;
-// enemy.income = 0;
 
 var StateController = new StateControllerClass(welcomeScreen);
 var infoPane = [new InfoPaneClass(PLAYER), new InfoPaneClass(ENEMY)];
@@ -38,6 +39,7 @@ window.onload = function() {
     // disable right click
     $('body').on('contextmenu', '#gameCanvas', function(e){ return false; });
     $('body').on('contextmenu', '#enemyCanvas', function(e){ return false; });
+    $('container').hide();
 
     currCanvas = PLAYER;
     loadImages();
@@ -54,10 +56,10 @@ function startGame() {
     started = true;
     if(waitingToStart) return;
     $('#container').fadeIn(1500);
-    document.getElementById('container').removeAttribute('hidden');
-    document.getElementById('container').removeAttribute('hidden');
     $('#userinfopane').hide();
     $('#enemyinfopane').hide();
+    $('#monstergrid').hide();
+    $('#optionsnav').show();
 
     timerId = setInterval(updateAll, 1000 / fps);
     setupInput();
@@ -203,10 +205,10 @@ function drawSelection(context) {
 }
 
 function textDraw(context) {
-    var tile = pixelToGrid(mouseX, mouseY);
-    ctx[currCanvas].fillStyle = 'white';
+    // var tile = pixelToGrid(mouseX, mouseY);
+    // ctx[currCanvas].fillStyle = 'white';
     // ctx[currCanvas].fillText(mouseX + ", " + mouseY, mouseX, mouseY);
-    ctx[currCanvas].fillText(tile.row + ", " + tile.col, mouseX + 10, mouseY + 10);
+    // ctx[currCanvas].fillText(tile.row + ", " + tile.col, mouseX + 10, mouseY + 10);
 
     // draw all queued messages
     while(messages.length > 0) {
@@ -285,6 +287,10 @@ function nextLevel() {
     StateController.monstersWaiting = [[], []];
     availableTowerLocations = [];
     upgradeableTowers = [];
+    monsterCounts = [[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0]];
+    monsterLevels = [[1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1]];
+    REAPER_UNIQUE = [0, 0]; // only one reaper per side
+    LIGHT_UNIQUE = [0, 0]; // only one reaper per side
 
     REAPER_UNIQUE = [0, 0];
 
@@ -386,3 +392,54 @@ function destroyTowers() {
     clearSelection(PLAYER);
     clearSelection(ENEMY);
 }
+
+var menuShowing = 0;
+function scrollMenu(direction) {
+    console.log(direction);
+    if(menuShowing) {
+        $('#buttonlabel').text("Towers");
+        $('#towergrid').show();
+        $('#monstergrid').hide();
+        menuShowing = Math.abs(menuShowing - 1);
+    } else {
+        $('#buttonlabel').text("Monsters");
+        $('#monstergrid').show();
+        $('#towergrid').hide();
+        menuShowing = Math.abs(menuShowing - 1);
+    }
+}
+
+function selectTower(type) {
+    if(player.gold < towerCosts[type]) {
+        queueMessage("Insufficient gold!", TILE_H * (TILE_ROWS + 1) / 2, TILE_W * (TILE_COLS + 1) / 2, PLAYER);
+    } else {
+        setDrag(type + TOWER_OFFSET_NUM, TILE_H * (TILE_ROWS + 1) / 2, TILE_W * (TILE_COLS + 1) / 2, true);
+    }
+}
+
+function sendMonster(type) {
+    if(player.gold < monsterCosts[PLAYER][type]) {
+        queueMessage("Insufficient gold!", TILE_H * (TILE_ROWS + 1) / 2, TILE_W * (TILE_COLS + 1) / 2, PLAYER);
+    } else {
+        StateController.sendMonster(type, ENEMY);
+    }
+}
+
+function updateGridTooltip() {
+    // there must be a better way to do this, but this is how it is now 
+    for(var i = 0; i < NUM_TOWERS; i++) {
+        let tooltipID = "tower" + (i + 1) + "Tooltip";
+        let costText = towerNames[i] + ": " + towerCosts[i];
+        document.getElementById(tooltipID).innerHTML = costText + "<br>" + towerDescriptions[i] + "<br>" + "Hotkey: " + (i + 1);
+    }
+
+    for(var i = 0; i < NUM_MONSTERS; i++) {
+        let tooltipID = "monster" + (i + 1) + "Tooltip";
+        let costText = monsterNames[i] + ": " + monsterCosts[PLAYER][i];
+        // $(tooltipID).text(costText + "<br />" + towerDescriptions[i]);
+        document.getElementById(tooltipID).innerHTML = costText + "<br>" + monsterDescriptions[i];
+    }
+}
+
+
+

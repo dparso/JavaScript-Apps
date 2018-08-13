@@ -1,13 +1,14 @@
 // monster movement
 const MONSTER_HEALTH_BAR_HEIGHT = 5;
 var MONSTER_ID = [0, 0];
-var monsterHealths = [[5.0, 30.0, 100.0, 250.0, 2000.0, 100000.0, 50000000.0, 8000000000.0], [5.0, 30.0, 100.0, 250.0, 2000.0, 100000.0, 50000000.0, 8000000000.0]];
+var monsterHealths = [[5.0, 20.0, 100.0, 250.0, 2000.0, 100000.0, 50000000.0, 8000000000.0], [5.0, 30.0, 100.0, 250.0, 2000.0, 100000.0, 50000000.0, 8000000000.0]];
 var monsterSpeeds = [[10, 5, 4, 6, 7, 2.5, 3, 2], [10, 5, 4, 6, 7, 2.5, 3, 2]];
 
 var monster_kill_ratio = 0.1; // gold from killing
 var monster_send_ratio = 0.3; // income from sending
-var monsterCosts = [[1.0, 2.0, 8.0, 20.0, 100.0, 1000.0, 20000.0, 100000.0], [1.0, 2.0, 8.0, 20.0, 100.0, 1000.0, 20000.0, 100000.0]];
-var monsterNames = ["Spook", "Fright", "Fear", "Dread", "Nightmare", "Terror", "Horror", "Chaos"]; // panic, despair, jitters, concern, creep, anguish, gloom, misery, desperation
+var monsterCosts = [[1.0, 3.0, 8.0, 20.0, 100.0, 1000.0, 20000.0, 100000.0], [1.0, 2.0, 8.0, 20.0, 100.0, 1000.0, 20000.0, 100000.0]];
+var monsterNames = ["Spook", "Fright", "Fear", "Dread", "Nightmare", "Terror", "Horror", "Chaos"]; // panic, despair, jitters, concern, creep, anguish, gloom, misery, desperation, wraith
+var monsterDescriptions = ["Weak, fast, and spooky.", "Strong, slow early-game monster.", "Be afraid!", "Shore up your defenses, or pay the price.", "The dark-alley life stealer.", "Looming, lumbering, lifeless.", "The lieutenant of Chaos.", "Game over, man."];
 
 var monsterCounts = [[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0]];
 var monsterLevels = [[1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1]];
@@ -189,7 +190,7 @@ function MonsterClass(type, context) {
             // only reward player if it was killed (also dies at end)
             var obj = this.context == PLAYER ? player : enemy;
             obj.killedMonster(this.type);
-            queueMessage("+" + this.value.toLocaleString(), this.x, this.y, this.context, 'green');
+            // queueMessage("+" + this.value.toLocaleString(), this.x, this.y, this.context, 'green');
         }
         var sender = this.context == PLAYER ? enemy : player;
         sender.monsterStrength -= monsterCosts[otherPlayer(this.context)][this.type] * 4;

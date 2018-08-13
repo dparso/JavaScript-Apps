@@ -55,9 +55,18 @@ const upgrade_effects = [dmg_upgrade_effects, rng_upgrade_effects, atk_upgrade_e
 
 var towerRanges = [3, 3, 2, 4, 1, 4, 2, 5];
 var towerDamages = [2.0, 3.0, 3.0, 5.0, 7.5, 10.0, 100.0, 1000.0];
-var towerAttackSpeeds = [1, 1, 3, 2, 3, 1, 1, 4];
+var towerAttackSpeeds = [1, 1, 3, 2, 3, 1, 1, 10];
 var towerCosts = [1.0, 2.0, 5.0, 10.0, 12.0, 20.0, 200.0, 10000.0];
 var towerNames = ["Shooter", "Cannon", "Glaive", "Wizard", "Conduit", "Juror", "Reaper", "Light"];
+var towerDescriptions = ["Basic tower. Deals low single-target damage.",
+                         "Slow but powerful. Deals medium area-of-effect damage.", 
+                         "Shoots spinning blades that damage anything within area.", 
+                         "Conjures powerful fireballs that deal area-of-effect damage.", 
+                         "Shoots lighting bolts that chain across multiple foes.", 
+                         "Fires strong arrows of light at multiple targets.", 
+                         "Master of death. Scythe applies damage-over-time effect.", 
+                         "Arbiter of light. Deals extremely high damage in a cone."];
+
 
 // conduit
 var lightning_strengths = [2, 2, 3, 3, 3, 3, 4];
@@ -755,7 +764,7 @@ ReaperClass.prototype.draw = function() {
         ctx[this.context].save();
         ctx[this.context].shadowColor = 'black';
         ctx[this.context].shadowBlur = 35;
-        ctx[this.context].globalAlpha = .60;
+        ctx[this.context].globalAlpha = .75;
 
         this.floatX += this.floatXSpeed;
         this.floatY += this.floatYSpeed;

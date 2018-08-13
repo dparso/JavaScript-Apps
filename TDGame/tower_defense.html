@@ -10,6 +10,20 @@
 	<link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
+
+<!-- <div id="mySidenav" class="sidenav">
+  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+  <a href="#">About</a>
+  <a href="#">Services</a>
+  <a href="#">Clients</a>
+  <a href="#">Contact</a>
+</div> -->
+
+<div id="main">
+<!--   <h2>Sidenav Push Example</h2>
+  <p>Click on the element below to open the side navigation menu, and push this content to the right.</p>
+  <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776; open</span>
+ -->
 	<div id="start">
 		<ul>
 			<li><button class="button" onclick="startGame()">Play</button></li>
@@ -38,7 +52,7 @@
 			<img id="pausebutton" onclick="pauseGame()" src="images/pause.png">
 			<img id="fastforwardbutton" onclick="fastGame()" src="images/fast-forward.png">
 
-			<div>
+<!-- 			<div>
 				<table class="iconrow" id="towerselections">
 					<tr>
 						<th><img src="images/Towers/gunner.png" class="selecticon" alt="icon"></th>
@@ -57,7 +71,8 @@
 						<th><img src="images/Towers/light.png" class="selecticon" alt="icon"></th>
 					</tr>
 				</table>
-			</div>
+			</div> -->
+
 
 			<button id="killmonsters" onclick="killMonsters()" class="button">Kill monsters!</button>
 			<button id="destroytowers" onclick="destroyTowers()" class="button">Destroy towers!</button>
@@ -76,7 +91,8 @@
 				<tr>
 					<th id="costtext">Cost:</th>
 					<th id="killtext">Kills:</th>
-					<th><button id="tierbutton" onmouseover="showPlayerTierText()" onmouseout="hidePlayerTierText()" class="infobutton hoverbutton tooltip" onclick="upgradePressed()">Tier (0/5) [t]<span class="tooltiptext" id="upgradecosttext">Blank!</span></button></th>
+					<!-- Remember to change the span in InfoPane.js where the content is written! -->
+					<th><button id="tierbutton" onmouseover="showPlayerTierText()" onmouseout="hidePlayerTierText()" class="infobutton hoverbutton tooltip" onclick="upgradePressed()">Tier (0/5) [u]<span class="tooltiptext tooltip-top" id="upgradecosttext">Blank!</span></button></th>
 					<th></th>
 				</tr>
 				<tr>
@@ -96,6 +112,49 @@
 		
 		<div class="split right">
 				<canvas id="enemyCanvas" width="700" height="700"></canvas>
+
+				<!-- Center menu -->
+				<div id="optionsnav" class="centernav">
+					<div class="nav">
+					<button id="leftbutton" onclick="scrollMenu('left')"><</button><p id="buttonlabel">Towers</p><button id="rightbutton" onclick="scrollMenu('right')">></button>
+					</div>
+					<div id="towergrid" class="grid-container" onmouseover="updateGridTooltip()"> 
+						<div class="left-grid-item tooltip"><input type="image" src="images/Towers/gunner.png" onclick="selectTower(0)" class="selecticon" alt="icon"><span id="tower1Tooltip" class="tooltiptext tooltip-left">Hi!</span></div>	  
+
+ 						<div class="right-grid-item tooltip"><input type="image" src="images/Towers/cannon.png" onclick="selectTower(1)" class="selecticon" alt="icon"><span id="tower2Tooltip" class="tooltiptext tooltip-right">Hi!</span></div>
+
+						<div class="left-grid-item tooltip"><input type="image" src="images/Towers/glaive.png" onclick="selectTower(2)" class="selecticon" alt="icon"><span id="tower3Tooltip" class="tooltiptext tooltip-left">Hi!</span></div>  
+
+						<div class="right-grid-item tooltip"><input type="image" src="images/Towers/wizard.png" onclick="selectTower(3)" class="selecticon" alt="icon"><span id="tower4Tooltip" class="tooltiptext tooltip-right">Hi!</span></div>
+
+						<div class="left-grid-item tooltip"><input type="image" src="images/Towers/conduit.png" onclick="selectTower(4)" class="selecticon" alt="icon"><span id="tower5Tooltip" class="tooltiptext tooltip-left">Hi!</span></div>
+
+						<div class="right-grid-item tooltip"><input type="image" src="images/Towers/juror.png" onclick="selectTower(5)" class="selecticon" alt="icon"><span id="tower6Tooltip" class="tooltiptext tooltip-right">Hi!</span></div> 
+
+						<div class="left-grid-item tooltip"><input type="image" src="images/Towers/reaper.png" onclick="selectTower(6)" class="selecticon" alt="icon"><span id="tower7Tooltip" class="tooltiptext tooltip-left">Hi!</span></div>
+
+						<div class="right-grid-item tooltip"><input type="image" src="images/Towers/light_with_wings.png" onclick="selectTower(7)" class="selecticon" alt="icon"><span id="tower8Tooltip" class="tooltiptext tooltip-right">Hi!</span></div>
+					</div>
+
+					<div id="monstergrid" class="grid-container" onmouseover="updateGridTooltip()"> 
+						  <div class="left-grid-item tooltip"><input type="image" src="images/Monsters/monster_1/monster_1.png" onclick="sendMonster(0)" class="selecticon" alt="icon"><span id="monster1Tooltip" class="tooltiptext tooltip-left">Hi!</span></div>
+
+						  <div class="right-grid-item tooltip"><input type="image" src="images/Monsters/monster_2/monster_2_right.png" onclick="sendMonster(1)" class="selecticon" alt="icon"><span id="monster2Tooltip" class="tooltiptext tooltip-right">Hi!</span></div>
+
+						  <div class="left-grid-item tooltip"><input type="image" src="images/Monsters/monster_3/monster_3.png" onclick="sendMonster(2)" class="selecticon" alt="icon"><span id="monster3Tooltip" class="tooltiptext tooltip-left">Hi!</span></div> 
+
+						  <div class="right-grid-item tooltip"><input type="image" src="images/Monsters/monster_4/monster_4_right.png" onclick="sendMonster(3)" class="selecticon" alt="icon"><span id="monster4Tooltip" class="tooltiptext tooltip-right">Hi!</span></div>
+
+						  <div class="left-grid-item tooltip"><input type="image" src="images/Monsters/monster_5/monster_5.png" onclick="sendMonster(4)" class="selecticon" alt="icon"><span id="monster5Tooltip" class="tooltiptext tooltip-left">Hi!</span></div>
+
+						  <div class="right-grid-item tooltip"><input type="image" src="images/Monsters/monster_6/monster_6_right.png" onclick="sendMonster(5)" class="selecticon" alt="icon"><span id="monster6Tooltip" class="tooltiptext tooltip-right">Hi!</span></div> 
+
+						  <div class="left-grid-item tooltip"><input type="image" src="images/Monsters/monster_7/monster_7_right.png" onclick="sendMonster(6)" class="selecticon" alt="icon"><span id="monster7Tooltip" class="tooltiptext tooltip-left">Hi!</span></div>
+
+						  <div class="right-grid-item tooltip"><input type="image" src="images/Monsters/monster_8/monster_8_walk_1_left.png" onclick="sendMonster(7)" class="selecticon" alt="icon"><span id="monster8Tooltip" class="tooltiptext tooltip-right">Hi!</span></div>
+					</div>
+				</div>
+
 				<div>
 					<table class="infotext">
 						<col width="90">
@@ -140,7 +199,7 @@
 						<th></th>
 					</tr>
 				</table>
-				<div>
+<!-- 				<div>
 					<table class="iconrow" id="monsterselections">
 						<tr>
 							<th><img src="images/Monsters/monster_1/monster_1.png" class="selecticon" alt="icon"></th>
@@ -160,9 +219,10 @@
 							<th><img src="images/Monsters/monster_8/monster_8_walk_1_left.png" class="selecticon" alt="icon"></th>
 						</tr>
 					</table>
-				</div>
+				</div> -->
 		</div>
 	</div>
+</div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="js/Animation.js"></script>
@@ -184,6 +244,16 @@
 <script src="js/Tower.js"></script>
 <script src="js/StateController.js"></script>
 <script src="js/Main.js"></script>
+<script>
+function openNav() {
+    document.getElementById("mySidenav").style.width = "250px";
+    document.getElementById("main").style.marginLeft = "250px";
+}
 
+function closeNav() {
+    document.getElementById("mySidenav").style.width = "0";
+    document.getElementById("main").style.marginLeft= "0";
+}
+</script>
 </body>
 </html>

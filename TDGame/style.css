@@ -10,7 +10,7 @@
   height: 700px;
   position: relative;
   width: 700px;
-  display: 'none';
+  /*display: 'none';*/
   user-select: none; /* no highlight for buttons */
 }
 
@@ -71,7 +71,7 @@
     position: fixed;
     z-index: 1;
     top: 0;
-    overflow-x: hidden;
+    /*overflow-x: hidden;*/
     padding-top: 20px;
 }
 
@@ -134,7 +134,7 @@
 	font-weight: 900;
 }
 
-button:focus, input[type="button"]:focus {
+button:focus, input[type="button"]:focus, input[type="image"]:focus {
     outline: none;
 }
 
@@ -143,42 +143,15 @@ button:focus, input[type="button"]:focus {
     background: linear-gradient(#242a33, #424a56);
 }
 
+
+
+/* tooltips */
+/* https://www.w3schools.com/css/css_tooltip.asp */
+
 .tooltip {
     position: relative;
     display: inline-block;
     /*border-bottom: 1px dotted black;*/
-}
-
-.testtext {
-    visibility: hidden;
-}
-
-.tooltip .tooltiptext {
-    visibility: hidden;
-    width: 120px;
-    background-color: #e08c1f;
-    color: #fff;
-    text-align: center;
-    border-radius: 6px;
-    padding: 5px 0;
-    position: absolute;
-    z-index: 1;
-    bottom: 125%;
-    left: 50%;
-    margin-left: -60px;
-    opacity: 0;
-    transition: opacity 0.3s;
-}
-
-.tooltip .tooltiptext::after {
-    content: "";
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: #555 transparent transparent transparent;
 }
 
 .tooltip:hover .tooltiptext {
@@ -186,6 +159,81 @@ button:focus, input[type="button"]:focus {
     opacity: 1;
     /*background: #111;*/
 }
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    position: absolute;
+    width: 160px;
+    color: #fff;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 6px;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity .6s;
+}
+
+.tooltip-left {
+    background-color: #5c526d;
+    top: 10px;
+    bottom:auto;
+    right: 128%;  
+}
+
+.tooltip-left::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    margin-top: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent transparent #555;
+}
+
+.tooltip-top {
+    background-color: #e29034;
+    bottom: 125%;
+    left: 50%;  
+    margin-left: -60px;
+}
+
+.tooltip-top::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #e29034 transparent transparent transparent;
+}
+
+.tooltip-right {
+    background-color: #5c526d;
+    top: 10px;
+    left: 125%;  
+}
+
+.tooltip-right::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 100%;
+    margin-top: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent #555 transparent transparent;
+}
+/* end tooltips */
+
+
+.selecticon {
+    max-width: 40px;
+    max-height: 45px;
+    display: block;
+}
+
 
 .infobutton {
 	display: block;
@@ -229,24 +277,217 @@ button:focus, input[type="button"]:focus {
     pointer-events: none;
 }
 
-.selecticon {
-    max-width: 30px;
-    max-height: 35px;
+.sidenav {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: #111;
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 60px;
 }
 
-img {
-	max-width: 100%;
-	max-height: 100%;
+.sidenav a {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #818181;
+    display: block;
+    transition: 0.3s;
+}
+
+.sidenav a:hover {
+    color: #f1f1f1;
+}
+
+/*.centernav .closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+}
+
+.centernav a {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #818181;
+    display: block;
+    transition: 0.3s;
+}
+
+.centernav a:hover {
+    color: #f1f1f1;
+}
+
+.centernav .closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+}*/
+
+/*#optionsnav {
+    top: 20px;
+    position: absolute;
+    width: 100px;
+}
+*/
+
+
+
+#main {
+    transition: margin-left .5s;
+    padding: 16px;
+}
+
+@media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+}
+
+.active {
+    background-color: #777373;
+}
+
+.nav {
+/*    list-style: none;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;*/
+    display: inline;
+    background-color: #333;
+    position: absolute;
+    top: 0px;
+    /*left: 28%;*/
+    width: 100%;
+}
+/*
+.nav li {
+    float: left;
+}*/
+
+#buttonlabel{
+    display: inline;
+    position: absolute;
+    top: -6px;
+    left: 28%;
+}
+
+#leftbutton {
+    /*display: block;*/
+    position: absolute;
+    width: 30px;
+    margin: 0 auto;
+    height: 20px;
+    /*line-height: 30px;*/
+    border: 2px solid #293342;
+    border-radius: 5px;
+    background: #333;
+    color: gray;
+    font-size: 22px;
+    font-weight: 900;
+}
+
+#rightbutton {
+    /*display: block;*/
+    position: absolute;
+    width: 30px;
+    margin: 0 auto;
+    height: 20px;
+    left: 75%;
+    /*line-height: 30px;*/
+    border: 2px solid #293342;
+    border-radius: 5px;
+    background: #333;
+    color: gray;
+    font-size: 22px;
+    font-weight: 900;
+}
+
+.centernav {
+    position: fixed;
+    left: 45%;
+    top: 40px;
+    width: 10%;
+    background-color: #333;
+    height: 89.7%;
+}
+
+/* grid */
+.grid-container {
+    position: absolute;
+    display: grid;
+    font-size: 12px;
+
+    grid-template-columns: auto auto;
+    background-color: #777373;
+    padding: 10px;
+    top: 8%;
+    left: 2%;
+    width: 96%;
+    /*left: 37.5%;*/
+}
+
+.left-grid-item {
+    /*grid-column: 1 / span 2;*/
+    background-color: #777373;
+    /*border: 1px solid rgba(0, 0, 0, 0.8);*/
+    padding: 10px;
+    text-align: center;
+    /*width: 10%;*/
+    outline: none;
+}
+
+.left-grid-item:hover {
+    background-color: #a4a3a8;
+}
+
+.right-grid-item {
+    /*grid-column: 2 / span 2;*/
+    background-color: #777373;
+    /*border: 1px solid rgba(0, 0, 0, 0.8);*/
+    padding: 10px;
+    text-align: center;
+    /*width: 10%;*/
+    outline: none;
+}
+
+.right-grid-item:hover {
+    background-color: #a4a3a8;
+}
+
+li {
+    padding: 5px;
+}
+
+li a {
+    display: block;
+    /*color: white;*/
+    text-align: center;
+    padding: 10px 8px;
+    text-decoration: none;
+}
+
+li a:hover:not(.active) {
+    background-color: #111;
 }
 
 ul {
 	list-style: none;
 	padding: 0;
-	margin: 0
+	margin: 0;
 }
 
-li {
-	padding: 5px;
+img {
+    max-width: 100%;
+    max-height: 100%;
 }
 
 body {

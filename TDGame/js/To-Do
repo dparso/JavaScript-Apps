@@ -1,6 +1,16 @@
 To-Do:
 
+Monsters send in groups
+Waves -- wave countdowns like 10 or 20 seconds, and you get a non-cumulative bonus for how much you sent that wave
+So you could get 0 in a wave if you didn't send anything (isn't that just like having cheaper monsters? Money back? No incentive over the long term)
+
+Add "canAfford" method to Util to reduce clutter of cost checks
+
+Pause animations during pause
+
 Separate tower classes into their own files
+
+Randomize tree generation, where harder levels have higher probability (how to keep it fair between sides?)
 
 Only one selection across canvases: cleaner
 
@@ -113,6 +123,8 @@ Target priorities! Last, first, close, strong
 Ideas for tier trees: single target, AOE, and support (e.g., hits do not more damage, but slow run speed or increase damage taken from other sources)
 
 If I were a rich man:
+	Convert to a single canvas -- would make drag and drop from tower menu easier, like the previous method
+
 	Tower tiers look different
 	Instead of highlighting the square a tower is on, overlay a shade onto the image itself
 
@@ -133,6 +145,7 @@ If I were a rich man:
 	Losing a life sends enemy into urgent
 	Enemy also takes into account number of monsters on his side
 	Enemy increases urgency the closer monsters get to the end
+	Enemy prioritizes tiles for specific towers -- a position for a shooter (with high range) might be better than a low-range conduit
 
 
 Notes for reducing lag:
@@ -151,6 +164,8 @@ Sabotage ideas:
 Powerup ideas:
 	Tower damage boost
 	You don't gain income for 30 seconds, but at the end, your monsters run twice as fast (or something)
+	Overall upgrades: Monster Armor levels (unlike current levels, this wouldn't increase monster costs)
+					  Monster Shoes
 
 Tower ideas:
 	Light:
@@ -164,8 +179,21 @@ Tower ideas:
 		Like a commander as you fight the battle -- always in the battle, but start off fairly weak
 		You don't upgrade them during the fight, but between battles as you earn experience
 
+	Portal-master: you choose two locations where it occasionally places portals. A certain number of monsters walk through one and are teleported to the other (presumably, back)
+
+	Do the monster mash...
+
+
 Monster ideas:
 	Hounds -- the beasts of the Reaper
+	The point shouldn't just to be to gain money to spend more money on monsters that are just faster/stronger versions of previous monsters. Even in the late-game, the most basic monsters should still have a purpose, like zerglings. Monsters should have abilities and properties that can combine in interesting ways, encouraging creative use of each one, not just spamming the most expensive one.
+	Only one boss alive at a time?
+
+Game Mode ideas:
+	Be the first to collect X gold (stockpile or cumulative)
+	Be the first to X towers
+	Things that emphasize the balance between sending monsters for income and building defense with towers
+	Allies: both sides defend against a third wave sender, can transfer money & (maybe?) place towers on each other's canvases
 
 Steps to creating a new tower:
 	Add new costs and upgrade effects in Tower.js
