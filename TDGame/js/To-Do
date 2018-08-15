@@ -1,8 +1,15 @@
 To-Do:
 
+Scale monster health better (big gaps between the higher monsters)
+
+Give towers their own damage, atk, and range upgrade arrays! 
+
 Change info pane colors to match theme
 
 Highlight selection should be less bright
+
+Reaper does weird target checking, try tier 5 and spam monster 7
+Allow dot stacking from reaper (tower line 754, increase the damage by factor)
 
 Attack right away on target swap (conduit is very slow when attacking monsters moving outside its range)
 
