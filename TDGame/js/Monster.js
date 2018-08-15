@@ -30,7 +30,7 @@ function MonsterClass(type, context) {
     this.context = context; // where to draw itself
     this.id = MONSTER_ID[this.context]++;
 
-    this.pathPosition = 0; // current goal
+    this.pathPosition = monsterPath[this.context].length - 1; // current goal
     this.visible = false;
     this.type = type;
     this.level = monsterLevels[otherPlayer(this.context)][this.type];
@@ -65,9 +65,9 @@ function MonsterClass(type, context) {
         }
 
         if(this.immobile) return;
-        if(this.pathPosition < monsterPath[this.context].length) {
+        if(this.pathPosition >= 0) {
             if(this.visible) {
-                var nextGoal = monsterPath[this.context][this.pathPosition];
+                var nextGoal = monsterPath[this.context][this.pathPosition].pixel;
                 var changeX = nextGoal.x - this.x;
                 var changeY = nextGoal.y - this.y;
                 if(changeX < 0) {
@@ -82,7 +82,7 @@ function MonsterClass(type, context) {
                 if(Math.abs(nextGoal.x - this.x) <= this.speed && Math.abs(nextGoal.y - this.y) <= this.speed) {
                     this.x = nextGoal.x;
                     this.y = nextGoal.y;
-                    this.pathPosition++;
+                    this.pathPosition--;
                 }
 
                 // since it moved, it must notify tiles if changed
@@ -276,18 +276,19 @@ function calculateMonsterPath(context) {
 
     while(finish.parent) {
         var pixelPos = gridToPixel(finish.row, finish.col);
-        if(monsterPath[context][0] != undefined) {
-            if(pixelPos.x != monsterPath[context][0].x && pixelPos.y != monsterPath[context][0].y) {
+        if(monsterPath[context][monsterPath[context].length - 1] != undefined) {
+            if(pixelPos.x != monsterPath[context][monsterPath[context].length - 1].pixel.x && pixelPos.y != monsterPath[context][monsterPath[context].length - 1].pixel.y) {
                 // changing direction: add previous
-                monsterPath[context].unshift({x: prevX, y: prevY});
+                monsterPath[context].push({pixel: {x: prevX, y: prevY}, position: fullMonsterPath[context].length});
             }
             prevX = pixelPos.x;
             prevY = pixelPos.y;
         } else {
-            monsterPath[context].unshift(pixelPos);
+            monsterPath[context].push({pixel: pixelPos, position: fullMonsterPath[context].length});
         }
+
         var tilePos = pixelToGrid(pixelPos.x, pixelPos.y);
-        fullMonsterPath[context].push(tilePos); // this one goes last-first for easy tower traversal
+        fullMonsterPath[context].push({tile: tilePos, position: monsterPath[context].length - 1}); // this one goes last-first for easy tower traversal
         finish = finish.parent;
     }
 }

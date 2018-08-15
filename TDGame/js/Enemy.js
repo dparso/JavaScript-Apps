@@ -270,7 +270,7 @@ function buyTower() {
 		// iterate until one is cheap enough
 		var type;
 		for(var t = towerCosts.length - 1; t >= 0; t--) {
-			if(t == LIGHT && LIGHT_UNIQUE[ENEMY] || t == REAPER && REAPER_UNIQUE[ENEMY]) {
+			if(t == SOLAR_PRINCE && SOLAR_PRINCE_UNIQUE[ENEMY] || t == REAPER && REAPER_UNIQUE[ENEMY]) {
 				continue; // don't keep trying to buy the unique towers
 			}
 			type = t;

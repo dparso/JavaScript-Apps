@@ -3,15 +3,22 @@ const PROJECTILE_TYPE_2 = 1;
 const PROJECTILE_TYPE_3 = 2;
 const PROJECTILE_TYPE_4 = 3;
 
+const PORTAL_CIRCLING = 0;
+const PORTAL_TRACKING = 1;
+const PORTAL_STATIONARY = 2;
+const PORTAL_LIFE = 3; // seconds
+const PORTAL_CAPACITY = 3; // number of monsters it can send before disappearing
+
 var PROJECTILE_ID = [0, 0];
 
-// [shooter, cannon, glaive, wizard, conduit, juror]
-var projectileSpeeds = [25, 15, 10, 13, 5, 20, 10, 10]; // note: faster speeds means less reliable hitboxes in hitTarget()
-var splashes = [0, 1, 0, 1, 0, 0, 0]; // does it deal splash
+// [shooter, cannon, glaive, wizard, conduit, juror, reaper, solar prince, aether]
+var projectileSpeeds = [25, 15, 10, 13, 5, 20, 10, 0, 15]; // note: faster speeds means less reliable hitboxes in hitTarget()
+var splashes = [0, 1, 0, 1, 0, 0, 0, 0]; // does it deal splash
 var splashRatios = [[0, 0, 0, 0, 0, 0, 0],
-                    [0.3, 0.3, 0.3, 0.3, 0.3, 0.6, 0.9],
+                    [0.3, 0.3, 0.5, 0.5, 0.6, 0.7, 0.9],
                     [0, 0, 0, 0, 0, 0, 0],
-                    [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+                    [0.5, 0.5, 0.6, 0.6, 0.6, 0.7, 0.7],
+                    [0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0],
@@ -21,15 +28,16 @@ var splashRatios = [[0, 0, 0, 0, 0, 0, 0],
 var splashRanges = [[0, 0, 0, 0, 0, 0, 0],
                    [2, 3, 4, 4, 6, 8, 10],
                    [0, 0, 0, 0, 0, 0, 0],
-                   [0, 0, 0, 0, 0, 0, 0],
                    [2, 2, 2, 2, 2, 2, 3],
+                   [0, 0, 0, 0, 0, 0, 0],
+                   [0, 0, 0, 0, 0, 0, 0],
                    [0, 0, 0, 0, 0, 0, 0],
                    [0, 0, 0, 0, 0, 0, 0],
                    [0, 0, 0, 0, 0, 0, 0],
                    [0, 0, 0, 0, 0, 0, 0]]; // how many tiles does it cover
 
 // glaive properties
-var glaive_strengths = [40, 60, 80, 120, 400, 800, 1200];
+var glaive_strengths = [5, 10, 20, 50, 200, 500, 2000];
 
 function ProjectileClass(start, targetId, img, type, damage, speed, tier, rotates, parent, context) {
     // positions
@@ -47,6 +55,7 @@ function ProjectileClass(start, targetId, img, type, damage, speed, tier, rotate
     this.damage = damage;
     this.speed = speed;
     this.rotates = rotates;
+    this.rotateSpeed = 1;
 
     this.splashRange = splashRanges[type][tier + 1];
     this.splashRatio = splashRatios[type][tier + 1];
@@ -136,7 +145,7 @@ ProjectileClass.prototype.draw = function() {
     if(this.visible) {
         drawBitmapCenteredWithRotation(this.img, this.x, this.y, this.angle, this.context); // randomize angle
         if(this.rotates) {
-            this.angle += 1;
+            this.angle += this.rotateSpeed;
         }
     }
 }
@@ -210,7 +219,164 @@ StraightProjectileClass.prototype.move = function() {
     }
 }
 
-function FlowProjectileClass(start, target, img, type, damage, speed, rotates, parent, context) {
-    ProjectileClass.call(this, start, target, img, type, damage, speed, rotates, parent, context);
-    this.time = 0;
+
+function PortalClass(start, targetId, state, img, type, damage, speed, tier, rotates, parent, context) {
+    ProjectileClass.call(this, start, targetId, img, type, damage, speed, tier, rotates, parent, context);
+
+    this.state = state;
+    this.currTile = StateController.currLevel.tiles[context][start.row][start.col];
+
+    let pix = gridToPixel(start.row, start.col);
+    this.center = {x: pix.x, y: pix.y};
+    this.x = this.center.x;
+    this.y = this.center.y;
+    this.pointInMonsterPath = null;
+
+    this.capacity = PORTAL_CAPACITY;
+    this.lifeRemaining = fps * PORTAL_LIFE;
+
+    this.targetPreviousLocation = null;
+    this.teleportDistance = 15;
+
+    // this.x = this.target.x + TILE_W / 2;
+    // this.y = this.target.y + TILE_H / 2;
+    this.rotateSpeed = -0.1;
+    // this.circleAngle = Math.PI / 2;
+}
+
+PortalClass.prototype = Object.create(ProjectileClass.prototype);  
+PortalClass.prototype.constructor = PortalClass;
+
+PortalClass.prototype.reachedTarget = function(targetPixel) {
+    return Math.abs((targetPixel.y) - this.y) < 20 && Math.abs((targetPixel.x) - this.x) < 20;
+}
+
+PortalClass.prototype.move = function() {
+    if(this.state == PORTAL_CIRCLING) {
+        // drawSprite(this.img, this.x, this.y, 1, 1, this.circleAngle, 1.0, this.context);
+        this.circleAngle -= .1;
+        // let cos = Math.cos(this.circleAngle);
+        // let sin = Math.sin(this.circleAngle);
+
+        this.x = this.center.x + Math.sin(this.circleAngle) * this.img.width;
+        this.y = this.center.y + Math.cos(this.circleAngle) * this.img.width;
+        // console.log(this.circleAngle % Math.PI);
+        // console.log(this.x + ", " + this.y);
+    } else if(this.state == PORTAL_TRACKING) {
+        if(this.target == undefined) {
+            this.becomeStationary();
+            return;
+        }
+
+        // lead the target
+        var trackPoint = {x: this.target.x, y: this.target.y};
+        if(this.targetPreviousLocation != null) {
+            if(this.targetPreviousLocation.x > this.target.x) {
+                // moving left, lead -x
+                trackPoint.x -= 3 * TILE_W / 2;
+
+            } else if (this.targetPreviousLocation.x < this.target.x) {
+                // moving right, lead +x
+                trackPoint.x += 3 * TILE_W / 2;
+            }
+
+            if(this.targetPreviousLocation.y > this.target.y) {
+                // moving up, lead -y
+                trackPoint.y -= 3 * TILE_H / 2;
+            } else if (this.targetPreviousLocation.y < this.target.y) {
+                // moving down, lead +y
+                trackPoint.y += 3 * TILE_H / 2;
+
+            }
+        }
+
+        this.targetPreviousLocation = {x: this.target.x, y: this.target.y};
+
+        let changeX = (trackPoint.x) - this.x;
+        let changeY = (trackPoint.y) - this.y;
+
+        let magnitude = Math.sqrt(Math.abs(changeX * changeX + changeY * changeY));
+
+        let xDir = changeX / magnitude;
+        let yDir = changeY / magnitude;
+
+        this.x += xDir * this.speed;
+        this.y += yDir * this.speed;
+
+        if(this.reachedTarget(trackPoint)) {
+            this.x = trackPoint.x;
+            this.y = trackPoint.y;
+            this.becomeStationary();
+        }
+    } else {
+        // check for monsters on the tile
+        if(this.currTile == undefined) return;
+        if(this.currTile.hasMonsters()) {
+            Object.keys(this.currTile.monstersOnTile).forEach(
+                ((monster) => {
+                    if(this.capacity <= 0) {
+                        this.die();
+                        return;
+                    }
+                    var obj = monsterList[this.context][monster];
+                    if(obj != undefined) {
+                        // deal damage, teleport if still alive
+                        if(obj.hitWithProjectile(this.damage)) {
+                            StateController.notifyTowerKilledMonster(this.parentId, this.context, obj.type);
+                        } else {
+                            this.teleportMonster(obj.id);
+                        }
+                        this.capacity--;
+                    }
+                })
+            );
+        }
+
+        this.lifeRemaining--;
+        if(this.lifeRemaining <= 0) {
+            this.die();
+        }
+    }
+    this.angle -= 0.2;
+}
+
+PortalClass.prototype.teleportMonster = function(monsterId) {
+    let monster = monsterList[this.context][monsterId];
+    if(this.pointInMonsterPath == null) {
+        console.log("SEE PROJECTILE 370!");
+        return;
+    }
+
+    let newIndex = Math.min(this.pointInMonsterPath + this.teleportDistance, fullMonsterPath[this.context].length - 1);
+    let newTile = fullMonsterPath[this.context][newIndex].tile;
+    let newPixel = gridToPixel(newTile.row, newTile.col);
+
+    // notify tiles
+    StateController.currLevel.tiles[this.context][monster.currTile.row][monster.currTile.col].notifyMonsterDepart(monster.id);
+    StateController.currLevel.tiles[this.context][newTile.row][newTile.col].notifyMonsterArrive(monster.id);
+
+    monster.x = newPixel.x;
+    monster.y = newPixel.y;
+    monster.currTile = newTile;
+
+    monster.pathPosition = fullMonsterPath[this.context][newIndex].position;
+}
+
+PortalClass.prototype.becomeStationary = function() {
+    this.state = PORTAL_STATIONARY;
+    let gridPos = pixelToGrid(this.x, this.y);
+    this.currTile = StateController.currLevel.tiles[this.context][gridPos.row][gridPos.col];
+
+    // calculate where in the monsterPath you are
+    for(var i = 0; i < fullMonsterPath[this.context].length; i++) {
+        let tile = fullMonsterPath[this.context][i].tile;
+        if(tile.row == this.currTile.row && tile.col == this.currTile.col) {
+            this.pointInMonsterPath = i;
+        }
+    }
+}
+
+
+PortalClass.prototype.draw = function() {
+    drawBitmapCenteredWithRotation(this.img, this.x + TILE_W / 2, this.y + TILE_H / 2, this.angle, this.context);
 }

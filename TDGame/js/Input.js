@@ -86,17 +86,17 @@ function handleMouseDown(evt) {
 
     switch(StateController.state) {
         case STATE_START:
-            // only registering clicks on the menu options
-            if(mouseX > START_IMAGE.x - START_IMAGE.img.width / 2 && mouseX < START_IMAGE.x + START_IMAGE.img.width / 2) {
-                if(mouseY > START_IMAGE.y && mouseY < START_IMAGE.y + START_IMAGE.img.height) {
-                    // clicked start!
-                    clearInterval(timerId);
-                    // fadeOut(STATE_SELECT, selectScreen, currCanvas);
-                    fadeOut(STATE_PLAY, levelOne, PLAYER);
-                    return;
-                }
-            }
-            break;
+            // // only registering clicks on the menu options
+            // if(mouseX > START_IMAGE.x - START_IMAGE.img.width / 2 && mouseX < START_IMAGE.x + START_IMAGE.img.width / 2) {
+            //     if(mouseY > START_IMAGE.y && mouseY < START_IMAGE.y + START_IMAGE.img.height) {
+            //         // clicked start!
+            //         clearInterval(timerId);
+            //         // fadeOut(STATE_SELECT, selectScreen, currCanvas);
+            //         fadeOut(STATE_PLAY, levelOne, PLAYER);
+            //         return;
+            //     }
+            // }
+            // break;
 
         case STATE_SELECT:
             // clicking "Click to proceed"
@@ -275,7 +275,7 @@ function keySet(evt, setTo) {
             return;
     }
 
-    if(evt.keyCode > KEY_NUM_OFFSET && evt.keyCode <= KEY_NUM_OFFSET + 8) {
+    if(evt.keyCode > KEY_NUM_OFFSET && evt.keyCode <= KEY_NUM_OFFSET + NUM_TOWERS) {
         // tower/monster hotkey!
         if((shiftHeld || !pressingNum) && setTo) {
             // allow multiple presses before release (press & hold monster)

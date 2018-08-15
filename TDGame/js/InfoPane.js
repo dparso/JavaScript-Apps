@@ -35,7 +35,7 @@ function InfoPaneClass(context) {
 			document.getElementById('damagetext').innerHTML = "Damage: " + Math.floor(tower.properties[DAMAGE]).toLocaleString() + dmgText;
 			document.getElementById('atktext').innerHTML = "Attack Speed: " + Math.floor(tower.properties[ATTACK_SPEED]).toLocaleString() + atkText;
 			document.getElementById('killtext').innerHTML = "Kills: " + tower.killCount;
-			document.getElementById('infopaneicon').src = "images/" + imageList[tower.type + TOWER_OFFSET_NUM];
+			document.getElementById('infopaneicon').src = "images/" + towerPicList[tower.type + TOWER_OFFSET_NUM];
 			document.getElementById('tierbutton').innerHTML = "Tier (" + (tower.tier + 1) + "/" + tier_costs[tower.type].length + ") [u] <span class='tooltiptext tooltip-top' id='upgradecosttext'>Blank!</span>";
 			document.getElementById('sellbutton').innerHTML = "Sell: " + tower.value.toLocaleString() + " [s]";
 			document.getElementById('targetbutton').innerHTML = "Target: " + PRIORITY_NAMES[tower.targetPriority] + " [t]";
@@ -47,7 +47,7 @@ function InfoPaneClass(context) {
 			document.getElementById('enemydamagetext').innerHTML = "Damage: " + Math.floor(tower.properties[DAMAGE]).toLocaleString();
 			document.getElementById('enemyatktext').innerHTML = "Attack Speed: " + Math.floor(tower.properties[ATTACK_SPEED]).toLocaleString();
 			document.getElementById('enemykilltext').innerHTML = "Kills: " + tower.killCount;
-			document.getElementById('enemyinfopaneicon').src = "images/" + imageList[tower.type + TOWER_OFFSET_NUM];
+			document.getElementById('enemyinfopaneicon').src = "images/" + towerPicList[tower.type + TOWER_OFFSET_NUM];
 			document.getElementById('enemytierbutton').innerHTML = "Tier (" + (tower.tier + 1) + "/" + tier_costs[tower.type].length + ")";
 		}
 

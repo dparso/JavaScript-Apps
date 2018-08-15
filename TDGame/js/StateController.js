@@ -34,12 +34,15 @@ function StateControllerClass(startLevel) {
                 }
                 tower = new ReaperClass(ofType, onSide);
                 break;
-            case LIGHT:
-                if(LIGHT_UNIQUE[onSide]) {
-                    if(onSide == PLAYER) queueMessage("Maximum light!", mouseX, mouseY, onSide);
+            case SOLAR_PRINCE:
+                if(SOLAR_PRINCE_UNIQUE[onSide]) {
+                    if(onSide == PLAYER) queueMessage("Maximum solar prince!", mouseX, mouseY, onSide);
                     return false;
                 }
-                tower = new LightClass(ofType, onSide);
+                tower = new SolarPrinceClass(ofType, onSide);
+                break;
+            case AETHER:
+                tower = new AetherClass(ofType, onSide);
                 break;
         }
 
@@ -51,7 +54,7 @@ function StateControllerClass(startLevel) {
         tower.active = true;
         tower.visible = true;
         tower.calculateTilesInRange();
-        if(ofType == LIGHT) {
+        if(ofType == SOLAR_PRINCE) {
             tower.radialSort();
         }
 
@@ -147,7 +150,7 @@ function StateControllerClass(startLevel) {
     this.sellTower = function(towerId, context) {
         var tower = towerList[context][towerId];
         if(tower.type == REAPER) REAPER_UNIQUE[context] = 0;
-        if(tower.type == LIGHT) LIGHT_UNIQUE[context] = 0;
+        if(tower.type == SOLAR_PRINCE) SOLAR_PRINCE_UNIQUE[context] = 0;
 
         // remove from tile
         var tile = towerList[context][towerId].currTile;
@@ -239,13 +242,13 @@ function StateControllerClass(startLevel) {
             }
             if(player.gold >= monsterCosts[PLAYER][type]) {
                 this.sendMonster(type, ENEMY, true);
-                this.sendMonster(type, PLAYER, true);
+                // this.sendMonster(type, PLAYER, true);
             } else {
                 queueMessage("Insufficient gold!", mouseX, mouseY, currCanvas);
             }
         } else if(context == PLAYER) {
             // tower
-            if(type > 7) {
+            if(type > 9) {
                 console.log("Not yet!");
                 return;
             }
@@ -253,8 +256,8 @@ function StateControllerClass(startLevel) {
             if(type == REAPER && REAPER_UNIQUE[PLAYER]) {
                 queueMessage("Maximum reapers!", mouseX, mouseY, PLAYER);
                 return false;
-            } else if(type == LIGHT && LIGHT_UNIQUE[PLAYER]) {
-                queueMessage("Maximum light!", mouseX, mouseY, PLAYER);
+            } else if(type == SOLAR_PRINCE && SOLAR_PRINCE_UNIQUE[PLAYER]) {
+                queueMessage("Maximum solar prince!", mouseX, mouseY, PLAYER);
                 return false;
             }
 

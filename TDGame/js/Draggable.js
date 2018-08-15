@@ -1,6 +1,11 @@
 function DraggableClass(type, x, y, context, classType) {
 	this.type = type;
-	this.img = tilePics[type];
+	if(dragPics[type] != undefined) {
+		this.img = dragPics[type];
+	} else {
+		this.img = towerPics[type];
+	}
+
 	this.x = x;
 	this.y = y;
 	this.context = context;

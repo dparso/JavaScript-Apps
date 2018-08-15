@@ -1,5 +1,17 @@
 To-Do:
 
+Change info pane colors to match theme
+
+Highlight selection should be less bright
+
+Attack right away on target swap (conduit is very slow when attacking monsters moving outside its range)
+
+Make tower starting costs very high, but upgrade costs _lower_ -- incentivize fewer towers, more upgrades
+
+Note: using aether image normal size and scaled 0.5, it looks like the stars are sparkling! Use this
+
+Alpha fading in and out for towers
+
 Monsters send in groups
 Waves -- wave countdowns like 10 or 20 seconds, and you get a non-cumulative bonus for how much you sent that wave
 So you could get 0 in a wave if you didn't send anything (isn't that just like having cheaper monsters? Money back? No incentive over the long term)
@@ -41,7 +53,7 @@ Can always draw boss with shadow effects!
 
 At top tier, conduit mouse controls stream, damages on tile
 
-x-flip monster based on direction
+Aether portals have to calculate where in the monsterPath they are, potential source of over-complexity
 
 You get more from sending monsters than you do from killing them
 
@@ -122,6 +134,8 @@ Target priorities! Last, first, close, strong
 
 Ideas for tier trees: single target, AOE, and support (e.g., hits do not more damage, but slow run speed or increase damage taken from other sources)
 
+Check projectiles' magnitude: if ever zero, division is NaN!
+
 If I were a rich man:
 	Convert to a single canvas -- would make drag and drop from tower menu easier, like the previous method
 
@@ -156,6 +170,7 @@ Notes for reducing lag:
 	Remove shadow, movement, & rotation effects from monsters, towers, projectiles
 	Reduce number of save/restores, try out the drawSprite method in Tower.js
 	Reduce garbage collection of projectiles and monsters by repurposing objects
+	Aether's portals use two save and restores per draw frame when circling
 
 Sabotage ideas:
 	Enemy towers disabled for x seconds
@@ -188,6 +203,8 @@ Monster ideas:
 	Hounds -- the beasts of the Reaper
 	The point shouldn't just to be to gain money to spend more money on monsters that are just faster/stronger versions of previous monsters. Even in the late-game, the most basic monsters should still have a purpose, like zerglings. Monsters should have abilities and properties that can combine in interesting ways, encouraging creative use of each one, not just spamming the most expensive one.
 	Only one boss alive at a time?
+
+	Immune to portals, crushes them -- dispel magic
 
 Game Mode ideas:
 	Be the first to collect X gold (stockpile or cumulative)

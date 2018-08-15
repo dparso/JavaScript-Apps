@@ -173,6 +173,10 @@ button:focus, input[type="button"]:focus, input[type="image"]:focus {
     transition: opacity .6s;
 }
 
+.tooltiptext {
+    pointer-events: none;
+}
+
 .tooltip-left {
     background-color: #5c526d;
     top: 10px;

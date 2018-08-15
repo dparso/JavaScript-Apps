@@ -12,11 +12,11 @@ var CLICK_CONTINUE_IMAGE;
 
 // levels
 var welcomeScreen = new LevelClass(LEVEL_START, [], function() {
-    drawRect(0, 0, canvas[PLAYER].width, canvas[PLAYER].height, 'black', PLAYER);
-    drawRect(0, 0, canvas[ENEMY].width, canvas[ENEMY].height, 'black', ENEMY);
-    var img = tilePics[TEXT_START];
-    ctx[PLAYER].drawImage(START_IMAGE.img, START_IMAGE.x - START_IMAGE.img.width / 2, START_IMAGE.y);
-    textDraw(PLAYER);
+    // drawRect(0, 0, canvas[PLAYER].width, canvas[PLAYER].height, 'black', PLAYER);
+    // drawRect(0, 0, canvas[ENEMY].width, canvas[ENEMY].height, 'black', ENEMY);
+    // var img = tilePics[TEXT_START][0];
+    // ctx[PLAYER].drawImage(START_IMAGE.img, START_IMAGE.x - START_IMAGE.img.width / 2, START_IMAGE.y);
+    // textDraw(PLAYER);
 });
 
 var selectScreen = new LevelClass(LEVEL_SELECT, [selectScreenGrid, selectScreenGrid], function(level, context) {
@@ -56,11 +56,11 @@ function drawGridLevel(level, context) {
         monsterList[context][id].draw();
     }
 
-    var light, reaper;
+    var solar_prince, reaper;
     for(id in towerList[context]) {
         var twr = towerList[context][id];
-        if(twr.type == LIGHT) {
-            light = twr;
+        if(twr.type == SOLAR_PRINCE) {
+            solar_prince = twr;
         } else if(twr.type == REAPER) {
             reaper = twr;
         } else {
@@ -71,8 +71,8 @@ function drawGridLevel(level, context) {
     if(reaper) {
         reaper.draw();
     }
-    if(light) {
-        light.draw();
+    if(solar_prince) {
+        solar_prince.draw();
     }
 
     // drag object
@@ -157,11 +157,12 @@ function pixelIsWithinObject(x, y, object) {
 }
 
 function initButtons() {
-    var img1 = tilePics[TEXT_START];
-    var img2 = tilePics[TEXT_CLICK_CONTINUE];
+    // console.log(tilePics[TEXT_START]);
+    // var img1 = tilePics[TEXT_START][0];
+    // var img2 = tilePics[TEXT_CLICK_CONTINUE][0];
 
-    START_IMAGE = {img: img1, x: canvas[PLAYER].width / 2, y: 3 * canvas[PLAYER].height / 10};
-    CLICK_CONTINUE_IMAGE = {img: img2, x: canvas[PLAYER].width / 2, y: 3 * canvas[PLAYER].height / 10};
+    // START_IMAGE = {img: img1, x: canvas[PLAYER].width / 2, y: 3 * canvas[PLAYER].height / 10};
+    // CLICK_CONTINUE_IMAGE = {img: img2, x: canvas[PLAYER].width / 2, y: 3 * canvas[PLAYER].height / 10};
 }
 
 function trueAngleBetweenPoints(base, point) {

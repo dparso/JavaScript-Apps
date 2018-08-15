@@ -21,8 +21,8 @@ var started = false;
 
 var player = new PlayerClass(PLAYER);
 var enemy = new PlayerClass(ENEMY);
-enemy.gold = 20;
-enemy.income = 5.0;
+// enemy.gold = 20;
+// enemy.income = 5.0;
 
 // player.gold = 500000000000;
 
@@ -175,8 +175,8 @@ function drawAll(context) {
     var strt = gridToPixel(MONSTER_START[context].row, MONSTER_START[context].col);
     var end = gridToPixel(MONSTER_END[context].row, MONSTER_END[context].col);
 
-    drawBitmapCenteredWithRotation(tilePics[TILE_MONSTER_START], strt.x + TILE_W / 2, strt.y + TILE_H / 2, spiralRotate, context);
-    drawBitmapCenteredWithRotation(tilePics[TILE_MONSTER_END], end.x + TILE_W / 2, end.y + TILE_H / 2, spiralRotate, context);
+    drawBitmapCenteredWithRotation(tilePics[TILE_MONSTER_START][0], strt.x + TILE_W / 2, strt.y + TILE_H / 2, spiralRotate, context);
+    drawBitmapCenteredWithRotation(tilePics[TILE_MONSTER_END][0], end.x + TILE_W / 2, end.y + TILE_H / 2, spiralRotate, context);
 
     // var colors = ['white', 'yellow', 'pink', 'green', 'blue', 'purple', 'gray', 'black', 'black']
     // for(var i = 0; i < towerLocationQueue.length; i++) {
@@ -205,10 +205,10 @@ function drawSelection(context) {
 }
 
 function textDraw(context) {
-    // var tile = pixelToGrid(mouseX, mouseY);
-    // ctx[currCanvas].fillStyle = 'white';
-    // ctx[currCanvas].fillText(mouseX + ", " + mouseY, mouseX, mouseY);
-    // ctx[currCanvas].fillText(tile.row + ", " + tile.col, mouseX + 10, mouseY + 10);
+    var tile = pixelToGrid(mouseX, mouseY);
+    ctx[currCanvas].fillStyle = 'white';
+    ctx[currCanvas].fillText(mouseX + ", " + mouseY, mouseX + 10, mouseY + 30);
+    ctx[currCanvas].fillText(tile.row + ", " + tile.col, mouseX + 10, mouseY + 10);
 
     // draw all queued messages
     while(messages.length > 0) {
@@ -290,7 +290,7 @@ function nextLevel() {
     monsterCounts = [[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0]];
     monsterLevels = [[1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1]];
     REAPER_UNIQUE = [0, 0]; // only one reaper per side
-    LIGHT_UNIQUE = [0, 0]; // only one reaper per side
+    SOLAR_PRINCE_UNIQUE = [0, 0]; // only one reaper per side
 
     REAPER_UNIQUE = [0, 0];
 
@@ -429,13 +429,13 @@ function updateGridTooltip() {
     // there must be a better way to do this, but this is how it is now 
     for(var i = 0; i < NUM_TOWERS; i++) {
         let tooltipID = "tower" + (i + 1) + "Tooltip";
-        let costText = towerNames[i] + ": " + towerCosts[i];
+        let costText = towerNames[i] + ": " + towerCosts[i].toLocaleString();
         document.getElementById(tooltipID).innerHTML = costText + "<br>" + towerDescriptions[i] + "<br>" + "Hotkey: " + (i + 1);
     }
 
     for(var i = 0; i < NUM_MONSTERS; i++) {
         let tooltipID = "monster" + (i + 1) + "Tooltip";
-        let costText = monsterNames[i] + ": " + monsterCosts[PLAYER][i];
+        let costText = monsterNames[i] + ": " + monsterCosts[PLAYER][i].toLocaleString();
         // $(tooltipID).text(costText + "<br />" + towerDescriptions[i]);
         document.getElementById(tooltipID).innerHTML = costText + "<br>" + monsterDescriptions[i];
     }

@@ -42,10 +42,12 @@ const TILE_TOWER_5 = 24;
 const TILE_TOWER_6 = 25;
 const TILE_TOWER_7 = 26;
 const TILE_TOWER_8 = 27;
-const NUM_TOWERS = 8;
+const TILE_TOWER_9 = 28;
+const NUM_TOWERS = 9;
+const LIGHT_WING_LEFT = 31;
+const LIGHT_WING_RIGHT = 32;
 
-const LIGHT_WING_LEFT = 28;
-const LIGHT_WING_RIGHT = 29;
+
 const a = TILE_TOWER_1; // these allow for single-character representation in the bitmap for better drawing
 const b = TILE_TOWER_2;
 const c = TILE_TOWER_3;
@@ -54,6 +56,7 @@ const e = TILE_TOWER_5;
 const f = TILE_TOWER_6;
 const g = TILE_TOWER_7;
 const h = TILE_TOWER_8;
+const i = TILE_TOWER_9;
 
 var selectScreenGrid =
    [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],

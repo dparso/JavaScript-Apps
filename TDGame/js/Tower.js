@@ -8,56 +8,63 @@ const WIZARD = 3;
 const CONDUIT = 4;
 const JUROR = 5;
 const REAPER = 6;
-const LIGHT = 7;
+const SOLAR_PRINCE = 7;
+const AETHER = 8;
 
 var REAPER_UNIQUE = [0, 0]; // only one reaper per side
-var LIGHT_UNIQUE = [0, 0]; // only one reaper per side
+var SOLAR_PRINCE_UNIQUE = [0, 0]; // only one reaper per side
 
 const NUM_TIERS = 6;
-const tier_costs = [[10.0, 25.0, 50.0, 150.0, 300.0, 3500.0],
-                    [15.0, 40.0, 100.0, 400.0, 800.0, 6000.0],
-                    [25.0, 60.0, 120.0, 800.0, 3000.0, 8000.0],
-                    [40.0, 80.0, 250.0, 2000.0, 8000.0, 14000.0],
-                    [40.0, 80.0, 200.0, 2000.0, 10000.0, 25000.0],
+                 // [50.0, 75.0, 100.0, 150.0, 200.0, 200.0, 750.0, 3000.0, 1000.0]
+
+const tier_costs = [[75.0, 100.0, 175.0, 500.0, 1200.0, 8000.0],
+                    [130.0, 275.0, 450.0, 1000.0, 8000.0, 30000.0],
+                    [220.0, 350.0, 800.0, 2000.0, 6000.0, 42000.0],
+                    [250.0, 550.0, 1400.0, 3500.0, 13500.0, 60000.0],
+                    [240.0, 500.0, 2000.0, 8000.0, 14000.0, 80000.0],
                     [100.0, 800.0, 2000.0, 10000.0, 56000.0, 130000.0],
                     [1000.0, 4000.0, 10000.0, 22000.0, 50000.0, 500000.0],
-                    [10000.0, 50000.0, 120000.0, 250000.0, 500000.0, 12000000.0]];
+                    [10000.0, 50000.0, 120000.0, 250000.0, 500000.0, 12000000.0],
+                    [100.0, 500.0, 1200.0, 2500.0, 5000.0, 120000.0]];
 
 // if changing these, make sure that the info pane doesn't resize from the text size on the upgrade button hover
-const dmg_upgrade_effects = [[5.0, 2.5, 1.75, 3.0, 1.25, 25.0],
-                             [2.5, 3.0, 3.0, 4.5, 20.0, 200.0],
-                             [1.5, 1.5, 2.0, 2.5, 2.5, 10.0],
-                             [1.5, 1.5, 2.5, 5.8, 8.5, 60.0],
+const dmg_upgrade_effects = [[5.0, 2.0, 1.75, 2.0, 2.5, 25.0],
+                             [2.5, 3.0, 3.5, 4.5, 30.0, 150.0],
+                             [1.5, 1.5, 2.0, 2.5, 5.0, 12.0],
+                             [1.5, 2.0, 3.0, 7.0, 13.0, 80.0],
                              [1.5, 2.0, 4.0, 3.0, 5.0, 200.0],
                              [3.0, 3.5, 4.0, 12.0, 18.0, 25.0],
                              [3.5, 6.0, 8.0, 10.0, 12.0, 20.0],
-                             [3.5, 6.0, 8.0, 10.0, 13.0, 18.0]];
+                             [3.5, 6.0, 8.0, 10.0, 13.0, 18.0],
+                             [3.5, 6.0, 9.0, 12.0, 15.0, 20.0]];
 
 const rng_upgrade_effects = [[1, 0, 1, 0, 2, 1],
                              [1, 0, 1, 0, 1, 0],
-                             [0, 1, 0, 1, 0, 0],
+                             [0, 1, 0, 0, 0, 0],
                              [1, 1, 0, 1, 0, 2],
                              [1, 1, 0, 0, 0, 2],
                              [1, 1, 0, 0, 0, 2],
                              [1, 1, 0, 0, 0, 0],
+                             [1, 1, 1, 2, 1, 1],
                              [1, 1, 1, 2, 1, 1]];
 
 const atk_upgrade_effects = [[1.5, 1.5, 2.0, 2.5, 1.5, 1.5],
-                             [1.1, 1.1, 1.1, 1.1, 1.2, 2.0],
-                             [1.5, 1.5, 2.0, 2.5, 2.5, 4.0],
+                             [1.1, 1.1, 1.1, 1.1, 1.2, 1.8],
+                             [1.4, 1.2, 2.0, 2.5, 2.5, 4.0],
                              [1.5, 1.5, 1.5, 1.2, 1.2, 1.0],
                              [1.5, 1.5, 1.5, 2.5, 3.5, 2.0],
                              [2.0, 1.2, 1.2, 2.0, 1.5, 1.5],
                              [1.5, 1.5, 1.5, 1.5, 1.5, 1.5],
+                             [1, 1, 1, 1, 1, 1],
                              [1, 1, 1, 1, 1, 1]];
 
 const upgrade_effects = [dmg_upgrade_effects, rng_upgrade_effects, atk_upgrade_effects];
 
-var towerRanges = [3, 3, 2, 4, 1, 4, 2, 5];
-var towerDamages = [2.0, 3.0, 3.0, 5.0, 7.5, 10.0, 100.0, 1000.0];
-var towerAttackSpeeds = [1, 1, 3, 2, 3, 1, 1, 10];
-var towerCosts = [1.0, 2.0, 5.0, 10.0, 12.0, 20.0, 200.0, 10000.0];
-var towerNames = ["Shooter", "Cannon", "Glaive", "Wizard", "Conduit", "Juror", "Reaper", "Light"];
+var towerRanges = [3, 3, 2, 4, 1, 4, 2, 5, 4];
+var towerDamages = [2.0, 3.0, 2.0, 5.0, 7.5, 10.0, 100.0, 1000.0, 1.0];
+var towerAttackSpeeds = [1, 1, 2, 2, 3, 1, 1, 10, 2];
+var towerCosts = [50.0, 75.0, 120.0, 150.0, 150.0, 200.0, 750.0, 3000.0, 1000.0];
+var towerNames = ["Shooter", "Cannon", "Glaive", "Wizard", "Conduit", "Juror", "Reaper", "Solar Prince", "Aether"];
 var towerDescriptions = ["Basic tower. Deals low single-target damage.",
                          "Slow but powerful. Deals medium area-of-effect damage.", 
                          "Shoots spinning blades that damage anything within area.", 
@@ -65,7 +72,8 @@ var towerDescriptions = ["Basic tower. Deals low single-target damage.",
                          "Shoots lighting bolts that chain across multiple foes.", 
                          "Fires strong arrows of light at multiple targets.", 
                          "Master of death. Scythe applies damage-over-time effect.", 
-                         "Arbiter of light. Deals extremely high damage in a cone."];
+                         "Arbiter of light. Deals extremely high damage in a cone.",
+                         "Portal master."];
 
 
 // conduit
@@ -129,7 +137,7 @@ function TowerClass(type, context) {
 
     this.classType = "tower";
 
-    this.img = tilePics[this.type + TOWER_OFFSET_NUM];
+    this.img = towerPics[this.type + TOWER_OFFSET_NUM];
 }
 
 // TowerClass methods
@@ -137,7 +145,7 @@ TowerClass.prototype.calculateTilesInRange = function() {
     // get all the tiles in fullMonsterPath that are in range, for attack checking
     this.tilesInRange = [];
     for(var tileNum = 0; tileNum < fullMonsterPath[this.context].length; tileNum++) {
-        var tilePos = fullMonsterPath[this.context][tileNum];
+        var tilePos = fullMonsterPath[this.context][tileNum].tile;
         if(this.inRange(tilePos.row, tilePos.col)) {
             this.tilesInRange.push({tile: tilePos, index: tileNum});
         }
@@ -309,7 +317,7 @@ TowerClass.prototype.upgradeTier = function(prop) {
     if(upgrade_effects[RANGE][this.type][this.tier] > 0) {
         // range has changed: recalculate tiles in range
         this.calculateTilesInRange();
-        if(this.type == LIGHT) this.radialSort();
+        if(this.type == SOLAR_PRINCE) this.radialSort();
     }
 }
 
@@ -462,7 +470,7 @@ ConduitClass.prototype.findChainTargets = function(fromTile, toIndex) {
 
     // walk down the path finding jumps
     while(jumps < lightning_jumps[this.tier + 1] && jumpDistance < lightning_jump_dist[this.tier + 1] && index < fullMonsterPath[this.context].length) {
-        var pos = fullMonsterPath[this.context][index];
+        var pos = fullMonsterPath[this.context][index].tile;
 
         var tile = StateController.currLevel.tiles[this.context][pos.row][pos.col];
         Object.keys(tile.monstersOnTile).forEach(
@@ -777,8 +785,22 @@ ReaperClass.prototype.draw = function() {
 }
 
 
-// light
-function LightClass(type, context) {
+// test alternative to save/restore, from https://stackoverflow.com/questions/38069462/html5-canvas-save-and-restore-performance
+function drawSprite(image, x, y, scaleX, scaleY, angle, alpha, context) {
+    // var leftImg = tilePics[LIGHT_WING_LEFT];
+    // var leftX = this.x - 13 * this.img.width / 10;
+    // var leftY = this.y - 10 * this.img.height / 13;
+
+    ctx[context].setTransform(scaleX, 0, 0, scaleY, image.width, image.height); // set scale and position
+    ctx[context].rotate(angle);
+    ctx[context].globalAlpha = alpha;
+    // ctx[context].drawImage(image, 100, 100, w, h, -cx, -cy, w, h); // render the subimage
+    ctx[context].drawImage(image, x, y); // render the subimage
+    ctx[context].setTransform(1, 0, 0, 1, 0, 0); // set scale and position
+}
+
+// solar prince
+function SolarPrinceClass(type, context) {
     TowerClass.call(this, type, context);
     this.floatY = 0;
     this.floatX = 0;
@@ -800,13 +822,13 @@ function LightClass(type, context) {
     this.dampening = 0.96; // how much damage is reduced across each jump
     this.tilesInRadialOrder = [];
 
-    LIGHT_UNIQUE[this.context] = 1;
+    SOLAR_PRINCE_UNIQUE[this.context] = 1;
 }
 
-LightClass.prototype = Object.create(TowerClass.prototype);  
-LightClass.prototype.constructor = LightClass; 
+SolarPrinceClass.prototype = Object.create(TowerClass.prototype);  
+SolarPrinceClass.prototype.constructor = SolarPrinceClass; 
 
-LightClass.prototype.radialSort = function() {
+SolarPrinceClass.prototype.radialSort = function() {
     // order tiles in range based on angle relative to tower (chest)
     this.yPerspective = this.y - 0.5 * this.img.height;
     this.tilesInRadialOrder = [];
@@ -822,31 +844,17 @@ LightClass.prototype.radialSort = function() {
     });
 }
 
-// test alternative to save/restore, from https://stackoverflow.com/questions/38069462/html5-canvas-save-and-restore-performance
-function drawSprite(image, x, y, scaleX, scaleY, angle, alpha, context) {
-    // var leftImg = tilePics[LIGHT_WING_LEFT];
-    // var leftX = this.x - 13 * this.img.width / 10;
-    // var leftY = this.y - 10 * this.img.height / 13;
-
-    ctx[context].setTransform(scaleX, 0, 0, scaleY, image.width, image.height); // set scale and position
-    ctx[context].rotate(angle);
-    ctx[context].globalAlpha = alpha;
-    // ctx[context].drawImage(image, 100, 100, w, h, -cx, -cy, w, h); // render the subimage
-    ctx[context].drawImage(image, x, y); // render the subimage
-    ctx[context].setTransform(1, 0, 0, 1, 0, 0); // set scale and position
-}
-
-LightClass.prototype.draw = function() {
+SolarPrinceClass.prototype.draw = function() {
     if(this.visible) {
         this.floatX += this.floatXSpeed;
         this.floatY += this.floatYSpeed;
         this.x += Math.cos(this.floatX) / 4;
         this.y += Math.sin(this.floatY) / 4;
 
-        var leftImg = tilePics[LIGHT_WING_LEFT];
+        var leftImg = towerPics[LIGHT_WING_LEFT];
         var leftX = this.x - 19 * this.img.width / 10;
         var leftY = this.y - 5 * this.img.height / 10;
-        var rightImg = tilePics[LIGHT_WING_RIGHT];
+        var rightImg = towerPics[LIGHT_WING_RIGHT];
         var rightX = this.x - this.img.width / 2;
         var rightY = this.y - 5 * this.img.height / 10;
 
@@ -881,7 +889,7 @@ LightClass.prototype.draw = function() {
     }
 }
 
-LightClass.prototype.attack = function() {
+SolarPrinceClass.prototype.attack = function() {
     var start = {x: this.x, y: this.yPerspective};
     var myAngle = Math.atan2(this.targets[0].y - this.yPerspective, this.targets[0].x - this.x);
     var ang = trueAngleBetweenPoints({x: this.x, y: this.yPerspective}, {x: this.targets[0].x, y: this.targets[0].y});
@@ -967,7 +975,7 @@ LightClass.prototype.attack = function() {
     }
 }
 
-LightClass.prototype.indexOfAngle = function(angle) {
+SolarPrinceClass.prototype.indexOfAngle = function(angle) {
     // binary search for a tile in this.tilesInRadialOrder close to angle
     var start = 0, end = this.tilesInRadialOrder.length - 1;
     var mid = 0;
@@ -986,7 +994,7 @@ LightClass.prototype.indexOfAngle = function(angle) {
     return mid;
 }
 
-LightClass.prototype.drawLightning = function(from, to, maxDiff, strength) {
+SolarPrinceClass.prototype.drawLightning = function(from, to, maxDiff, strength) {
     // https://codepen.io/mcdorli/post/creating-lightnings-with-javascript-and-html5-canvas
     var direction = 0; // 0 corresponds to y variation, 1 to x
     if(Math.abs(from.x - to.x) > Math.abs(from.y - to.y)) {
@@ -997,4 +1005,139 @@ LightClass.prototype.drawLightning = function(from, to, maxDiff, strength) {
     var segmentHeight = 50;
 
     render(from, to, direction, maxDiff, segmentHeight, this.context, strength, "#ffd402");
+}
+
+// test alternative to save/restore, from https://stackoverflow.com/questions/38069462/html5-canvas-save-and-restore-performance
+// function drawSprite(image, x, y, scaleX, scaleY, angle, alpha, context) {
+//     // var leftImg = tilePics[LIGHT_WING_LEFT];
+//     // var leftX = this.x - 13 * this.img.width / 10;
+//     // var leftY = this.y - 10 * this.img.height / 13;
+
+//     ctx[context].setTransform(scaleX, 0, 0, scaleY, image.width, image.height); // set scale and position
+//     ctx[context].rotate(angle);
+//     ctx[context].globalAlpha = alpha;
+//     // ctx[context].drawImage(image, 100, 100, w, h, -cx, -cy, w, h); // render the subimage
+//     ctx[context].drawImage(image, x, y); // render the subimage
+//     ctx[context].setTransform(1, 0, 0, 1, 0, 0); // set scale and position
+// }
+
+// aether
+function AetherClass(type, context) {
+    TowerClass.call(this, type, context);
+    this.floatY = 0;
+    this.floatX = 0;
+    this.float = 0;
+    this.maxFloatX = 15.0;
+    this.maxFloatY = 5.0;
+    this.floatXSpeed = 0.1;
+    this.floatYSpeed = 0.15;
+    this.floatXDirection = 1;
+    this.floatYDirection = 1;
+
+    // portals
+    this.portalGenerationRate = 1; // per second
+    this.timeSincePortalGen = 0;
+    this.maxPortals = 3;
+    // create three portals to spin around
+    this.activePortals = [];
+}
+
+AetherClass.prototype = Object.create(TowerClass.prototype);  
+AetherClass.prototype.constructor = AetherClass; 
+
+AetherClass.prototype.addPortalToSpin = function() {
+    var prevPortal = this.activePortals[this.activePortals.length - 1];
+    if(this.activePortals.length < this.maxPortals) {
+        var portal = new PortalClass(this.currTile, -1, PORTAL_CIRCLING, projectilePics[this.type][0], this.type, this.properties[DAMAGE], projectileSpeeds[this.type], this.tier, false, this.id, this.context);
+        portal.circleAngle = prevPortal == undefined ? 0 : prevPortal.circleAngle + (2 * Math.PI / this.maxPortals);
+        prevPortal = portal;
+        this.activePortals.push(portal);
+    }
+}
+
+AetherClass.prototype.attack = function() {
+    // Aether can only attack if he has a portal available to use
+    if(this.activePortals.length > 0) {
+        var portal = this.activePortals.shift();
+        portal.state = PORTAL_TRACKING;
+        portal.target = this.targets[0];
+        projectileList[this.context][portal.id] = portal;
+    }
+    // for(var target = 0; target < this.targets.length; target++) {
+    //     if(this.targets[target] == undefined) continue;
+    //     var portal = new PortalClass({x: this.x, y: this.y}, this.targets[target].id, projectilePics[this.type][0], this.type, this.properties[DAMAGE], this.tier, true, this.id, this.context);
+    //     projectileList[this.context][portal.id] = portal;            
+    // }
+}
+
+AetherClass.prototype.move = function() {
+    if(!this.active) {
+        return;
+    }
+
+    if(this.timeSincePortalGen > 1000 / fps / this.portalGenerationRate) {
+        this.addPortalToSpin();
+        this.timeSincePortalGen = 0;
+    }
+
+    if(this.timeSinceTargetCheck > 1000 / fps / TOWER_TARGET_CHECK_RATE) {
+        this.findTarget(); // this is NOT necessary to do every time, computationally speaking
+        this.timeSinceTargetCheck = 0;
+    }
+
+    // is locally set
+    if(this.targets[0]) {
+        // is alive
+        if(this.targets[0].health > 0) {
+            // check if target has moved out of range
+            if(!this.inRange(this.targets[0].currTile.row, this.targets[0].currTile.col)) {
+                this.targets[0] = null;
+            } else {
+                this.track({x: this.targets[0].x + TILE_W / 2, y: this.targets[0].y + TILE_H / 2});
+                if(this.timeSinceAttack > (1000 / fps) / this.properties[ATTACK_SPEED]) {
+                    this.attack();
+                    this.timeSinceAttack = 0;
+                }
+            }
+        } else {
+            // died
+            this.findTarget();       
+        }
+    } else {
+        // deleted in the mean time
+        this.findTarget();
+    }
+
+    for(var i = 0; i < this.activePortals.length; i++) {
+        this.activePortals[i].move(true);
+    }
+
+    this.timeSinceAttack++;
+    this.timeSinceTargetCheck++;
+    this.timeSincePortalGen++;
+}
+
+AetherClass.prototype.draw = function() {
+    if(this.visible) {
+        ctx[this.context].save();
+        // this whole process is inefficient but produces an incredible sparkling effect
+        ctx[this.context].translate(this.x, this.y);
+        ctx[this.context].scale(0.2, 0.2);
+        ctx[this.context].shadowColor = 'purple';
+        ctx[this.context].shadowBlur = 35;
+        ctx[this.context].globalAlpha = .75;
+
+        this.floatX += this.floatXSpeed;
+        this.floatY += this.floatYSpeed;
+        this.x += Math.cos(this.floatX) / 4;
+        this.y += Math.sin(this.floatY) / 4;
+        // ctx[this.context].drawImage(this.img, this.x - this.img.width / 2, this.y - this.img.height / 2);
+
+        ctx[this.context].drawImage(this.img, -this.img.width / 2, -this.img.height / 2);
+        ctx[this.context].restore();
+
+        for(var i = 0; i < this.activePortals.length; i++) {
+            this.activePortals[i].draw(true);
+        }
+    }
 }
