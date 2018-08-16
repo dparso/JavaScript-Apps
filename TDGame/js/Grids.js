@@ -34,16 +34,17 @@ var MONSTER_END = [null, null];
 
 // towers
 const TOWER_OFFSET_NUM = 20;
-const TILE_TOWER_1 = 20;
-const TILE_TOWER_2 = 21;
-const TILE_TOWER_3 = 22;
-const TILE_TOWER_4 = 23;
-const TILE_TOWER_5 = 24;
-const TILE_TOWER_6 = 25;
-const TILE_TOWER_7 = 26;
-const TILE_TOWER_8 = 27;
-const TILE_TOWER_9 = 28;
-const NUM_TOWERS = 9;
+const TILE_TOWER_1 = 20; // shooter
+const TILE_TOWER_2 = 21; // cannon
+const TILE_TOWER_3 = 22; // glaive
+const TILE_TOWER_4 = 23; // wizard
+const TILE_TOWER_5 = 24; // conduit
+const TILE_TOWER_6 = 25; // juror
+const TILE_TOWER_7 = 26; // reaper
+const TILE_TOWER_8 = 27; // solar prince
+const TILE_TOWER_9 = 28; // aether
+const TILE_TOWER_10 = 29; // generator
+const NUM_TOWERS = 10;
 const LIGHT_WING_LEFT = 31;
 const LIGHT_WING_RIGHT = 32;
 

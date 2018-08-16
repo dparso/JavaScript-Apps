@@ -52,28 +52,6 @@
 			<img id="pausebutton" onclick="pauseGame()" src="images/pause.png">
 			<img id="fastforwardbutton" onclick="fastGame()" src="images/fast-forward.png">
 
-<!-- 			<div>
-				<table class="iconrow" id="towerselections">
-					<tr>
-						<th><img src="images/Towers/gunner.png" class="selecticon" alt="icon"></th>
-						<th><img src="images/Towers/cannon.png" class="selecticon" alt="icon"></th>
-					</tr>
-					<tr>
-						<th><img src="images/Towers/glaive.png" class="selecticon" alt="icon"></th>
-						<th><img src="images/Towers/wizard.png" class="selecticon" alt="icon"></th>
-					</tr>
-					<tr>
-						<th><img src="images/Towers/conduit.png" class="selecticon" alt="icon"></th>
-						<th><img src="images/Towers/juror.png" class="selecticon" alt="icon"></th>
-					</tr>
-					<tr>
-						<th><img src="images/Towers/reaper.png" class="selecticon" alt="icon"></th>
-						<th><img src="images/Towers/light.png" class="selecticon" alt="icon"></th>
-					</tr>
-				</table>
-			</div> -->
-
-
 			<button id="killmonsters" onclick="killMonsters()" class="button">Kill monsters!</button>
 			<button id="destroytowers" onclick="destroyTowers()" class="button">Destroy towers!</button>
 
@@ -136,6 +114,8 @@
 						<div class="right-grid-item tooltip"><input type="image" src="images/Towers/Drag/solar_prince.png" onclick="selectTower(7)" class="selecticon" alt="icon"><span id="tower8Tooltip" class="tooltiptext tooltip-right">Hi!</span></div>
 
 						<div class="left-grid-item tooltip"><input type="image" src="images/Towers/Drag/aether.png" onclick="selectTower(8)" class="selecticon" alt="icon"><span id="tower9Tooltip" class="tooltiptext tooltip-right">Hi!</span></div>
+
+						<div class="right-grid-item tooltip"><input type="image" src="images/Monsters/monster_1/monster_1.png" onclick="selectTower(9)" class="selecticon" alt="icon"><span id="tower10Tooltip" class="tooltiptext tooltip-right">Hi!</span></div>
 					</div>
 
 					<div id="monstergrid" class="grid-container" onmouseover="updateGridTooltip()"> 
@@ -201,27 +181,6 @@
 						<th></th>
 					</tr>
 				</table>
-<!-- 				<div>
-					<table class="iconrow" id="monsterselections">
-						<tr>
-							<th><img src="images/Monsters/monster_1/monster_1.png" class="selecticon" alt="icon"></th>
-							<th><img src="images/Monsters/monster_2/monster_2_right.png" class="selecticon" alt="icon"></th>
-						</tr>
-						<tr>
-							<th><img src="images/Monsters/monster_3/monster_3.png" class="selecticon" alt="icon"></th>
-							<th><img src="images/Monsters/monster_4/monster_4_right.png" class="selecticon" alt="icon"></th>
-						</tr>
-						<tr>
-							<th><img src="images/Monsters/monster_5/monster_5.png" class="selecticon" alt="icon"></th>
-							<th><img src="images/Monsters/monster_6/monster_6_right.png" class="selecticon" alt="icon"></th>
-						</tr>
-
-						<tr>
-							<th><img src="images/Monsters/monster_7/monster_7_right.png" class="selecticon" alt="icon"></th>
-							<th><img src="images/Monsters/monster_8/monster_8_walk_1_left.png" class="selecticon" alt="icon"></th>
-						</tr>
-					</table>
-				</div> -->
 		</div>
 	</div>
 </div>
@@ -249,6 +208,7 @@
 <script src="js/Towers/Conduit.js"></script>
 <script src="js/Towers/Glaive.js"></script>
 <script src="js/Towers/Juror.js"></script>
+<script src="js/Towers/MonsterGenerator.js"></script>
 <script src="js/Towers/Reaper.js"></script>
 <script src="js/Towers/Shooter.js"></script>
 <script src="js/Towers/SolarPrince.js"></script>

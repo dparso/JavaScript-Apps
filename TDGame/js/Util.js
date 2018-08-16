@@ -20,7 +20,7 @@ var welcomeScreen = new LevelClass(LEVEL_START, [], function() {
 });
 
 var selectScreen = new LevelClass(LEVEL_SELECT, [selectScreenGrid, selectScreenGrid], function(level, context) {
-    if(context == ENEMY) {
+    if(context === ENEMY) {
         drawRect(0, 0, canvas[context].width, canvas[context].height, 'black', context);
         return;
     }
@@ -59,9 +59,9 @@ function drawGridLevel(level, context) {
     var solar_prince, reaper;
     for(id in towerList[context]) {
         var twr = towerList[context][id];
-        if(twr.type == SOLAR_PRINCE) {
+        if(twr.type === SOLAR_PRINCE) {
             solar_prince = twr;
-        } else if(twr.type == REAPER) {
+        } else if(twr.type === REAPER) {
             reaper = twr;
         } else {
             towerList[context][id].draw();
@@ -84,13 +84,13 @@ function drawGridLevel(level, context) {
             // highlight the tile it'll be placed on
             highlightTile(objectTile.row, objectTile.col, 'white', 0.4, context);
 
-            if(dragObject[context].classType == "tower") {
+            if(dragObject[context].classType === "tower") {
                 // highlight tiles in range
                 for(var row = objectTile.row - dragObject[context].range; row <= objectTile.row + dragObject[context].range; row++) {
                     for(var col = objectTile.col - dragObject[context].range; col <= objectTile.col + dragObject[context].range; col++) {
                         if(gridInRange(row, col)) { // in bounds
                             var tile = StateController.currLevel.tiles[context][row][col];
-                            if(tile.type != TILE_WALL || tile.hasTower()) {
+                            if(tile.type !== TILE_WALL || tile.hasTower()) {
                                 // color red
                                 highlightTile(row, col, 'red', 0.5, context);                      
                             } else {
@@ -133,7 +133,7 @@ function gridInRange(row, col) {
 
 function canPlaceTower(row, col, context) {
     var tile = StateController.currLevel.tiles[context][row][col];
-    if(tile.type == TILE_WALL && !tile.hasTower()) {
+    if(tile.type === TILE_WALL && !tile.hasTower()) {
         return true;
     }
     return false;

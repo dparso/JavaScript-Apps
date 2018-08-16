@@ -17,7 +17,7 @@ function TileClass(position, type, img, transparent) {
     }
 
     this.hasTower = function() {
-        return this.towerOnTile != -1;
+        return this.towerOnTile !== -1;
     }
 
     this.notifyTowerPlaced = function(towerID) {

@@ -46,7 +46,7 @@ function calculateMousePos(evt) {
         }
     }
 
-    if(StateController.state == STATE_PLAY) {
+    if(StateController.state === STATE_PLAY) {
         // display tooltips for purchases
         var hoverTile = pixelToGrid(mouseX, mouseY);
         var tile = StateController.currLevel.tiles[currCanvas][hoverTile.row][hoverTile.col];
@@ -60,7 +60,7 @@ function calculateMousePos(evt) {
             tooltip = null;
         }
 
-        if(index != undefined) {
+        if(index !== undefined) {
             setTooltip(text, mouseX + 5, mouseY - 10, currCanvas);
         }
     }
@@ -117,7 +117,7 @@ function handleMouseDown(evt) {
             break;
 
         case STATE_PLAY:
-            if(currCanvas == PLAYER) { // tower
+            if(currCanvas === PLAYER) { // tower
                 if(!isDragging) {
                     // selected a tower to build
                     var tile = StateController.currLevel.tiles[currCanvas][tileClicked.row][tileClicked.col];
@@ -129,7 +129,7 @@ function handleMouseDown(evt) {
                         }
                     } else if(tile.hasTower()) {
                         // selected a tower to view
-                        if(selection[currCanvas] == tile.towerOnTile) {
+                        if(selection[currCanvas] === tile.towerOnTile) {
                             clearSelection(currCanvas);
                         } else {
                             selection[currCanvas] = tile.towerOnTile;
@@ -151,7 +151,7 @@ function handleMouseDown(evt) {
                     }
                 } else if(tile.hasTower()) {
                     // selecting an opponent's tower
-                    if(selection[currCanvas] == tile.towerOnTile) {
+                    if(selection[currCanvas] === tile.towerOnTile) {
                         clearSelection(currCanvas); // deselect
                     } else {
                         selection[currCanvas] = tile.towerOnTile;
@@ -188,7 +188,7 @@ function handleMouseUp(evt) {
 }
 
 function setDrag(towerType, x, y, visible) {
-    if(towerType - TOWER_OFFSET_NUM == REAPER && REAPER_UNIQUE[PLAYER]) {
+    if(towerType - TOWER_OFFSET_NUM === REAPER && REAPER_UNIQUE[PLAYER]) {
         queueMessage("Maximum reapers!", mouseX, mouseY, PLAYER);
         return;
     }
@@ -258,18 +258,18 @@ function keySet(evt, setTo) {
             evt.preventDefault();
             return;
         case 85:
-            if(selection[PLAYER] != null && setTo) {
+            if(selection[PLAYER] !== null && setTo) {
                 // u: upgrade selection
                 upgradePressed();
             }
             return;
         case 84: // t: cycle target
-            if(selection[PLAYER] != null && setTo) {
+            if(selection[PLAYER] !== null && setTo) {
                 targetPressed();
             }
             return;
         case 83: // s: sell selection
-            if(selection[PLAYER] != null && setTo) {
+            if(selection[PLAYER] !== null && setTo) {
                 sellPressed();
             }
             return;
@@ -291,10 +291,10 @@ function keyPressed(evt) {
         return;
     }
 
-    if(evt.keyCode == 9) {
+    if(evt.keyCode === 9) {
         // tab: cycle tower selection
         var keys = Object.keys(towerList[currCanvas]);
-        if(selection[currCanvas] != null) {
+        if(selection[currCanvas] !== null) {
             var index;
             if(shiftHeld) {
                 // cycle backwards
@@ -315,15 +315,15 @@ function keyPressed(evt) {
         }
 
         evt.preventDefault();
-    } else if(evt.keyCode == 27) {
+    } else if(evt.keyCode === 27) {
         // escape: cancel tower placement
         pressEscape();
         evt.preventDefault();
-    } else if(evt.keyCode == 80) {
+    } else if(evt.keyCode === 80) {
         // pause
         pauseGame();
         evt.preventDefault();
-    } else if(evt.keyCode == 70) {
+    } else if(evt.keyCode === 70) {
         // fast forward
         fastGame();
         evt.preventDefault();
@@ -337,10 +337,10 @@ function keyReleased(evt) {
 }
 
 function pressEscape() {
-    if(dragObject[currCanvas] != null) {
+    if(dragObject[currCanvas] !== null) {
         dragObject[currCanvas] = null;
     }
-    if(selection[currCanvas] != null) {
+    if(selection[currCanvas] !== null) {
         clearSelection(currCanvas);
     }
 }

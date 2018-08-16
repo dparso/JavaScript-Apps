@@ -87,7 +87,7 @@ function MonsterClass(type, context) {
 
                 // since it moved, it must notify tiles if changed
                 var newTile = pixelToGrid(this.x, this.y);
-                if(newTile.col != this.currTile.col || newTile.row != this.currTile.row) {
+                if(newTile.col !== this.currTile.col || newTile.row !== this.currTile.row) {
                     // notify old & new tile
                     StateController.currLevel.tiles[this.context][this.currTile.row][this.currTile.col].notifyMonsterDepart(this.id);
                     StateController.currLevel.tiles[this.context][newTile.row][newTile.col].notifyMonsterArrive(this.id);
@@ -116,7 +116,7 @@ function MonsterClass(type, context) {
             }
             var img = this.imgs[this.imgIndex][this.direction];
             var color;
-            if(this.context == PLAYER) {
+            if(this.context === PLAYER) {
                 color = 'black';
             } else {
                 color = 'white';
@@ -173,9 +173,9 @@ function MonsterClass(type, context) {
     }
 
     this.removeDot = function(towerId, dotId) {
-        if(towerList[this.context][towerId] != undefined) {
+        if(towerList[this.context][towerId] !== undefined) {
             // tower might have been sold
-            if(towerList[this.context][towerId].type == REAPER) {
+            if(towerList[this.context][towerId].type === REAPER) {
                 this.reaperDot = false;
             }
         }
@@ -188,11 +188,11 @@ function MonsterClass(type, context) {
 
         if(killed) {
             // only reward player if it was killed (also dies at end)
-            var obj = this.context == PLAYER ? player : enemy;
+            var obj = this.context === PLAYER ? player : enemy;
             obj.killedMonster(this.type);
             // queueMessage("+" + this.value.toLocaleString(), this.x, this.y, this.context, 'green');
         }
-        var sender = this.context == PLAYER ? enemy : player;
+        var sender = this.context === PLAYER ? enemy : player;
         sender.monsterStrength -= monsterCosts[otherPlayer(this.context)][this.type] * 4;
 
         StateController.currLevel.tiles[this.context][this.currTile.row][this.currTile.col].notifyMonsterDepart(this.id);
@@ -214,7 +214,7 @@ function Queue() {
     }
 
     this.empty = function() {
-        return this.data.length == 0;
+        return this.data.length === 0;
     }
 }
 
@@ -224,13 +224,13 @@ function calculateMonsterPath(context) {
     var currTile, finish;
     for(var row = 0; row < TILE_ROWS; row++) {
         for(var col = 0; col < TILE_COLS; col++) {
-            if(StateController.currLevel.tiles[context][row][col].type == TILE_MONSTER_START) {
+            if(StateController.currLevel.tiles[context][row][col].type === TILE_MONSTER_START) {
                 currTile = StateController.currLevel.tiles[context][row][col];
             }
         }
     }
     
-    if(currTile == undefined) {
+    if(currTile === undefined) {
         return;
     }
 
@@ -240,18 +240,18 @@ function calculateMonsterPath(context) {
     while(!frontier.empty()) {
         var currTile = frontier.pop();
 
-        if(currTile.type == TILE_MONSTER_END) {
+        if(currTile.type === TILE_MONSTER_END) {
             finish = currTile;
             break; // do more
         }
 
         // add neighbors that are PATH and unvisited
         for(var rowOffset = -1; rowOffset <= 1; rowOffset++) {
-            if(rowOffset == 0) continue;
+            if(rowOffset === 0) continue;
             if(gridInRange(currTile.row + rowOffset, currTile.col)) {
                 var tile = StateController.currLevel.tiles[context][currTile.row + rowOffset][currTile.col];
 
-                if((tile.type == TILE_PATH || tile.type == TILE_MONSTER_END) && !tile.visited) {
+                if((tile.type === TILE_PATH || tile.type === TILE_MONSTER_END) && !tile.visited) {
                     // add this to path
                     tile.parent = currTile;
                     frontier.push(tile);
@@ -259,10 +259,10 @@ function calculateMonsterPath(context) {
             }
         }
         for(var colOffset = -1; colOffset <= 1; colOffset++) {
-            if(colOffset == 0) continue;
+            if(colOffset === 0) continue;
             if(gridInRange(currTile.row, currTile.col + colOffset)) {
                 var tile = StateController.currLevel.tiles[context][currTile.row][currTile.col + colOffset];
-                if((tile.type == TILE_PATH || tile.type == TILE_MONSTER_END) && !tile.visited) {
+                if((tile.type === TILE_PATH || tile.type === TILE_MONSTER_END) && !tile.visited) {
                     // add this to path
                     tile.parent = currTile;
                     frontier.push(tile);
@@ -276,8 +276,8 @@ function calculateMonsterPath(context) {
 
     while(finish.parent) {
         var pixelPos = gridToPixel(finish.row, finish.col);
-        if(monsterPath[context][monsterPath[context].length - 1] != undefined) {
-            if(pixelPos.x != monsterPath[context][monsterPath[context].length - 1].pixel.x && pixelPos.y != monsterPath[context][monsterPath[context].length - 1].pixel.y) {
+        if(monsterPath[context][monsterPath[context].length - 1] !== undefined) {
+            if(pixelPos.x !== monsterPath[context][monsterPath[context].length - 1].pixel.x && pixelPos.y !== monsterPath[context][monsterPath[context].length - 1].pixel.y) {
                 // changing direction: add previous
                 monsterPath[context].push({pixel: {x: prevX, y: prevY}, position: fullMonsterPath[context].length});
             }

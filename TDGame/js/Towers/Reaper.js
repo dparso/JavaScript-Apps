@@ -37,12 +37,12 @@ ReaperClass.prototype.attack = function() {
             Object.keys(targetTile.monstersOnTile).forEach(
                 ((monster) => {
                     var obj = monsterList[this.context][monster];
-                    if(obj != undefined) {
+                    if(obj !== undefined) {
                         if(obj.hitWithProjectile(dmg)) {
                             StateController.notifyTowerKilledMonster(this.id, this.context, obj.type);
                         } else {
                             // apply DoT
-                            if(obj.towersWithDots[this.id] == undefined) {
+                            if(obj.towersWithDots[this.id] === undefined) {
                                 var dot = new DoTClass(monster, dmg * reaper_dot_ratio, reaper_dot_rates[this.tier + 1], reaper_dot_durations[this.tier + 1], this.id, this.context);
                                 obj.dots[dot.id] = dot;
                                 obj.towersWithDots[this.id] = dot.id;

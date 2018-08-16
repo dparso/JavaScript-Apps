@@ -13,7 +13,7 @@ function PlayerClass(context) {
 	this.monsterStrength = 0;
 
 	this.loseLife = function() {
-		if(--this.lives == 0) {
+		if(--this.lives === 0) {
 			// lost the game!
 			StateController.endGame(this.context);
 		}

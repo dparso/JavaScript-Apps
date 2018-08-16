@@ -10,6 +10,7 @@ const JUROR = 5;
 const REAPER = 6;
 const SOLAR_PRINCE = 7;
 const AETHER = 8;
+const GENERATOR = 9;
 
 var REAPER_UNIQUE = [0, 0]; // only one reaper per side
 var SOLAR_PRINCE_UNIQUE = [0, 0]; // only one reaper per side
@@ -25,46 +26,50 @@ const tier_costs = [[75.0, 100.0, 175.0, 500.0, 1200.0, 8000.0], // shooter
                     [300.0, 1200.0, 4000.0, 23000.0, 84000.0, 240000.0], // juror
                     [1800.0, 6000.0, 20000.0, 60000.0, 150000.0, 500000.0], // reaper
                     [10000.0, 50000.0, 120000.0, 250000.0, 500000.0, 12000000.0], // solar prince
-                    [2000.0, 3500.0, 6200.0, 10000.0, 28000.0, 50000.0]]; // aether
+                    [2000.0, 3500.0, 6200.0, 10000.0, 28000.0, 50000.0], // aether
+                    [2000.0, 3500.0, 6200.0, 10000.0, 28000.0, 50000.0]]; // generator
 
 // if changing these, make sure that the info pane doesn't resize from the text size on the upgrade button hover
-const dmg_upgrade_effects = [[5.0, 2.0, 1.75, 2.0, 2.5, 25.0],
-                             [2.5, 3.0, 3.5, 4.5, 30.0, 150.0],
-                             [1.5, 1.5, 2.0, 2.5, 5.0, 12.0],
-                             [1.5, 2.0, 3.0, 7.0, 13.0, 80.0],
-                             [1.5, 2.0, 4.0, 3.0, 5.0, 200.0],
-                             [3.0, 3.5, 4.0, 12.0, 18.0, 25.0],
-                             [3.5, 6.0, 8.0, 10.0, 12.0, 20.0],
-                             [3.5, 6.0, 8.0, 10.0, 13.0, 18.0],
-                             [3.5, 6.0, 9.0, 12.0, 15.0, 20.0]];
+const dmg_upgrade_effects = [[5.0, 2.0, 1.75, 2.0, 2.5, 25.0], // shooter
+                             [2.5, 3.0, 3.5, 4.5, 30.0, 150.0], // cannon
+                             [1.5, 1.5, 2.0, 2.5, 5.0, 12.0], // glaive
+                             [1.5, 2.0, 3.0, 7.0, 13.0, 80.0], // wizard
+                             [1.5, 2.0, 4.0, 3.0, 5.0, 200.0], // conduit
+                             [3.0, 3.5, 4.0, 12.0, 18.0, 25.0], // juror
+                             [3.5, 6.0, 8.0, 10.0, 12.0, 20.0], // solar prince
+                             [3.5, 6.0, 8.0, 10.0, 13.0, 18.0], // reaper
+                             [3.5, 6.0, 9.0, 12.0, 15.0, 20.0], // aether
+                             [3.5, 6.0, 9.0, 12.0, 15.0, 20.0]]; // generator
 
-const rng_upgrade_effects = [[1, 0, 1, 0, 2, 1],
-                             [1, 0, 1, 0, 1, 0],
-                             [0, 1, 0, 0, 0, 0],
-                             [1, 1, 0, 1, 0, 2],
-                             [1, 1, 0, 0, 0, 2],
-                             [1, 1, 0, 0, 0, 2],
-                             [1, 1, 0, 0, 0, 0],
-                             [1, 0, 0, 1, 0, 1],
-                             [1, 1, 1, 2, 1, 1]];
+const rng_upgrade_effects = [[1, 0, 1, 0, 2, 1], // shooter
+                             [1, 0, 1, 0, 1, 0], // cannon
+                             [0, 1, 0, 0, 0, 0], // glaive
+                             [1, 1, 0, 1, 0, 2], // wizard
+                             [1, 1, 0, 0, 0, 2], // conduit
+                             [1, 1, 0, 0, 0, 2], // juror
+                             [1, 1, 0, 0, 0, 0], // solar prince
+                             [1, 0, 0, 1, 0, 1], // reaper
+                             [1, 1, 1, 2, 1, 1], // aether
+                             [1, 1, 1, 2, 1, 1]]; // generator
 
-const atk_upgrade_effects = [[1.5, 1.5, 2.0, 2.5, 1.5, 1.5],
-                             [1.1, 1.1, 1.1, 1.1, 1.2, 1.8],
-                             [1.4, 1.2, 2.0, 2.5, 2.5, 4.0],
-                             [1.5, 1.5, 1.5, 1.2, 1.2, 1.0],
-                             [1.5, 1.5, 1.5, 2.5, 3.5, 2.0],
-                             [2.0, 1.2, 1.2, 2.0, 1.5, 1.5],
-                             [1.5, 1.5, 1.5, 1.5, 1.5, 1.5],
-                             [1, 1, 1, 1, 1, 1],
-                             [1, 1, 1, 1, 1, 1]];
+const atk_upgrade_effects = [[1.5, 1.5, 2.0, 2.5, 1.5, 1.5], // shooter
+                             [1.1, 1.1, 1.1, 1.1, 1.2, 1.8], // cannon
+                             [1.4, 1.2, 2.0, 2.5, 2.5, 4.0], // glaive
+                             [1.5, 1.5, 1.5, 1.2, 1.2, 1.0], // wizard
+                             [1.5, 1.5, 1.5, 2.5, 3.5, 2.0], // conduit
+                             [2.0, 1.2, 1.2, 2.0, 1.5, 1.5], // juror
+                             [1.5, 1.5, 1.5, 1.5, 1.5, 1.5], // solar prince
+                             [1, 1, 1, 1, 1, 1], // reaper
+                             [1, 1, 1, 1, 1, 1], // aether
+                             [1, 1, 1, 1, 1, 1]]; // generator
 
 const upgrade_effects = [dmg_upgrade_effects, rng_upgrade_effects, atk_upgrade_effects];
 
-var towerRanges = [3, 3, 2, 4, 1, 4, 2, 4, 4];
-var towerDamages = [2.0, 3.0, 2.0, 5.0, 7.5, 10.0, 100.0, 1000.0, 1.0];
-var towerAttackSpeeds = [1, 1, 2, 2, 3, 1, 1, 10, 2];
-var towerCosts = [50.0, 75.0, 120.0, 150.0, 150.0, 200.0, 750.0, 3000.0, 1000.0];
-var towerNames = ["Shooter", "Cannon", "Glaive", "Wizard", "Conduit", "Juror", "Reaper", "Solar Prince", "Aether"];
+var towerRanges = [3, 3, 2, 4, 1, 4, 2, 4, 4, 2];
+var towerDamages = [2.0, 3.0, 2.0, 5.0, 7.5, 10.0, 100.0, 1000.0, 1.0, 1.0];
+var towerAttackSpeeds = [1, 1, 2, 2, 3, 1, 1, 10, 2, 1];
+var towerCosts = [50.0, 75.0, 120.0, 150.0, 150.0, 200.0, 750.0, 3000.0, 1000.0, 100.0];
+var towerNames = ["Shooter", "Cannon", "Glaive", "Wizard", "Conduit", "Juror", "Reaper", "Solar Prince", "Aether", "Barracks"];
 var towerDescriptions = ["Basic tower. Deals low single-target damage.",
                          "Slow but powerful. Deals medium area-of-effect damage.", 
                          "Shoots spinning blades that damage anything within area.", 
@@ -73,7 +78,8 @@ var towerDescriptions = ["Basic tower. Deals low single-target damage.",
                          "Fires strong arrows of light at multiple targets.", 
                          "Master of death. Scythe applies damage-over-time effect.", 
                          "Arbiter of light. Deals extremely high damage in a cone.",
-                         "Portal master."];
+                         "Portal master.",
+                         "Trains and sends monsters on the enemy's side."];
 
 
 // conduit
@@ -188,7 +194,7 @@ TowerClass.prototype.getLastTarget = function(toIndex) {
 
 TowerClass.prototype.findTarget = function() {
     this.targets = [];
-    if(this.targetPriority == TARGET_FIRST) {
+    if(this.targetPriority === TARGET_FIRST) {
         this.getFirstTarget(0);
     } else {
         this.getLastTarget(0);
@@ -250,7 +256,7 @@ TowerClass.prototype.attack = function() {
     }
 
     for(var target = 0; target < this.targets.length; target++) {
-        if(this.targets[target] == undefined) continue;
+        if(this.targets[target] === undefined) continue;
         var projectile = new ProjectileClass({x: this.x, y: this.y}, this.targets[target].id, projectilePics[this.type][0], this.type, dmg, projectileSpeeds[this.type], this.tier, true, this.id, this.context);
         projectileList[this.context][projectile.id] = projectile;            
     }
@@ -272,7 +278,7 @@ TowerClass.prototype.draw = function() {
         }
 
         drawBitmapCenteredWithRotation(this.img, this.x + xOff, this.y + yOff, angle, this.context);
-        if(this.type == 3) {
+        if(this.type === 3) {
             // wizard: draw fireball on staff
             drawBitmapCenteredWithRotation(animationPics[FIRE][0], this.x + 12, this.y - 13, this.fireAngle++, this.context);
             this.fireAngle %= 360;
@@ -295,7 +301,7 @@ TowerClass.prototype.canUpgrade = function() {
 }
 
 TowerClass.prototype.checkUpgrade = function() {
-    if(!this.canUpgrade() && this.context == ENEMY) {
+    if(!this.canUpgrade() && this.context === ENEMY) {
         // remove self from upgradeable
         var index = upgradeableTowers.indexOf(this.id);
         if (index > -1) {
@@ -317,7 +323,7 @@ TowerClass.prototype.upgradeTier = function(prop) {
     if(upgrade_effects[RANGE][this.type][this.tier] > 0) {
         // range has changed: recalculate tiles in range
         this.calculateTilesInRange();
-        if(this.type == SOLAR_PRINCE) this.radialSort();
+        if(this.type === SOLAR_PRINCE) this.radialSort();
     }
 }
 

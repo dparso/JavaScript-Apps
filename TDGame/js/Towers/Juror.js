@@ -21,7 +21,7 @@ JurorClass.prototype.getRandomTarget = function() {
 
 JurorClass.prototype.findTarget = function() {
     this.targets = [];
-    if(this.targetPriority == TARGET_FIRST) {
+    if(this.targetPriority === TARGET_FIRST) {
         this.getFirstTarget(0);
     } else {
         this.getLastTarget(0);

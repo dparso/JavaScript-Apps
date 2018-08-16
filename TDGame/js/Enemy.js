@@ -34,10 +34,10 @@ function pathByTile(row, col) {
 	var pathCount = 0;
 	for(var rowOff = -2; rowOff <= 2; rowOff++) {
 		for(var colOff = -2; colOff <= 2; colOff++) {
-			if(rowOff == 0 && colOff == 0 || !gridInRange(row + rowOff, col + colOff)) {
+			if(rowOff === 0 && colOff === 0 || !gridInRange(row + rowOff, col + colOff)) {
 				continue;
 			}
-			if(StateController.currLevel.tiles[ENEMY][row + rowOff][col + colOff].type == TILE_PATH) {
+			if(StateController.currLevel.tiles[ENEMY][row + rowOff][col + colOff].type === TILE_PATH) {
 				pathCount++;
 			}
 		}
@@ -164,7 +164,7 @@ function evaluateComfort() {
 				enemyTowerProbability = 0.1;
 				ENEMY_URGENCY = URGENT;
 			} else {
-				if(enemy.income / player.income > 1.5 || player.monsterStrength == 0) {
+				if(enemy.income / player.income > 1.5 || player.monsterStrength === 0) {
 					// press the attack!
 					enemyTowerProbability = 0.1;
 					ENEMY_URGENCY = RAPID;
@@ -183,7 +183,7 @@ function evaluateComfort() {
 
 var startOfGame = 0;
 function enemyActions() {
-	if(StateController.state != STATE_PLAY) return;
+	if(StateController.state !== STATE_PLAY) return;
 
 	evaluateComfort();
 
@@ -238,7 +238,7 @@ function buyUpgrade() {
 	// currently, this doesn't guarantee an upgrade if the chosen tower is too expensive
 	// for which tower?
 	var length = upgradeableTowers.length;
-	if(length == 0) {
+	if(length === 0) {
 		return false;
 	}
 
@@ -270,7 +270,7 @@ function buyTower() {
 		// iterate until one is cheap enough
 		var type;
 		for(var t = towerCosts.length - 1; t >= 0; t--) {
-			if(t == SOLAR_PRINCE && SOLAR_PRINCE_UNIQUE[ENEMY] || t == REAPER && REAPER_UNIQUE[ENEMY]) {
+			if(t === SOLAR_PRINCE && SOLAR_PRINCE_UNIQUE[ENEMY] || t === REAPER && REAPER_UNIQUE[ENEMY]) {
 				continue; // don't keep trying to buy the unique towers
 			}
 			type = t;

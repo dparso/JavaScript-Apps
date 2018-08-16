@@ -125,7 +125,7 @@ function scale() {
 
 var timeSinceLastIncome = 0;
 function playerIncome() {
-    if(StateController.state != STATE_PLAY) return;
+    if(StateController.state !== STATE_PLAY) return;
 
     if(timeSinceLastIncome > 1000 / fps * INCOME_RATE) {
         player.gainGold(player.income);
@@ -167,7 +167,7 @@ var spiralRotate = 0;
 function drawAll(context) {
     StateController.drawLevel(context);
     // draw tower selection
-    if(selection[context] != null) {
+    if(selection[context] !== null) {
         drawSelection(context);
     }
 
@@ -234,7 +234,7 @@ function textDraw(context) {
 }
 
 function drawTooltip() {
-    if(tooltip != null) {
+    if(tooltip !== null) {
         var text = tooltip.text;
         var color = "rgb(122, 68, 20)";
 
@@ -253,7 +253,7 @@ function drawTooltip() {
         }
 
         var xPos;
-        if(tooltip.ctx == PLAYER) {
+        if(tooltip.ctx === PLAYER) {
             xPos = 620 - width;
         } else {
             xPos = 70;
@@ -356,7 +356,7 @@ function pauseGame() {
 }
 
 function fastGame() {
-    if(game_speed == 1) {
+    if(game_speed === 1) {
         // speed up
         clearInterval(timerId);
         timerId = setInterval(updateAll, 1000 / fps / 2);

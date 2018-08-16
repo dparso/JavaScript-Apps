@@ -26,13 +26,13 @@ function LevelClass(levelType, levelGrids, drawFunction, loadFunction) {
 	            // var img2 = tilePics[type2][0];
 	            var imgIndex = 0, imgIndex2 = 0;
 	            // choose which image to use
-	            if(type == TILE_WALL) {
+	            if(type === TILE_WALL) {
 	            	let left = {row: row, col: col - 1};
 	            	let up = {row: row - 1, col: col};
 	            	let right = {row: row, col: col + 1};
 	            	let down = {row: row + 1, col: col};
 	            	if(gridInRange(left.row, left.col)) {
-						if(this.grids[PLAYER][left.row][left.col] == TILE_WALL) {
+						if(this.grids[PLAYER][left.row][left.col] === TILE_WALL) {
 	            			atLeft = true;
 	            		}
 	            	} else {
@@ -40,7 +40,7 @@ function LevelClass(levelType, levelGrids, drawFunction, loadFunction) {
 	            	}
 
 	            	if(gridInRange(up.row, up.col)) {
-						if(this.grids[PLAYER][up.row][up.col] == TILE_WALL) {
+						if(this.grids[PLAYER][up.row][up.col] === TILE_WALL) {
 	            			atUp = true;
 	            		}
 	            	} else {
@@ -48,7 +48,7 @@ function LevelClass(levelType, levelGrids, drawFunction, loadFunction) {
 	            	}
 
 	            	if(gridInRange(right.row, right.col)) {
-						if(this.grids[PLAYER][right.row][right.col] == TILE_WALL) {
+						if(this.grids[PLAYER][right.row][right.col] === TILE_WALL) {
 	            			atRight = true;
 	            		}
 	            	} else {
@@ -56,7 +56,7 @@ function LevelClass(levelType, levelGrids, drawFunction, loadFunction) {
 	            	}
 
 	            	if(gridInRange(down.row, down.col)) {
-						if(this.grids[PLAYER][down.row][down.col] == TILE_WALL) {
+						if(this.grids[PLAYER][down.row][down.col] === TILE_WALL) {
 	            			atDown = true;
 	            		}
 	            	} else {
@@ -67,13 +67,13 @@ function LevelClass(levelType, levelGrids, drawFunction, loadFunction) {
 	            	imgIndex = this.getTileTypeFromSurroundings(atLeft, atUp, atRight, atDown);
 	            }
 
-	            if(type2 == TILE_WALL_2) {
+	            if(type2 === TILE_WALL_2) {
 	            	let left = {row: row, col: col - 1};
 	            	let up = {row: row - 1, col: col};
 	            	let right = {row: row, col: col + 1};
 	            	let down = {row: row + 1, col: col};
 	            	if(gridInRange(left.row, left.col)) {
-						if(this.grids[ENEMY][left.row][left.col] == TILE_WALL_2) {
+						if(this.grids[ENEMY][left.row][left.col] === TILE_WALL_2) {
 	            			atLeft = true;
 	            		}
 	            	} else {
@@ -81,7 +81,7 @@ function LevelClass(levelType, levelGrids, drawFunction, loadFunction) {
 	            	}
 
 	            	if(gridInRange(up.row, up.col)) {
-						if(this.grids[ENEMY][up.row][up.col] == TILE_WALL_2) {
+						if(this.grids[ENEMY][up.row][up.col] === TILE_WALL_2) {
 	            			atUp = true;
 	            		}
 	            	} else {
@@ -89,7 +89,7 @@ function LevelClass(levelType, levelGrids, drawFunction, loadFunction) {
 	            	}
 
 	            	if(gridInRange(right.row, right.col)) {
-						if(this.grids[ENEMY][right.row][right.col] == TILE_WALL_2) {
+						if(this.grids[ENEMY][right.row][right.col] === TILE_WALL_2) {
 	            			atRight = true;
 	            		}
 	            	} else {
@@ -97,7 +97,7 @@ function LevelClass(levelType, levelGrids, drawFunction, loadFunction) {
 	            	}
 
 	            	if(gridInRange(down.row, down.col)) {
-						if(this.grids[ENEMY][down.row][down.col] == TILE_WALL_2) {
+						if(this.grids[ENEMY][down.row][down.col] === TILE_WALL_2) {
 	            			atDown = true;
 	            		}
 	            	} else {
@@ -112,11 +112,11 @@ function LevelClass(levelType, levelGrids, drawFunction, loadFunction) {
 	            var img = tilePics[type][imgIndex];
 	            var img2 = tilePics[type2][imgIndex2];
 
-	          	if(type == TILE_MONSTER_START || type == TILE_MONSTER_END) {
+	          	if(type === TILE_MONSTER_START || type === TILE_MONSTER_END) {
 	          		img = tilePics[TILE_PATH][0];
 	          	}
 
-	          	if(type2 == TILE_MONSTER_START || type2 == TILE_MONSTER_END) {
+	          	if(type2 === TILE_MONSTER_START || type2 === TILE_MONSTER_END) {
 	          		img2 = tilePics[TILE_PATH][0];
 	          	}
 
@@ -126,27 +126,27 @@ function LevelClass(levelType, levelGrids, drawFunction, loadFunction) {
 	            this.tiles[PLAYER][row][col] = tile;
 	            this.tiles[ENEMY][row][col] = tile2;
 
-	            if(type2 == TILE_WALL_2) {
+	            if(type2 === TILE_WALL_2) {
 	            	// tell the enemy handler that this is a valid location for a tower
 	            	availableTowerLocations.push({row: row, col: col});
 	            }
 
 	            // set monster starts (could be cleaner)
-	            if(type == TILE_MONSTER_START) {
+	            if(type === TILE_MONSTER_START) {
 	                MONSTER_START[PLAYER] = {row: row, col: col};
-	            } else if(type == TILE_MONSTER_END) {
+	            } else if(type === TILE_MONSTER_END) {
 	                MONSTER_END[PLAYER] = {row: row, col: col};
 	            }
 
-	            if(type2 == TILE_MONSTER_START) {
+	            if(type2 === TILE_MONSTER_START) {
 	                MONSTER_START[ENEMY] = {row: row, col: col};
-	            } else if(type2 == TILE_MONSTER_END) {
+	            } else if(type2 === TILE_MONSTER_END) {
 	                MONSTER_END[ENEMY] = {row: row, col: col};
 	            }
 	        }
 	    }
 
-	    if(this.type == LEVEL_TRACK) {
+	    if(this.type === LEVEL_TRACK) {
 	    	calculateMonsterPath(PLAYER);
 	    	calculateMonsterPath(ENEMY);
 	    }

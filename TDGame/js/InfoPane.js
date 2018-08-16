@@ -7,7 +7,7 @@ function InfoPaneClass(context) {
 
 	this.show = function() {
 		if(!this.showing) {
-			if(this.context == PLAYER) {
+			if(this.context === PLAYER) {
 				$('#userinfopane').fadeIn('fast');
 			} else {
 				$('#enemyinfopane').fadeIn('fast');
@@ -28,7 +28,7 @@ function InfoPaneClass(context) {
 			atkText = "<font color='#12ad0f'>&times" + upgrade_effects[ATTACK_SPEED][tower.type][tower.tier + 1].toLocaleString() + "</font>";
 		}
 
-		if(this.context == PLAYER) {
+		if(this.context === PLAYER) {
 			document.getElementById('nametext').innerHTML = "Name: " + towerNames[tower.type];
 			document.getElementById('costtext').innerHTML = "Cost: " + towerCosts[tower.type].toLocaleString();
 			document.getElementById('rangetext').innerHTML = "Range: " + tower.properties[RANGE].toLocaleString() + rngText;
@@ -52,7 +52,7 @@ function InfoPaneClass(context) {
 		}
 
 		var text;
-		if(tower.tier + 1 == tier_costs[tower.type].length) {
+		if(tower.tier + 1 === tier_costs[tower.type].length) {
 			text = "No more upgrades!";
 		} else {
 			text = "Cost: " + tier_costs[tower.type][tower.tier + 1].toLocaleString();
@@ -61,7 +61,7 @@ function InfoPaneClass(context) {
 	}
 
 	this.hide = function() {
-		if(this.context == PLAYER) {
+		if(this.context === PLAYER) {
 			$('#userinfopane').fadeOut('fast');
 		} else {
 			$('#enemyinfopane').fadeOut('fast');
@@ -71,7 +71,7 @@ function InfoPaneClass(context) {
 }
 
 function showPlayerTierText() {
-	if(selection[PLAYER] != null) {
+	if(selection[PLAYER] !== null) {
 		if(towerList[PLAYER][selection[PLAYER]].tier < NUM_TIERS - 1) {
 			showAddText = true;
 		}

@@ -26,7 +26,7 @@ AetherClass.prototype.addPortalToSpin = function() {
     var prevPortal = this.activePortals[this.activePortals.length - 1];
     if(this.activePortals.length < this.maxPortals) {
         var portal = new PortalClass(this.currTile, -1, PORTAL_CIRCLING, projectilePics[this.type][0], this.type, this.properties[DAMAGE], projectileSpeeds[this.type], this.tier, false, this.id, this.context);
-        portal.circleAngle = prevPortal == undefined ? 0 : prevPortal.circleAngle + (2 * Math.PI / this.maxPortals);
+        portal.circleAngle = prevPortal === undefined ? 0 : prevPortal.circleAngle + (2 * Math.PI / this.maxPortals);
         prevPortal = portal;
         this.activePortals.push(portal);
     }
@@ -41,7 +41,7 @@ AetherClass.prototype.attack = function() {
         projectileList[this.context][portal.id] = portal;
     }
     // for(var target = 0; target < this.targets.length; target++) {
-    //     if(this.targets[target] == undefined) continue;
+    //     if(this.targets[target] === undefined) continue;
     //     var portal = new PortalClass({x: this.x, y: this.y}, this.targets[target].id, projectilePics[this.type][0], this.type, this.properties[DAMAGE], this.tier, true, this.id, this.context);
     //     projectileList[this.context][portal.id] = portal;            
     // }

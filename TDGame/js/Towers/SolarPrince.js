@@ -116,7 +116,7 @@ SolarPrinceClass.prototype.attack = function() {
 
     while(count < this.tilesInRadialOrder.length) { // count at most all tiles
         tileObj = this.tilesInRadialOrder[i];
-        if(tileObj == undefined) {
+        if(tileObj === undefined) {
             // doesn't happen often, just in case
             count++;
             i++;
@@ -149,7 +149,7 @@ SolarPrinceClass.prototype.attack = function() {
             Object.keys(tile.monstersOnTile).forEach(
                 ((monster) => {
                     var obj = monsterList[this.context][monster];
-                    if(obj != undefined) {
+                    if(obj !== undefined) {
                         if(obj.health > 0) {
                             if(obj.hitWithProjectile(this.properties[DAMAGE])) {
                                 StateController.notifyTowerKilledMonster(this.id, this.context, obj.type);

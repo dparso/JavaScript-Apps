@@ -65,14 +65,14 @@ function ProjectileClass(start, targetId, img, type, damage, speed, tier, rotate
 }
 
 ProjectileClass.prototype.move = function() {
-    if(this.target == undefined) {
+    if(this.target === undefined) {
         this.die();
         return;
     }
     
     if(this.visible) {
         // change angle
-        if(this.type == JUROR) {
+        if(this.type === JUROR) {
             this.track({x: this.target.x + TILE_W / 2, y: this.target.y + TILE_H / 2});
         }
 
@@ -94,7 +94,7 @@ ProjectileClass.prototype.move = function() {
         if(this.hitTarget()) {
             // monster might have died in travel time
             if(this.target.health > 0) {
-                if(this.target != undefined) {
+                if(this.target !== undefined) {
                     if(this.target.hitWithProjectile(this.damage)) {
                         StateController.notifyTowerKilledMonster(this.parentId, this.context, this.target.type);
                     }
@@ -114,7 +114,7 @@ ProjectileClass.prototype.move = function() {
                             Object.keys(targetTile.monstersOnTile).forEach(
                                 ((monster) => {
                                     var obj = monsterList[this.context][monster];
-                                    if(obj != undefined) {
+                                    if(obj !== undefined) {
                                         if(obj.hitWithProjectile(this.damage * this.splashRatio)) {
                                             StateController.notifyTowerKilledMonster(this.parentId, this.context, obj.type);
                                         }
@@ -151,7 +151,7 @@ ProjectileClass.prototype.draw = function() {
 }
 
 ProjectileClass.prototype.die = function() {
-    if(this.type == PROJECTILE_TYPE_2) {
+    if(this.type === PROJECTILE_TYPE_2) {
         // explode!
         makeAnimation(EXPLOSION, this.target.x + TILE_W / 2, this.target.y + TILE_H / 2, 0, this.context);
     }
@@ -168,12 +168,12 @@ StraightProjectileClass.prototype = Object.create(ProjectileClass.prototype);
 StraightProjectileClass.prototype.constructor = StraightProjectileClass; 
 
 StraightProjectileClass.prototype.move = function() {
-    if(this.target == undefined) {
+    if(this.target === undefined) {
         this.die();
         return;
     }
 
-    if(this.xVel == null) {
+    if(this.xVel === null) {
         // calculate initial velocity
         var changeX = (this.target.x + TILE_W / 2) - this.x;
         var changeY = (this.target.y + TILE_H / 2) - this.y;
@@ -208,7 +208,7 @@ StraightProjectileClass.prototype.move = function() {
                     return;
                 }
                 var obj = monsterList[this.context][monster];
-                if(obj != undefined) {
+                if(obj !== undefined) {
                     if(obj.hitWithProjectile(this.damage)) {
                         StateController.notifyTowerKilledMonster(this.parentId, this.context, obj.type);
                     }
@@ -252,7 +252,7 @@ PortalClass.prototype.reachedTarget = function(targetPixel) {
 }
 
 PortalClass.prototype.move = function() {
-    if(this.state == PORTAL_CIRCLING) {
+    if(this.state === PORTAL_CIRCLING) {
         // drawSprite(this.img, this.x, this.y, 1, 1, this.circleAngle, 1.0, this.context);
         this.circleAngle -= .1;
         // let cos = Math.cos(this.circleAngle);
@@ -262,15 +262,15 @@ PortalClass.prototype.move = function() {
         this.y = this.center.y + Math.cos(this.circleAngle) * this.img.width;
         // console.log(this.circleAngle % Math.PI);
         // console.log(this.x + ", " + this.y);
-    } else if(this.state == PORTAL_TRACKING) {
-        if(this.target == undefined) {
+    } else if(this.state === PORTAL_TRACKING) {
+        if(this.target === undefined) {
             this.becomeStationary();
             return;
         }
 
         // lead the target
         var trackPoint = {x: this.target.x, y: this.target.y};
-        if(this.targetPreviousLocation != null) {
+        if(this.targetPreviousLocation !== null) {
             if(this.targetPreviousLocation.x > this.target.x) {
                 // moving left, lead -x
                 trackPoint.x -= 3 * TILE_W / 2;
@@ -310,7 +310,7 @@ PortalClass.prototype.move = function() {
         }
     } else {
         // check for monsters on the tile
-        if(this.currTile == undefined) return;
+        if(this.currTile === undefined) return;
         if(this.currTile.hasMonsters()) {
             Object.keys(this.currTile.monstersOnTile).forEach(
                 ((monster) => {
@@ -319,7 +319,7 @@ PortalClass.prototype.move = function() {
                         return;
                     }
                     var obj = monsterList[this.context][monster];
-                    if(obj != undefined) {
+                    if(obj !== undefined) {
                         // deal damage, teleport if still alive
                         if(obj.hitWithProjectile(this.damage)) {
                             StateController.notifyTowerKilledMonster(this.parentId, this.context, obj.type);
@@ -342,7 +342,7 @@ PortalClass.prototype.move = function() {
 
 PortalClass.prototype.teleportMonster = function(monsterId) {
     let monster = monsterList[this.context][monsterId];
-    if(this.pointInMonsterPath == null) {
+    if(this.pointInMonsterPath === null) {
         console.log("SEE PROJECTILE 370!");
         return;
     }
@@ -370,7 +370,7 @@ PortalClass.prototype.becomeStationary = function() {
     // calculate where in the monsterPath you are
     for(var i = 0; i < fullMonsterPath[this.context].length; i++) {
         let tile = fullMonsterPath[this.context][i].tile;
-        if(tile.row == this.currTile.row && tile.col == this.currTile.col) {
+        if(tile.row === this.currTile.row && tile.col === this.currTile.col) {
             this.pointInMonsterPath = i;
         }
     }

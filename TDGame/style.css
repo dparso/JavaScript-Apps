@@ -27,16 +27,6 @@
     border-bottom-right-radius: 1%;
 }
 
-#towerselections {
-    top: 145px;
-    right: 0px;
-}
-
-#monsterselections {
-    top: 145px;
-    left: 0px;
-}
-
 #killmonsters {
     position: absolute;
     top: 40px;
@@ -274,11 +264,6 @@ button:focus, input[type="button"]:focus, input[type="image"]:focus {
 
 .sellbutton:hover {
 	background: #ef0000;
-}
-
-.iconrow {
-    position: absolute;
-    pointer-events: none;
 }
 
 .sidenav {

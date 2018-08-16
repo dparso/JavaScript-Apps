@@ -29,20 +29,23 @@ function StateControllerClass(startLevel) {
                 break;
             case REAPER:
                 if(REAPER_UNIQUE[onSide]) {
-                    if(onSide == PLAYER) queueMessage("Maximum reapers!", mouseX, mouseY, onSide);
+                    if(onSide === PLAYER) queueMessage("Maximum reapers!", mouseX, mouseY, onSide);
                     return false;
                 }
                 tower = new ReaperClass(ofType, onSide);
                 break;
             case SOLAR_PRINCE:
                 if(SOLAR_PRINCE_UNIQUE[onSide]) {
-                    if(onSide == PLAYER) queueMessage("Maximum solar prince!", mouseX, mouseY, onSide);
+                    if(onSide === PLAYER) queueMessage("Maximum solar prince!", mouseX, mouseY, onSide);
                     return false;
                 }
                 tower = new SolarPrinceClass(ofType, onSide);
                 break;
             case AETHER:
                 tower = new AetherClass(ofType, onSide);
+                break;
+            case GENERATOR:
+                tower = new GeneratorClass(ofType, onSide);
                 break;
         }
 
@@ -54,7 +57,7 @@ function StateControllerClass(startLevel) {
         tower.active = true;
         tower.visible = true;
         tower.calculateTilesInRange();
-        if(ofType == SOLAR_PRINCE) {
+        if(ofType === SOLAR_PRINCE) {
             tower.radialSort();
         }
 
@@ -64,7 +67,7 @@ function StateControllerClass(startLevel) {
         this.currLevel.tiles[onSide][atGrid.row][atGrid.col].notifyTowerPlaced(tower.id);
 
         // player pays for it (cost checks already occurred)
-        if(onSide == PLAYER) {
+        if(onSide === PLAYER) {
             player.buyTower(tower.type);
             player.towerStrength += towerCosts[tower.type];
             // console.log("PLACE " + player.towerStrength);
@@ -102,7 +105,7 @@ function StateControllerClass(startLevel) {
         StateController.monstersWaiting[toSide].push(monster);
         // toSide is the resulting side, but the opposite side sent it
         var level = monsterLevels[toSide][ofType];
-        if(toSide == PLAYER) {
+        if(toSide === PLAYER) {
             enemy.sendMonster(ofType);
             enemy.monsterStrength += monsterCosts[sender][ofType] * 4;
         } else {
@@ -122,7 +125,7 @@ function StateControllerClass(startLevel) {
     // isPlayer = true if player is upgrading, in which case display error on fail (otherwise don't)
     this.upgradeTower = function(tower, upgradeType, isPlayer) {
         if(tower.tier + 1 >= tier_costs[tower.type].length) return false; // no more upgrades
-        var obj = tower.context == PLAYER ? player : enemy;
+        var obj = tower.context === PLAYER ? player : enemy;
 
         if(obj.gold >= tier_costs[tower.type][tower.tier + 1]) {
             var xPos, yPos;
@@ -149,8 +152,8 @@ function StateControllerClass(startLevel) {
 
     this.sellTower = function(towerId, context) {
         var tower = towerList[context][towerId];
-        if(tower.type == REAPER) REAPER_UNIQUE[context] = 0;
-        if(tower.type == SOLAR_PRINCE) SOLAR_PRINCE_UNIQUE[context] = 0;
+        if(tower.type === REAPER) REAPER_UNIQUE[context] = 0;
+        if(tower.type === SOLAR_PRINCE) SOLAR_PRINCE_UNIQUE[context] = 0;
 
         // remove from tile
         var tile = towerList[context][towerId].currTile;
@@ -158,7 +161,7 @@ function StateControllerClass(startLevel) {
         // clear selection
         clearSelection(context);
         // grant gold
-        var obj = context == PLAYER ? player : enemy;
+        var obj = context === PLAYER ? player : enemy;
         obj.numTowers--;
 
         for(var i = tower.tier; i >= 0; i--) {
@@ -209,21 +212,21 @@ function StateControllerClass(startLevel) {
     }
 
     this.notifyLifeLost = function(context) {
-        if(context == PLAYER) {
+        if(context === PLAYER) {
             player.loseLife();
-        } else if(context == ENEMY) {
+        } else if(context === ENEMY) {
             enemy.loseLife();
         }
     }
 
     this.notifyTowerKilledMonster = function(towerId, context, monsterType) {
-        if(towerList[context][towerId] != undefined) { // tower could have been sold
+        if(towerList[context][towerId] !== undefined) { // tower could have been sold
             towerList[context][towerId].notifyKilledMonster(monsterType);
         }
     }
 
     this.endGame = function(loser) {
-        if(loser == PLAYER) {
+        if(loser === PLAYER) {
             gameLost = true;
         } else {
             gameWon = true;
@@ -231,7 +234,7 @@ function StateControllerClass(startLevel) {
     }
 
     this.hotkey = function(code, shift, context) {
-        if(this.state != STATE_PLAY) return;
+        if(this.state !== STATE_PLAY) return;
 
         var type = code - KEY_NUM_OFFSET - 1;
         if(shift) {
@@ -246,22 +249,22 @@ function StateControllerClass(startLevel) {
             } else {
                 queueMessage("Insufficient gold!", mouseX, mouseY, currCanvas);
             }
-        } else if(context == PLAYER) {
+        } else if(context === PLAYER) {
             // tower
             if(type > 9) {
                 console.log("Not yet!");
                 return;
             }
 
-            if(type == REAPER && REAPER_UNIQUE[PLAYER]) {
+            if(type === REAPER && REAPER_UNIQUE[PLAYER]) {
                 queueMessage("Maximum reapers!", mouseX, mouseY, PLAYER);
                 return false;
-            } else if(type == SOLAR_PRINCE && SOLAR_PRINCE_UNIQUE[PLAYER]) {
+            } else if(type === SOLAR_PRINCE && SOLAR_PRINCE_UNIQUE[PLAYER]) {
                 queueMessage("Maximum solar prince!", mouseX, mouseY, PLAYER);
                 return false;
             }
 
-            if(dragObject[PLAYER] != null && type == dragObject[PLAYER].type - TOWER_OFFSET_NUM) {
+            if(dragObject[PLAYER] !== null && type === dragObject[PLAYER].type - TOWER_OFFSET_NUM) {
                 // cancel current selection
                 dragObject[PLAYER] = null;
             } else if(player.gold >= towerCosts[type]) {

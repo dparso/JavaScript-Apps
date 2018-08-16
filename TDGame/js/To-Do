@@ -1,5 +1,7 @@
 To-Do:
 
+Towers initialize x, y, currTile on construction
+
 Scale monster health better (big gaps between the higher monsters)
 
 Give towers their own damage, atk, and range upgrade arrays! 
@@ -204,6 +206,9 @@ Tower ideas:
 	Portal-master: you choose two locations where it occasionally places portals. A certain number of monsters walk through one and are teleported to the other (presumably, back)
 
 	Do the monster mash...
+
+	Tower that generates little soldiers of your side (the ones who would be running through the other maze) to fight monsters on the track
+	Or, the towers that generate monsters generate them on your side when enemies pass!!
 
 
 Monster ideas:

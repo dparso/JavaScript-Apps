@@ -82,11 +82,12 @@ ConduitClass.prototype.move = function() {
     this.timeSinceTargetCheck++;
 
     // is locally set
-    if(this.targets[0] != null) {
+    console.log(this.targets[0]);
+    if(this.targets[0] !== undefined && this.targets[0] !== null) {
         // has targets
         if(this.targets[0].length > 0) {
             // is alive
-            if(this.targets[0][0] != null && this.targets[0][0] != undefined) {
+            if(this.targets[0][0] !== null && this.targets[0][0] !== undefined) {
                 if(this.targets[0][0].health > 0) {
                     // check if target has moved out of range
                     if(Math.abs(this.targets[0][0].currTile.row - this.currTile.row) > this.properties[RANGE] || Math.abs(this.targets[0][0].currTile.col - this.currTile.col) > this.properties[RANGE]) {
@@ -124,7 +125,7 @@ ConduitClass.prototype.attack = function() {
     for(var target = 0; target < this.targets.length; target++) {
         for(var chain = 0; chain < this.targets[target].length; chain++) {
             var trgt = this.targets[target][chain];
-            if(trgt == undefined) {
+            if(trgt === undefined) {
                 continue;
             }
             if(chain > 0) strength = 2; // reduce clutter for the chain
