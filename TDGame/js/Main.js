@@ -29,6 +29,14 @@ var enemy = new PlayerClass(ENEMY);
 var StateController = new StateControllerClass(welcomeScreen);
 var infoPane = [new InfoPaneClass(PLAYER), new InfoPaneClass(ENEMY)];
 
+
+// setup values
+var difficulty = EASY;
+var race = LIGHT;
+var lightDescription = "Light. Fight for the preservation of life and balance of the world.";
+var darkDescription = "Dark. Extinguish the flame of life and cover the lands in shadow.";
+var diffDescriptions = {"Easy": "Gold is plentiful, monsters are weak, and your enemy is foolish.", "Normal": "Reasonable prices and a competent enemy.", "Hard": "Scavenge for gold and fear your enemy.", "Insane": "We'll get started on your tombstone."};
+
 window.onload = function() {
     canvas[PLAYER] = document.getElementById('gameCanvas');
     canvas[ENEMY] = document.getElementById('enemyCanvas');
@@ -39,7 +47,9 @@ window.onload = function() {
     // disable right click
     $('body').on('contextmenu', '#gameCanvas', function(e){ return false; });
     $('body').on('contextmenu', '#enemyCanvas', function(e){ return false; });
-    $('container').hide();
+    // $('#container').hide();
+    $('#levelconfig').hide();
+    openSelect();
 
     currCanvas = PLAYER;
     loadImages();
@@ -53,6 +63,23 @@ function loadingDoneStartGame() {
 }
 
 function startGame() {
+    if($('#levelconfig').is(":hidden")) {
+        $('#start').fadeOut(500);
+        // user pressed start: bring them to the game configuration screen
+        $('#levelconfig').fadeIn(500);
+        // Get the element with id="defaultOpen" and click on it
+        document.getElementById("defaultOpen").click();
+
+        $('#racedescription').text(lightDescription);
+
+        /*if the user clicks anywhere outside the select box,
+        then close all select boxes:*/
+        document.addEventListener("click", closeAllSelect);
+    }
+}
+
+
+function playGame() {
     started = true;
     if(waitingToStart) return;
     $('#container').fadeIn(1500);
@@ -75,7 +102,7 @@ function updateAll() {
         drawAll(ENEMY);
 
         ctx[PLAYER].fillStyle = 'white';
-        ctx[PLAYER].font = "20px Helvetica";
+        ctx[PLAYER].font = "68px Stranger";
         ctx[PLAYER].fillText("You won!", 6 * canvas[PLAYER].width / 14, 23 * canvas[PLAYER].height / 32);
         ctx[PLAYER].fillText("click to continue", 6 * canvas[PLAYER].width / 14, 25 * canvas[PLAYER].height / 32);
         return;
@@ -85,7 +112,7 @@ function updateAll() {
         drawAll(ENEMY);
 
         ctx[PLAYER].fillStyle = 'white';
-        ctx[PLAYER].font = "20px Helvetica";
+        ctx[PLAYER].font = "68px Stranger";
         ctx[PLAYER].fillText("You lost!", 6 * canvas[PLAYER].width / 14, 2 * canvas[PLAYER].height / 4);
         ctx[PLAYER].fillText("click to continue", 8 * canvas[PLAYER].width / 20, 18 * canvas[PLAYER].height / 32);
         return;
@@ -106,7 +133,7 @@ function updateAll() {
 
     drawAll(PLAYER);
     drawAll(ENEMY);
-    drawTooltip();
+    // drawTooltip();
 
 }
 
@@ -139,17 +166,22 @@ var timeSinceLastRelease = [0, 0];
 function monsterUpdate(context) {
     var len = StateController.monstersWaiting[context].length;
     if(len > 0) {
-        if(timeSinceLastRelease[context] > 0.05 * fps) {
+        // console.log(len + ", " + Object.keys(monsterList[context]).length);
+        // if(timeSinceLastRelease[context] > 0.05 * fps) {
             var monster = StateController.monstersWaiting[context].pop();
+            monsterList[context][monster.id] = monster;
             monster.visible = true;
             timeSinceLastRelease[context] = 0;
-        }
+        // }
     }
 
     timeSinceLastRelease[context]++;
 }
 
 function moveAll(context) {
+    var t = StateController.currLevel.tiles[PLAYER][7][1];
+    // console.log("has " + Object.keys(t.monstersOnTile).length);
+
     for(id in monsterList[context]) {
       monsterList[context][id].move();
     }
@@ -205,10 +237,10 @@ function drawSelection(context) {
 }
 
 function textDraw(context) {
-    var tile = pixelToGrid(mouseX, mouseY);
-    ctx[currCanvas].fillStyle = 'white';
-    ctx[currCanvas].fillText(mouseX + ", " + mouseY, mouseX + 10, mouseY + 30);
-    ctx[currCanvas].fillText(tile.row + ", " + tile.col, mouseX + 10, mouseY + 10);
+    // var tile = pixelToGrid(mouseX, mouseY);
+    // ctx[currCanvas].fillStyle = 'white';
+    // ctx[currCanvas].fillText(mouseX + ", " + mouseY, mouseX + 10, mouseY + 30);
+    // ctx[currCanvas].fillText(tile.row + ", " + tile.col, mouseX + 10, mouseY + 10);
 
     // draw all queued messages
     while(messages.length > 0) {
@@ -233,38 +265,38 @@ function textDraw(context) {
     document.getElementById('enemygoldtext').innerHTML = "Gold: " + Math.floor(enemy.gold).toLocaleString();
 }
 
-function drawTooltip() {
-    if(tooltip !== null) {
-        var text = tooltip.text;
-        var color = "rgb(122, 68, 20)";
+// function drawTooltip() {
+//     if(tooltip !== null) {
+//         var text = tooltip.text;
+//         var color = "rgb(122, 68, 20)";
 
-        ctx[tooltip.ctx].font = "12px Helvetica"; // set font first for accurate measuring
-        ctx[tooltip.ctx].fillStyle = color;
-        ctx[tooltip.ctx].textAlign = "left";
-        ctx[tooltip.ctx].textBaseline = "top";
-        ctx[tooltip.ctx].globalAlpha = 1.0;
+//         ctx[tooltip.ctx].font = "12px Zombie"; // set font first for accurate measuring
+//         ctx[tooltip.ctx].fillStyle = color;
+//         ctx[tooltip.ctx].textAlign = "left";
+//         ctx[tooltip.ctx].textBaseline = "top";
+//         ctx[tooltip.ctx].globalAlpha = 1.0;
 
-        var width = ctx[tooltip.ctx].measureText(text).width + TOOLTIP_PADDING * 2;
-        var yOffset = 0;
+//         var width = ctx[tooltip.ctx].measureText(text).width + TOOLTIP_PADDING * 2;
+//         var yOffset = 0;
 
-        if(tooltip.y + TOOLTIP_BOX_HEIGHT > canvas[tooltip.ctx].height) {
-            // shift to keep on screen
-            yOffset = canvas[tooltip.ctx].height - (tooltip.y + TOOLTIP_BOX_HEIGHT);
-        }
+//         if(tooltip.y + TOOLTIP_BOX_HEIGHT > canvas[tooltip.ctx].height) {
+//             // shift to keep on screen
+//             yOffset = canvas[tooltip.ctx].height - (tooltip.y + TOOLTIP_BOX_HEIGHT);
+//         }
 
-        var xPos;
-        if(tooltip.ctx === PLAYER) {
-            xPos = 620 - width;
-        } else {
-            xPos = 70;
-        }
+//         var xPos;
+//         if(tooltip.ctx === PLAYER) {
+//             xPos = 620 - width;
+//         } else {
+//             xPos = 70;
+//         }
 
-        drawRect(xPos, tooltip.y + yOffset, width, TOOLTIP_BOX_HEIGHT, color, tooltip.ctx);
+//         drawRect(xPos, tooltip.y + yOffset, width, TOOLTIP_BOX_HEIGHT, color, tooltip.ctx);
 
-        ctx[tooltip.ctx].fillStyle = "white";
-        ctx[tooltip.ctx].fillText(text, xPos + TOOLTIP_PADDING, tooltip.y + yOffset);
-    }
-}
+//         ctx[tooltip.ctx].fillStyle = "white";
+//         ctx[tooltip.ctx].fillText(text, xPos + TOOLTIP_PADDING, tooltip.y + yOffset);
+//     }
+// }
 
 function nextLevel() {
     gameWon = false;
@@ -395,14 +427,13 @@ function destroyTowers() {
 
 var menuShowing = 0;
 function scrollMenu(direction) {
-    console.log(direction);
     if(menuShowing) {
-        $('#buttonlabel').text("Towers");
+        $('#infopanelabel').text("Towers");
         $('#towergrid').show();
         $('#monstergrid').hide();
         menuShowing = Math.abs(menuShowing - 1);
     } else {
-        $('#buttonlabel').text("Monsters");
+        $('#infopanelabel').text("Monsters");
         $('#monstergrid').show();
         $('#towergrid').hide();
         menuShowing = Math.abs(menuShowing - 1);
@@ -441,5 +472,114 @@ function updateGridTooltip() {
     }
 }
 
+function selectTab(evt, tabName) {
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.className += " active";
+}
 
+// note: this will open *all* dropdowns!
+function openSelect() {
+    var customElement, i, j, selElmnt, a, b, c;
 
+    /* look for any elements with the class "custom-select": */
+    customElement = document.getElementsByClassName("custom-select");
+    for (i = 0; i < customElement.length; i++) {
+        selElmnt = customElement[i].getElementsByTagName("select")[0];
+        /*for each element, create a new DIV that will act as the selected item:*/
+        a = document.createElement("DIV");
+        a.setAttribute("class", "select-selected");
+        a.innerHTML = selElmnt.options[selElmnt.selectedIndex].innerHTML;
+        customElement[i].appendChild(a);
+        /*for each element, create a new DIV that will contain the option list:*/
+        b = document.createElement("DIV");
+        b.setAttribute("class", "select-items select-hide");
+        for (j = 0; j < selElmnt.length; j++) {
+            /*for each option in the original select element,
+            create a new DIV that will act as an option item:*/
+            c = document.createElement("DIV");
+            c.innerHTML = selElmnt.options[j].innerHTML;
+            c.addEventListener("click", function(e) {
+                /*when an item is clicked, update the original select box,
+                and the selected item:*/
+                var y, i, k, s, h;
+                s = this.parentNode.parentNode.getElementsByTagName("select")[0];
+                h = this.parentNode.previousSibling;
+                for (i = 0; i < s.length; i++) {
+                    if (s.options[i].innerHTML == this.innerHTML) {
+                        s.selectedIndex = i;
+                        h.innerHTML = this.innerHTML;
+                        y = this.parentNode.getElementsByClassName("same-as-selected");
+                        for (k = 0; k < y.length; k++) {
+                            y[k].removeAttribute("class");
+                        }
+                        this.setAttribute("class", "same-as-selected");
+                        break;
+                    }
+                }
+                h.click();
+            });
+            b.appendChild(c);
+        }
+        customElement[i].appendChild(b);
+        a.addEventListener("click", function(e) {
+            /*when the select box is clicked, close any other select boxes,
+            and open/close the current select box:*/
+            e.stopPropagation();
+            closeAllSelect(this);
+            this.nextSibling.classList.toggle("select-hide");
+            this.classList.toggle("select-arrow-active");
+        });
+    }
+}
+
+function closeAllSelect(elmnt) {
+    /*a function that will close all select boxes in the document,
+    except the current select box:*/
+    var x, y, i, arrNo = [];
+    x = document.getElementsByClassName("select-items");
+    y = document.getElementsByClassName("select-selected");
+
+    // adjust current difficulty
+    let diff = y[0].innerHTML;
+    $('#diffdescription').text(diffDescriptions[diff]);
+
+    for (i = 0; i < y.length; i++) {
+        if (elmnt == y[i]) {
+            arrNo.push(i)
+        } else {
+            y[i].classList.remove("select-arrow-active");
+        }
+    }
+    for (i = 0; i < x.length; i++) {
+        if (arrNo.indexOf(i)) {
+            x[i].classList.add("select-hide");
+        }
+    }
+}
+
+function switchRace() {
+    if(race === LIGHT) {
+        race = DARK;
+        $('#racedescription').text(darkDescription);
+    } else {
+        race = LIGHT;
+        $('#racedescription').text(lightDescription);
+    }
+}
+
+function hideMenu() {
+    if($('#levelconfig').is(":visible")) {
+        $('#levelconfig').fadeOut(500);
+
+        $('#start').fadeIn(500);
+    }    
+}

@@ -37,14 +37,9 @@ AetherClass.prototype.attack = function() {
     if(this.activePortals.length > 0) {
         var portal = this.activePortals.shift();
         portal.state = PORTAL_TRACKING;
-        portal.target = this.targets[0];
+        portal.target = this.target;
         projectileList[this.context][portal.id] = portal;
     }
-    // for(var target = 0; target < this.targets.length; target++) {
-    //     if(this.targets[target] === undefined) continue;
-    //     var portal = new PortalClass({x: this.x, y: this.y}, this.targets[target].id, projectilePics[this.type][0], this.type, this.properties[DAMAGE], this.tier, true, this.id, this.context);
-    //     projectileList[this.context][portal.id] = portal;            
-    // }
 }
 
 AetherClass.prototype.move = function() {
@@ -63,22 +58,16 @@ AetherClass.prototype.move = function() {
     }
 
     // is locally set
-    if(this.targets[0]) {
-        // is alive
-        if(this.targets[0].health > 0) {
-            // check if target has moved out of range
-            if(!this.inRange(this.targets[0].currTile.row, this.targets[0].currTile.col)) {
-                this.targets[0] = null;
-            } else {
-                this.track({x: this.targets[0].x + TILE_W / 2, y: this.targets[0].y + TILE_H / 2});
-                if(this.timeSinceAttack > (1000 / fps) / this.properties[ATTACK_SPEED]) {
-                    this.attack();
-                    this.timeSinceAttack = 0;
-                }
-            }
+    if(this.target) {
+        // check if target has moved out of range
+        if(!this.inRange(this.target.currTile.row, this.target.currTile.col)) {
+            this.targets[0] = null;
         } else {
-            // died
-            this.findTarget();       
+            this.track({x: this.target.x + TILE_W / 2, y: this.target.y + TILE_H / 2});
+            if(this.timeSinceAttack > (1000 / fps) / this.properties[ATTACK_SPEED]) {
+                this.attack();
+                this.timeSinceAttack = 0;
+            }
         }
     } else {
         // deleted in the mean time

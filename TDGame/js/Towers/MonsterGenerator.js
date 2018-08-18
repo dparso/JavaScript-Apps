@@ -16,7 +16,6 @@ GeneratorClass.prototype.constructor = GeneratorClass;
 
 
 GeneratorClass.prototype.move = function() {
-    console.log("hello");
     if(this.timeSinceGenerate > 1000.0 / fps / this.generationRate) {
         this.generateMonster();
         this.timeSinceGenerate = 0;
@@ -25,11 +24,5 @@ GeneratorClass.prototype.move = function() {
 }
 
 GeneratorClass.prototype.generateMonster = function() {
-    StateController.sendMonster(this.monsterType, otherPlayer(this.context));
-}
-
-GeneratorClass.prototype.draw = function() {
-    if(this.visible) {
-        ctx[this.context].drawImage(this.img, this.x, this.y);
-    }
+    StateController.sendMonster(this.monsterType, otherPlayer(this.context), false, true);
 }

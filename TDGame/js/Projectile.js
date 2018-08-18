@@ -365,6 +365,7 @@ PortalClass.prototype.teleportMonster = function(monsterId) {
 PortalClass.prototype.becomeStationary = function() {
     this.state = PORTAL_STATIONARY;
     let gridPos = pixelToGrid(this.x, this.y);
+    console.log(this.x + ", " + this.y + ", " + gridPos);
     this.currTile = StateController.currLevel.tiles[this.context][gridPos.row][gridPos.col];
 
     // calculate where in the monsterPath you are

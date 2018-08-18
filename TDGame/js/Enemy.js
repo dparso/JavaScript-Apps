@@ -183,6 +183,7 @@ function evaluateComfort() {
 
 var startOfGame = 0;
 function enemyActions() {
+	return;
 	if(StateController.state !== STATE_PLAY) return;
 
 	evaluateComfort();
@@ -194,7 +195,6 @@ function enemyActions() {
 		startOfGame++;
 	}
 
-	return;
 	// enemyTowerProbability = ENEMY_TOWER_PROB * (1 - enemy.numTowers / 30.0); // 30 towers is enough!
 	// enemyActionRate = ENEMY_ACTION_RATE - (enemy.gold / 50000); // slightly increase with gold excess -- don't sit around, spend money!
 

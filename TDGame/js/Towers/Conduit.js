@@ -2,7 +2,7 @@
 function ConduitClass(type, context) {
     TowerClass.call(this, type, context);
 
-    // this.targets = [];
+    this.targets = [];
     this.maxJumpDistance = 50;
     this.maxJumps = 10;
     this.dampening = 0.96; // how much damage is reduced across each jump
@@ -11,7 +11,7 @@ function ConduitClass(type, context) {
 ConduitClass.prototype = Object.create(TowerClass.prototype);  
 ConduitClass.prototype.constructor = ConduitClass; 
 
-ConduitClass.prototype.findChainTargets = function(fromTile, toIndex) {
+ConduitClass.prototype.findChainTargets = function(fromTile) {
     var jumps = 0;
     var jumpDistance = 0;
     var index = fromTile;
@@ -28,7 +28,7 @@ ConduitClass.prototype.findChainTargets = function(fromTile, toIndex) {
                     if(jumps > lightning_jumps[this.tier + 1]) {
                         return;
                     }
-                    this.targets[toIndex].push(monsterList[this.context][Number(monster)]);
+                    this.targets.push(monsterList[this.context][Number(monster)]);
                     jumps++;
                 } else {
                     first = false;
@@ -42,26 +42,28 @@ ConduitClass.prototype.findChainTargets = function(fromTile, toIndex) {
 
 ConduitClass.prototype.getFirstTarget = function(toIndex) {
     // follow the path, end -> start, and attack the first monster in range
+    this.targets = [];
     for(var tileNum = 0; tileNum < this.tilesInRange.length; tileNum++) {
         var tilePos = this.tilesInRange[tileNum];
         var tile = StateController.currLevel.tiles[this.context][tilePos.tile.row][tilePos.tile.col];
         if(tile.hasMonsters()) {
             // found target
-            this.targets[toIndex] = [monsterList[this.context][Object.keys(tile.monstersOnTile)[0]]];
-            this.findChainTargets(tilePos.index, 0);
+            this.targets = [monsterList[this.context][Object.keys(tile.monstersOnTile)[0]]];
+            this.findChainTargets(tilePos.index);
             return;
         }
     }
 }
 
 ConduitClass.prototype.getLastTarget = function(toIndex) {
+    this.targets = [];
     for(var tileNum = this.tilesInRange.length - 1; tileNum > 0; tileNum--) {
         var tilePos = this.tilesInRange[tileNum].tile;
         if(this.inRange(tilePos.row, tilePos.col)) {
             var tile = StateController.currLevel.tiles[this.context][tilePos.row][tilePos.col];
             if(tile.hasMonsters()) {
-                this.targets[toIndex] = [monsterList[this.context][Object.keys(tile.monstersOnTile)[0]]];
-                this.findChainTargets(tileNum, 0);
+                this.targets = [monsterList[this.context][Object.keys(tile.monstersOnTile)[0]]];
+                this.findChainTargets(tileNum);
                 return;
             }
         }
@@ -81,30 +83,21 @@ ConduitClass.prototype.move = function() {
     }
     this.timeSinceTargetCheck++;
 
-    // is locally set
-    console.log(this.targets[0]);
-    if(this.targets[0] !== undefined && this.targets[0] !== null) {
-        // has targets
-        if(this.targets[0].length > 0) {
-            // is alive
-            if(this.targets[0][0] !== null && this.targets[0][0] !== undefined) {
-                if(this.targets[0][0].health > 0) {
-                    // check if target has moved out of range
-                    if(Math.abs(this.targets[0][0].currTile.row - this.currTile.row) > this.properties[RANGE] || Math.abs(this.targets[0][0].currTile.col - this.currTile.col) > this.properties[RANGE]) {
-                        this.targets[0] = null;
-                    } else if(this.timeSinceAttack > (1000 / fps) / this.properties[ATTACK_SPEED]) {
-                        this.attack();
-                        this.timeSinceAttack = 0;
-                    }
-                } else { // dead: new target
-                    this.findTarget();       
-                }
-            } else { // no target yet
-                this.findTarget();
+    // has targets
+    if(this.targets.length > 0) {
+        if(this.targets[0]) {
+            // check if target has moved out of range
+            if(Math.abs(this.targets[0].currTile.row - this.currTile.row) > this.properties[RANGE] || Math.abs(this.targets[0].currTile.col - this.currTile.col) > this.properties[RANGE]) {
+                this.targets = [];
+            } else if(this.timeSinceAttack > (1000 / fps) / this.properties[ATTACK_SPEED]) {
+                this.attack();
+                this.timeSinceAttack = 0;
             }
-        } else {
+        } else { // no target yet
             this.findTarget();
         }
+    } else {
+        this.findTarget();
     }
     this.timeSinceAttack++;
 }
@@ -122,21 +115,19 @@ ConduitClass.prototype.attack = function() {
 
     var start = {x: this.x, y: this.y};
     var strength = lightning_strengths[this.tier + 1];
-    for(var target = 0; target < this.targets.length; target++) {
-        for(var chain = 0; chain < this.targets[target].length; chain++) {
-            var trgt = this.targets[target][chain];
-            if(trgt === undefined) {
-                continue;
-            }
-            if(chain > 0) strength = 2; // reduce clutter for the chain
-            var tar = {x: trgt.x + TILE_W / 2, y: trgt.y + TILE_H / 2};
-            // lightning gets slightly less crazy as it jumps
-            this.drawLightning(start, tar, Math.max(MAX_LIGHTNING_DIFFERENCE - chain * 5, 10), strength);
-            start = tar;   
-            if(this.targets[target][chain].hitWithProjectile(this.properties[DAMAGE] * Math.pow(this.dampening, chain))) {
-                StateController.notifyTowerKilledMonster(this.id, this.context, target.type);
-            }     
+    for(var chain = 0; chain < this.targets.length; chain++) {
+        var trgt = this.targets[chain];
+        if(!trgt) {
+            continue;
         }
+        if(chain > 0) strength = 2; // reduce clutter for the chain
+        var tar = {x: trgt.x + TILE_W / 2, y: trgt.y + TILE_H / 2};
+        // lightning gets slightly less crazy as it jumps
+        this.drawLightning(start, tar, Math.max(MAX_LIGHTNING_DIFFERENCE - chain * 5, 10), strength);
+        start = tar;   
+        if(this.targets[chain].hitWithProjectile(this.properties[DAMAGE] * Math.pow(this.dampening, chain))) {
+            StateController.notifyTowerKilledMonster(this.id, this.context, this.targets[chain].type);
+        }     
     }
 }
 

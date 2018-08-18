@@ -1,5 +1,20 @@
 To-Do:
 
+When pressing play button, configure screen comes up to align with the play button. So, clicking play twice starts the game. No back button, Play can change to Ready!
+Enemy bought tower too expensive
+
+On out of range, get new target!
+
+Probably because when tower doesn't have a target, it calls findTarget then move() is over -- could repeat frame after frame
+Aether portals track based on next tile
+Clean up how monsters are created. Currently added both to monsterList and monstersWaiting
+
+Tracking projectiles like Juror arrow find new target if died
+
+Solar prince stopped attacking anything after a while -- when lots of towers are moving out of range
+
+Prioritize most expensive upgrades
+
 Towers initialize x, y, currTile on construction
 
 Scale monster health better (big gaps between the higher monsters)
@@ -84,13 +99,9 @@ Define tower-specific upgrades by giving each class its own upgrade array
 
 Try to design the monster on the front page as a boss!
 
-Debug button for delete all monsters/towers
-
 Modify lightning code for awesome looking laser beam (red)! Turn maxDifference down
 
 As it stands, monsters can't be attacked in their original square, as they haven't yet notified the tile of their presence
-
-Objects like tower and monster should have their row, col as properties, rather than having to calculate it every frame
 
 Tower type: line directly to monster, damages per second
 

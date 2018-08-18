@@ -1,6 +1,4 @@
-
-
-
+Note that this is not optimized for any format but full-sized Chrome browsers. The purpose of this is experimenting with game mechanics and design, not, for the time being, cross-platform availability.
 
 
 

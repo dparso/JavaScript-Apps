@@ -16,14 +16,13 @@ CannonClass.prototype.attack = function() {
         var diff = dmg * atk / fps - dmg;
         dmg += diff;
     }
-    for(var target = 0; target < this.targets.length; target++) {
-        var img = projectilePics[this.type][0];
-        var speed = projectileSpeeds[this.type];
-        if(this.tier >= 4){
-            img = projectilePics[this.type][1]; // big bomb!
-            speed /= 2;
-        }
-        var projectile = new ProjectileClass({x: this.x, y: this.y}, this.targets[target].id, img, this.type, dmg, speed, this.tier, true, this.id, this.context);
-        projectileList[this.context][projectile.id] = projectile;            
+
+    var img = projectilePics[this.type][0];
+    var speed = projectileSpeeds[this.type];
+    if(this.tier >= 4){
+        img = projectilePics[this.type][1]; // big bomb!
+        speed /= 2;
     }
+    var projectile = new ProjectileClass({x: this.x, y: this.y}, this.target.id, img, this.type, dmg, speed, this.tier, true, this.id, this.context);
+    projectileList[this.context][projectile.id] = projectile;            
 }

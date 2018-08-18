@@ -59,7 +59,7 @@ function drawMessage(message, alpha, delta, x, y, color, context) {
     ctx[context].fillStyle = color;
     ctx[context].globalAlpha = alpha;
 
-    ctx[context].font = "16px Helvetica";
+    ctx[context].font = "34px Stranger";
     ctx[context].textAlign = "left";
     ctx[context].textBaseline = "top";
     ctx[context].fillText(message, x, y);

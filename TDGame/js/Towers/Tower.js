@@ -136,7 +136,7 @@ function TowerClass(type, context) {
     this.visible = false;
     this.killCount = 0;
     this.value = towerCosts[type] / 2;
-    this.targets = [];
+    this.target;
     this.targetPriority = TARGET_FIRST;
     this.tilesInRange = [];
     this.timeSinceTargetCheck = 0;
@@ -164,20 +164,22 @@ TowerClass.prototype.reset = function() {
     this.active = false; // might not want this here
 } // end of towerReset
 
-TowerClass.prototype.getFirstTarget = function(toIndex) {
+TowerClass.prototype.getFirstTarget = function(toIndex = -1) {
     // follow the path, end -> start, and attack the first monster in range
     for(var tileNum = 0; tileNum < this.tilesInRange.length; tileNum++) {
         var tilePos = this.tilesInRange[tileNum].tile;
         var tile = StateController.currLevel.tiles[this.context][tilePos.row][tilePos.col];
         if(tile.hasMonsters()) {
             // found our target!
-            this.targets[toIndex] = monsterList[this.context][Object.keys(tile.monstersOnTile)[0]];
+            this.target = monsterList[this.context][Object.keys(tile.monstersOnTile)[0]];
+            if(this.type === SOLAR_PRINCE && this.context === PLAYER) console.log("found on tile " + tile.row + ", " + tile.col + ", index " + toIndex + ", id " + this.target.id);
             return;
         }
     }
+    if(this.type === SOLAR_PRINCE && this.context === PLAYER) console.log("found nothing");
 }
 
-TowerClass.prototype.getLastTarget = function(toIndex) {
+TowerClass.prototype.getLastTarget = function(toIndex = -1) {
     // last
     for(var tileNum = this.tilesInRange.length - 1; tileNum > 0; tileNum--) {
         var tilePos = this.tilesInRange[tileNum].tile;
@@ -185,7 +187,7 @@ TowerClass.prototype.getLastTarget = function(toIndex) {
             var tile = StateController.currLevel.tiles[this.context][tilePos.row][tilePos.col];
             if(tile.hasMonsters()) {
                 // found our target!
-                this.targets[toIndex] = monsterList[this.context][Object.keys(tile.monstersOnTile)[0]];
+                this.target = monsterList[this.context][Object.keys(tile.monstersOnTile)[0]];
                 return;
             }
         }
@@ -193,11 +195,11 @@ TowerClass.prototype.getLastTarget = function(toIndex) {
 }
 
 TowerClass.prototype.findTarget = function() {
-    this.targets = [];
+    this.target = null;
     if(this.targetPriority === TARGET_FIRST) {
-        this.getFirstTarget(0);
+        this.getFirstTarget();
     } else {
-        this.getLastTarget(0);
+        this.getLastTarget();
     }
 }
 
@@ -213,25 +215,22 @@ TowerClass.prototype.move = function() {
     this.timeSinceTargetCheck++;
 
     // is locally set
-    if(this.targets[0]) {
-        // is alive
-        if(this.targets[0].health > 0) {
-            // check if target has moved out of range
-            if(!this.inRange(this.targets[0].currTile.row, this.targets[0].currTile.col)) {
-                this.targets[0] = null;
-            } else {
-                this.track({x: this.targets[0].x + TILE_W / 2, y: this.targets[0].y + TILE_H / 2});
-                if(this.timeSinceAttack > (1000 / fps) / this.properties[ATTACK_SPEED]) {
-                    this.attack();
-                    this.timeSinceAttack = 0;
-                }
-            }
+    if(this.type === SOLAR_PRINCE && this.context === PLAYER) console.log(this.target);
+    if(this.target) {
+        if(this.type === SOLAR_PRINCE && this.context === PLAYER) console.log("defined");
+        // check if target has moved out of range
+        if(!this.inRange(this.target.currTile.row, this.target.currTile.col)) {
+            this.target = null;
         } else {
-            // died
-            this.findTarget();       
+            this.track({x: this.target.x + TILE_W / 2, y: this.target.y + TILE_H / 2});
+            if(this.timeSinceAttack > (1000 / fps) / this.properties[ATTACK_SPEED]) {
+                this.attack();
+                this.timeSinceAttack = 0;
+            }
         }
     } else {
-        // deleted in the mean time
+        // deleted since last frame
+        if(this.type === SOLAR_PRINCE && this.context === PLAYER) console.log("finding new, gone");
         this.findTarget();
     }
 
@@ -255,11 +254,8 @@ TowerClass.prototype.attack = function() {
         dmg += diff;
     }
 
-    for(var target = 0; target < this.targets.length; target++) {
-        if(this.targets[target] === undefined) continue;
-        var projectile = new ProjectileClass({x: this.x, y: this.y}, this.targets[target].id, projectilePics[this.type][0], this.type, dmg, projectileSpeeds[this.type], this.tier, true, this.id, this.context);
-        projectileList[this.context][projectile.id] = projectile;            
-    }
+    var projectile = new ProjectileClass({x: this.x, y: this.y}, this.target.id, projectilePics[this.type][0], this.type, dmg, projectileSpeeds[this.type], this.tier, true, this.id, this.context);
+    projectileList[this.context][projectile.id] = projectile;
 }
 
 TowerClass.prototype.draw = function() {

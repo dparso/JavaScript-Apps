@@ -1,3 +1,11 @@
+const EASY = 0;
+const MEDIUM = 1;
+const HARD = 2;
+const INSANE = 3;
+
+const LIGHT = 0;
+const DARK = 1;
+
 
 function StateControllerClass(startLevel) {
     this.state;
@@ -84,7 +92,7 @@ function StateControllerClass(startLevel) {
         return true;
     }
 
-    this.sendMonster = function(ofType, toSide, usedHotkey = false) {
+    this.sendMonster = function(ofType, toSide, usedHotkey = false, fromBarracks = false) {
         toSide = PLAYER;
         var sender = otherPlayer(toSide);
         monsterCounts[sender][ofType]++;
@@ -101,23 +109,29 @@ function StateControllerClass(startLevel) {
 
         var monster = new MonsterClass(ofType, toSide);
         monster.reset();
-        monsterList[toSide][monster.id] = monster;
+        // monsterList[toSide][monster.id] = monster;
         StateController.monstersWaiting[toSide].push(monster);
         // toSide is the resulting side, but the opposite side sent it
         var level = monsterLevels[toSide][ofType];
         if(toSide === PLAYER) {
-            enemy.sendMonster(ofType);
+            if(!fromBarracks) {
+                enemy.sendMonster(ofType);
+            }
             enemy.monsterStrength += monsterCosts[sender][ofType] * 4;
         } else {
-            player.sendMonster(ofType);
-            player.monsterStrength += monsterCosts[sender][ofType] * 4;
-            // console.log(player.monsterStrength);
-            // player sent: display message over the selection tile
             var side = toSide;
             if(usedHotkey) {
                 side = currCanvas;
             }
-            queueMessage("-" + (monsterCosts[sender][monster.type]).toLocaleString(), mouseX, mouseY, side);
+            
+            if(!fromBarracks) {
+                player.sendMonster(ofType);
+                queueMessage("-" + (monsterCosts[sender][monster.type]).toLocaleString(), mouseX, mouseY, side);
+            }
+            player.monsterStrength += monsterCosts[sender][ofType] * 4;
+            // console.log(player.monsterStrength);
+            // player sent: display message over the selection tile
+
             return true;
         }
     }

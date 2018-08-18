@@ -6,7 +6,8 @@ var monsterSpeeds = [[10, 5, 4, 6, 7, 2.5, 3, 2], [10, 5, 4, 6, 7, 2.5, 3, 2]];
 
 var monster_kill_ratio = 0.1; // gold from killing
 var monster_send_ratio = 0.3; // income from sending
-var monsterCosts = [[1.0, 3.0, 8.0, 20.0, 100.0, 1000.0, 20000.0, 100000.0], [1.0, 2.0, 8.0, 20.0, 100.0, 1000.0, 20000.0, 100000.0]];
+var monsterCosts = [[50.0, 190.0, 800.0, 1500.0, 8000.0, 50000.0, 250000.0, 5000000.0],
+                    [50.0, 190.0, 800.0, 1500.0, 8000.0, 50000.0, 250000.0, 5000000.0]];
 var monsterNames = ["Spook", "Fright", "Fear", "Dread", "Nightmare", "Terror", "Horror", "Chaos"]; // panic, despair, jitters, concern, creep, anguish, gloom, misery, desperation, wraith
 var monsterDescriptions = ["Weak, fast, and spooky.", "Strong, slow early-game monster.", "Be afraid!", "Shore up your defenses, or pay the price.", "The dark-alley life stealer.", "Looming, lumbering, lifeless.", "The lieutenant of Chaos.", "Game over, man."];
 
