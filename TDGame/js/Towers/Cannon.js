@@ -23,6 +23,6 @@ CannonClass.prototype.attack = function() {
         img = projectilePics[this.type][1]; // big bomb!
         speed /= 2;
     }
-    var projectile = new ProjectileClass({x: this.x, y: this.y}, this.target.id, img, this.type, dmg, speed, this.tier, true, this.id, this.context);
+    var projectile = new ProjectileClass({x: this.x, y: this.y}, this.targets[0].id, img, this.type, dmg, speed, this.tier, true, this.id, this.context);
     projectileList[this.context][projectile.id] = projectile;            
 }

@@ -42,7 +42,19 @@ var levelThree = new LevelClass(LEVEL_TRACK, [levelThreeGrid_player, levelThreeG
     drawGridLevel(level, context);
 });
 
-const LEVELS = [levelOne, levelTwo, levelThree];
+var levelFour = new LevelClass(LEVEL_TRACK, [levelFourGrid_player, levelFourGrid_enemy], function(level, context) {
+    drawGridLevel(level, context);
+});
+
+var levelFive = new LevelClass(LEVEL_TRACK, [levelFiveGrid_player, levelFiveGrid_enemy], function(level, context) {
+    drawGridLevel(level, context);
+});
+
+var levelSix = new LevelClass(LEVEL_TRACK, [levelSixGrid_player, levelSixGrid_enemy], function(level, context) {
+    drawGridLevel(level, context);
+});
+
+const LEVELS = [levelOne, levelTwo, levelThree, levelFour, levelFive, levelSix];
 
 // generalized function for drawing a playable level
 function drawGridLevel(level, context) {

@@ -94,7 +94,7 @@ function collisionHandling(object) {
     if(gridPos.col >= 0 && gridPos.row >= 0 && gridPos.col < TILE_COLS && gridPos.row < TILE_ROWS) {
         var tileType = StateController.currLevel.tiles[gridPos.row][gridPos.col].type;
         switch(tileType) {
-            case TILE_TREE:
+            case TILE_OBSTACLE:
                 return false;
             case TILE_WALL:
                 return false;

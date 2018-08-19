@@ -50,6 +50,7 @@ function calculateMousePos(evt) {
         // display tooltips for purchases
         var hoverTile = pixelToGrid(mouseX, mouseY);
         var tile = StateController.currLevel.tiles[currCanvas][hoverTile.row][hoverTile.col];
+
         if(typeIsTower(tile.type)) {
             var index = tile.type - TOWER_OFFSET_NUM;
             var text = towerNames[index] + ": " + towerCosts[index].toLocaleString() + " [" + (index + 1) + "]";

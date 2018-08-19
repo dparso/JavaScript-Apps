@@ -259,7 +259,7 @@ function StateControllerClass(startLevel) {
             }
             if(player.gold >= monsterCosts[PLAYER][type]) {
                 this.sendMonster(type, ENEMY, true);
-                // this.sendMonster(type, PLAYER, true);
+                this.sendMonster(type, PLAYER, true);
             } else {
                 queueMessage("Insufficient gold!", mouseX, mouseY, currCanvas);
             }

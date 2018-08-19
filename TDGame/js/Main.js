@@ -93,6 +93,8 @@ function playGame() {
 
     // StateController.changeState(STATE_START, welcomeScreen);
     StateController.changeState(STATE_PLAY, LEVELS[0]);
+    // ctx[PLAYER].scale(0.5, 0.5);
+
 }
 
 function updateAll() {
@@ -237,10 +239,10 @@ function drawSelection(context) {
 }
 
 function textDraw(context) {
-    // var tile = pixelToGrid(mouseX, mouseY);
-    // ctx[currCanvas].fillStyle = 'white';
+    var tile = pixelToGrid(mouseX, mouseY);
+    ctx[currCanvas].fillStyle = 'white';
     // ctx[currCanvas].fillText(mouseX + ", " + mouseY, mouseX + 10, mouseY + 30);
-    // ctx[currCanvas].fillText(tile.row + ", " + tile.col, mouseX + 10, mouseY + 10);
+    ctx[currCanvas].fillText(tile.row + ", " + tile.col, mouseX + 10, mouseY + 10);
 
     // draw all queued messages
     while(messages.length > 0) {
@@ -358,6 +360,7 @@ function restartGame() {
     StateController.monstersWaiting = [[], []];
     availableTowerLocations = [];
     upgradeableTowers = [];
+    game_speed = 1;
 
     REAPER_UNIQUE = [0, 0];
 

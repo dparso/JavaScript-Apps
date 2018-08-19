@@ -18,7 +18,7 @@ var SOLAR_PRINCE_UNIQUE = [0, 0]; // only one reaper per side
 const NUM_TIERS = 6;
                  // [50.0, 75.0, 120.0, 150.0, 150.0, 200.0, 750.0, 3000.0, 1000.0]
 
-const tier_costs = [[75.0, 100.0, 175.0, 500.0, 1200.0, 8000.0], // shooter
+const tier_costs = [[75.0, 100.0, 175.0, 500.0, 1500.0, 12000.0], // shooter
                     [130.0, 275.0, 450.0, 1000.0, 8000.0, 30000.0], // cannon
                     [220.0, 350.0, 800.0, 2000.0, 6000.0, 42000.0], // glaive
                     [250.0, 550.0, 1400.0, 3500.0, 13500.0, 60000.0], // wizard
@@ -30,7 +30,7 @@ const tier_costs = [[75.0, 100.0, 175.0, 500.0, 1200.0, 8000.0], // shooter
                     [2000.0, 3500.0, 6200.0, 10000.0, 28000.0, 50000.0]]; // generator
 
 // if changing these, make sure that the info pane doesn't resize from the text size on the upgrade button hover
-const dmg_upgrade_effects = [[5.0, 2.0, 1.75, 2.0, 2.5, 25.0], // shooter
+const dmg_upgrade_effects = [[5.0, 2.0, 1.75, 2.0, 7.5, 45.0], // shooter
                              [2.5, 3.0, 3.5, 4.5, 30.0, 150.0], // cannon
                              [1.5, 1.5, 2.0, 2.5, 5.0, 12.0], // glaive
                              [1.5, 2.0, 3.0, 7.0, 13.0, 80.0], // wizard
@@ -111,7 +111,7 @@ const DAMAGE = 0;
 const RANGE = 1;
 const ATTACK_SPEED = 2;
 
-const TOWER_TARGET_CHECK_RATE = 2; // x times per second
+const TOWER_TARGET_CHECK_RATE = 15; // x times per second
 
 // TowerClass definition & properties
 function TowerClass(type, context) {
@@ -136,7 +136,7 @@ function TowerClass(type, context) {
     this.visible = false;
     this.killCount = 0;
     this.value = towerCosts[type] / 2;
-    this.target;
+    this.targets = [];
     this.targetPriority = TARGET_FIRST;
     this.tilesInRange = [];
     this.timeSinceTargetCheck = 0;
@@ -164,22 +164,22 @@ TowerClass.prototype.reset = function() {
     this.active = false; // might not want this here
 } // end of towerReset
 
-TowerClass.prototype.getFirstTarget = function(toIndex = -1) {
+TowerClass.prototype.getFirstTarget = function() {
     // follow the path, end -> start, and attack the first monster in range
     for(var tileNum = 0; tileNum < this.tilesInRange.length; tileNum++) {
         var tilePos = this.tilesInRange[tileNum].tile;
         var tile = StateController.currLevel.tiles[this.context][tilePos.row][tilePos.col];
         if(tile.hasMonsters()) {
             // found our target!
-            this.target = monsterList[this.context][Object.keys(tile.monstersOnTile)[0]];
-            if(this.type === SOLAR_PRINCE && this.context === PLAYER) console.log("found on tile " + tile.row + ", " + tile.col + ", index " + toIndex + ", id " + this.target.id);
+            this.targets.push(monsterList[this.context][Object.keys(tile.monstersOnTile)[0]]);
+            if(this.type === SOLAR_PRINCE && this.context === PLAYER) console.log("found on tile " + tile.row + ", " + tile.col + ", " +  "id " + this.targets[0].id);
             return;
         }
     }
     if(this.type === SOLAR_PRINCE && this.context === PLAYER) console.log("found nothing");
 }
 
-TowerClass.prototype.getLastTarget = function(toIndex = -1) {
+TowerClass.prototype.getLastTarget = function() {
     // last
     for(var tileNum = this.tilesInRange.length - 1; tileNum > 0; tileNum--) {
         var tilePos = this.tilesInRange[tileNum].tile;
@@ -187,7 +187,7 @@ TowerClass.prototype.getLastTarget = function(toIndex = -1) {
             var tile = StateController.currLevel.tiles[this.context][tilePos.row][tilePos.col];
             if(tile.hasMonsters()) {
                 // found our target!
-                this.target = monsterList[this.context][Object.keys(tile.monstersOnTile)[0]];
+                this.targets.push(monsterList[this.context][Object.keys(tile.monstersOnTile)[0]]);
                 return;
             }
         }
@@ -195,7 +195,7 @@ TowerClass.prototype.getLastTarget = function(toIndex = -1) {
 }
 
 TowerClass.prototype.findTarget = function() {
-    this.target = null;
+    this.targets = [];
     if(this.targetPriority === TARGET_FIRST) {
         this.getFirstTarget();
     } else {
@@ -215,14 +215,14 @@ TowerClass.prototype.move = function() {
     this.timeSinceTargetCheck++;
 
     // is locally set
-    if(this.type === SOLAR_PRINCE && this.context === PLAYER) console.log(this.target);
-    if(this.target) {
+    if(this.type === SOLAR_PRINCE && this.context === PLAYER) console.log(this.targets);
+    if(this.targets[0]) {
         if(this.type === SOLAR_PRINCE && this.context === PLAYER) console.log("defined");
         // check if target has moved out of range
-        if(!this.inRange(this.target.currTile.row, this.target.currTile.col)) {
-            this.target = null;
+        if(!this.inRange(this.targets[0].currTile.row, this.targets[0].currTile.col)) {
+            this.targets = [];
         } else {
-            this.track({x: this.target.x + TILE_W / 2, y: this.target.y + TILE_H / 2});
+            this.track({x: this.targets[0].x + TILE_W / 2, y: this.targets[0].y + TILE_H / 2});
             if(this.timeSinceAttack > (1000 / fps) / this.properties[ATTACK_SPEED]) {
                 this.attack();
                 this.timeSinceAttack = 0;
@@ -254,7 +254,7 @@ TowerClass.prototype.attack = function() {
         dmg += diff;
     }
 
-    var projectile = new ProjectileClass({x: this.x, y: this.y}, this.target.id, projectilePics[this.type][0], this.type, dmg, projectileSpeeds[this.type], this.tier, true, this.id, this.context);
+    var projectile = new ProjectileClass({x: this.x, y: this.y}, this.targets[0].id, projectilePics[this.type][0], this.type, dmg, projectileSpeeds[this.type], this.tier, true, this.id, this.context);
     projectileList[this.context][projectile.id] = projectile;
 }
 

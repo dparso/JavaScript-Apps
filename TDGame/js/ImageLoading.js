@@ -20,23 +20,9 @@ imageList[TILE_WALL] = ["Tiles/ground/one_horizontal.png",
                         "Tiles/ground/one_right.png",
                         "Tiles/ground/one_down.png"];
 
-imageList[TILE_WALL_2] = ["Tiles/ground/one_horizontal.png",
-                        "Tiles/ground/one_vertical.png",
-                        "Tiles/ground/two_left_up.png",
-                        "Tiles/ground/two_left_down.png",
-                        "Tiles/ground/two_right_up.png",
-                        "Tiles/ground/two_right_down.png",
-                        "Tiles/ground/three_left.png",
-                        "Tiles/ground/three_up.png",
-                        "Tiles/ground/three_right.png",
-                        "Tiles/ground/three_down.png",
-                        "Tiles/ground/four.png",
-                        "Tiles/ground/one_left.png",
-                        "Tiles/ground/one_up.png",
-                        "Tiles/ground/one_right.png",
-                        "Tiles/ground/one_down.png"];
+imageList[TILE_LAVA] = ["Tiles/lava.png"];
 
-imageList[TILE_TREE] = ["Tiles/tree2.png"];
+imageList[TILE_OBSTACLE] = ["Tiles/obstacles/tree.png", "Tiles/obstacles/rocks.png", "Tiles/obstacles/tree_2.png", "Tiles/obstacles/tree_3.png", "Tiles/obstacles/log.png", "Tiles/obstacles/tombstone.png"];
 imageList[TILE_MONSTER_START] = ["startSpiral.png"];
 imageList[TILE_MONSTER_END] = ["endSpiral.png"];
 

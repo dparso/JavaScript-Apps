@@ -577,9 +577,10 @@ button:focus, input[type="button"]:focus, input[type="image"]:focus {
 
 #diffdescription {
     position: absolute;
-    top: 5%;
+    top: -40%;
     left: 170px;
-    width: 180px;
+    width: 200px;
+    font-size: 48px;
 }
 
 #raceselect {
@@ -602,9 +603,10 @@ button:focus, input[type="button"]:focus, input[type="image"]:focus {
 #racedescription {
     position: absolute;
     /*display: inline;*/
-    top: 0px;
+    top: -45%;
     left: 150px;
-    width: 180px;
+    width: 200px;
+    font-size: 48px;
 }
 
 #readybutton {

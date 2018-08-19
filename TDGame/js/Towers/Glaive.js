@@ -22,7 +22,7 @@ GlaiveClass.prototype.attack = function() {
     var speed = projectileSpeeds[this.type];
     speed -= speed * this.tier / tier_costs[this.type].length; // approaches 1
     var hits = glaive_strengths[this.tier + 1];
-    var projectile = new StraightProjectileClass({x: this.x, y: this.y}, this.target.id, projectilePics[this.type][0], this.type, dmg, speed, hits, this.tier, true, this.id, this.context);
+    var projectile = new StraightProjectileClass({x: this.x, y: this.y}, {x: this.targets[0].x, y: this.targets[0].y}, projectilePics[this.type][0], this.type, dmg, speed, hits, this.tier, true, this.id, this.context);
     projectileList[this.context][projectile.id] = projectile;            
 }
 

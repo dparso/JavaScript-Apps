@@ -113,7 +113,10 @@ SolarPrinceClass.prototype.attack = function() {
 
     var count = 0;
     var i = index;
-
+    if(tiles.tilesInRadialOrder.length == 0) {
+        console.log("no tiles");
+    }
+    
     while(count < this.tilesInRadialOrder.length) { // count at most all tiles
         tileObj = this.tilesInRadialOrder[i];
         if(tileObj === undefined) {

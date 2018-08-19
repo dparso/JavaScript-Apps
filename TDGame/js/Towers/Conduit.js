@@ -2,7 +2,6 @@
 function ConduitClass(type, context) {
     TowerClass.call(this, type, context);
 
-    this.targets = [];
     this.maxJumpDistance = 50;
     this.maxJumps = 10;
     this.dampening = 0.96; // how much damage is reduced across each jump
@@ -37,36 +36,6 @@ ConduitClass.prototype.findChainTargets = function(fromTile) {
         );
         index++;
         jumpDistance++;
-    }
-}
-
-ConduitClass.prototype.getFirstTarget = function(toIndex) {
-    // follow the path, end -> start, and attack the first monster in range
-    this.targets = [];
-    for(var tileNum = 0; tileNum < this.tilesInRange.length; tileNum++) {
-        var tilePos = this.tilesInRange[tileNum];
-        var tile = StateController.currLevel.tiles[this.context][tilePos.tile.row][tilePos.tile.col];
-        if(tile.hasMonsters()) {
-            // found target
-            this.targets = [monsterList[this.context][Object.keys(tile.monstersOnTile)[0]]];
-            this.findChainTargets(tilePos.index);
-            return;
-        }
-    }
-}
-
-ConduitClass.prototype.getLastTarget = function(toIndex) {
-    this.targets = [];
-    for(var tileNum = this.tilesInRange.length - 1; tileNum > 0; tileNum--) {
-        var tilePos = this.tilesInRange[tileNum].tile;
-        if(this.inRange(tilePos.row, tilePos.col)) {
-            var tile = StateController.currLevel.tiles[this.context][tilePos.row][tilePos.col];
-            if(tile.hasMonsters()) {
-                this.targets = [monsterList[this.context][Object.keys(tile.monstersOnTile)[0]]];
-                this.findChainTargets(tileNum);
-                return;
-            }
-        }
     }
 }
 

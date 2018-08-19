@@ -18,18 +18,18 @@ ShooterClass.prototype.attack = function() {
         dmg += diff;
     }
 
-    for(var target = 0; target < this.targets.length; target++) {
-        if(this.tier >= 4) {
-            // spray!
-            for(var degree = -15; degree <= 15; degree++) {
-                var rad = degree * (Math.PI / 180) + this.angle;
-                var xOff = Math.cos(rad) * 1000; 
-                var yOff = Math.sin(rad) * 1000;
-                var pro = new StraightProjectileClass({x: this.x, y: this.y}, {x: this.x + xOff, y: this.y + yOff}, projectilePics[this.type][0], this.type, dmg / 2.0, projectileSpeeds[this.type], 1, this.tier, false, this.id, this.context);
-                projectileList[this.context][pro.id] = pro; 
-            }
-        }
-        var projectile = new ProjectileClass({x: this.x, y: this.y}, this.targets[target].id, projectilePics[this.type][0], this.type, dmg, projectileSpeeds[this.type], this.tier, false, this.id, this.context);
-        projectileList[this.context][projectile.id] = projectile;            
-    }
+    // if(this.tier >= 4) {
+    //     // spray!
+    //     for(var degree = -15; degree <= 15; degree++) {
+    //         var rad = degree * (Math.PI / 180) + this.angle;
+    //         var xOff = Math.cos(rad) * 1000;
+    //         var yOff = Math.sin(rad) * 1000;
+    //         var pro = new StraightProjectileClass({x: this.x, y: this.y}, {x: this.x + xOff, y: this.y + yOff}, projectilePics[this.type][0], this.type, dmg / 2.0, projectileSpeeds[this.type], 1, this.tier, false, this.id, this.context);
+    //         projectileList[this.context][pro.id] = pro;
+    //         console.log(pro);
+    //     }
+    // }
+    
+    var projectile = new ProjectileClass({x: this.x, y: this.y}, this.targets[0].id, projectilePics[this.type][0], this.type, dmg, projectileSpeeds[this.type], this.tier, false, this.id, this.context);
+    projectileList[this.context][projectile.id] = projectile;            
 }

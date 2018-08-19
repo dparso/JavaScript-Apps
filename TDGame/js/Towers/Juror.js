@@ -53,37 +53,37 @@ JurorClass.prototype.attack = function() {
     }
 }
 
-JurorClass.prototype.move = function() {
-    if(!this.active) {
-        return;
-    }
+// JurorClass.prototype.move = function() {
+//     if(!this.active) {
+//         return;
+//     }
 
-    if(this.timeSinceTargetCheck > 1000 / fps / TOWER_TARGET_CHECK_RATE) {
-        this.findTarget(); // this is NOT necessary to do every time, computationally speaking
-        this.timeSinceTargetCheck = 0;
-    }
-    this.timeSinceTargetCheck++;
+//     if(this.timeSinceTargetCheck > 1000 / fps / TOWER_TARGET_CHECK_RATE) {
+//         this.findTarget(); // this is NOT necessary to do every time, computationally speaking
+//         this.timeSinceTargetCheck = 0;
+//     }
+//     this.timeSinceTargetCheck++;
 
-    // is locally set
-    if(this.type === SOLAR_PRINCE && this.context === PLAYER) console.log(this.target);
-    if(this.targets.length > 0) {
-        // check if target has moved out of range
-        if(this.targets[0]) {
-            if(!this.inRange(this.targets[0].currTile.row, this.targets[0].currTile.col)) {
-                this.targets = [];
-            } else {
-                if(this.timeSinceAttack > (1000 / fps) / this.properties[ATTACK_SPEED]) {
-                    this.attack();
-                    this.timeSinceAttack = 0;
-                }
-            }
-        } else {
-            this.findTarget();
-        }
-    } else {
-        // deleted since last frame
-        this.findTarget();
-    }
+//     // is locally set
+//     if(this.type === SOLAR_PRINCE && this.context === PLAYER) console.log(this.target);
+//     if(this.targets.length > 0) {
+//         // check if target has moved out of range
+//         if(this.targets[0]) {
+//             if(!this.inRange(this.targets[0].currTile.row, this.targets[0].currTile.col)) {
+//                 this.targets = [];
+//             } else {
+//                 if(this.timeSinceAttack > (1000 / fps) / this.properties[ATTACK_SPEED]) {
+//                     this.attack();
+//                     this.timeSinceAttack = 0;
+//                 }
+//             }
+//         } else {
+//             this.findTarget();
+//         }
+//     } else {
+//         // deleted since last frame
+//         this.findTarget();
+//     }
 
-    this.timeSinceAttack++;
-}
+//     this.timeSinceAttack++;
+// }

@@ -91,43 +91,45 @@ ProjectileClass.prototype.move = function() {
         this.x += xDir * this.speed;
         this.y += yDir * this.speed;
 
-        if(this.hitTarget()) {
-            // monster might have died in travel time
-            if(this.target.health > 0) {
-                if(this.target !== undefined) {
+        if(this.target) {
+            if(this.hitTarget()) {
+                // monster might have died in travel time
+                if(this.target.health > 0) {
                     if(this.target.hitWithProjectile(this.damage)) {
                         StateController.notifyTowerKilledMonster(this.parentId, this.context, this.target.type);
                     }
                 }
-            }
-            if(splashes[this.type]) {
-                var thisTile = pixelToGrid(this.x, this.y);
+                if(splashes[this.type]) {
+                    var thisTile = pixelToGrid(this.x, this.y);
 
-                // apply splash to every nearby tile
-                for(var row = thisTile.row - this.splashRange; row <= thisTile.row + this.splashRange; row++) {
-                    for(var col = thisTile.col - this.splashRange; col <= thisTile.col + this.splashRange; col++) {    
-                        if(!gridInRange(row, col)) continue;
+                    // apply splash to every nearby tile
+                    for(var row = thisTile.row - this.splashRange; row <= thisTile.row + this.splashRange; row++) {
+                        for(var col = thisTile.col - this.splashRange; col <= thisTile.col + this.splashRange; col++) {    
+                            if(!gridInRange(row, col)) continue;
 
-                        var targetTile = StateController.currLevel.tiles[this.context][row][col];
-                        // apply to all monsters on that tile
-                        if(targetTile.hasMonsters()) {
-                            Object.keys(targetTile.monstersOnTile).forEach(
-                                ((monster) => {
-                                    var obj = monsterList[this.context][monster];
-                                    if(obj !== undefined) {
-                                        if(obj.hitWithProjectile(this.damage * this.splashRatio)) {
-                                            StateController.notifyTowerKilledMonster(this.parentId, this.context, obj.type);
+                            var targetTile = StateController.currLevel.tiles[this.context][row][col];
+                            // apply to all monsters on that tile
+                            if(targetTile.hasMonsters()) {
+                                Object.keys(targetTile.monstersOnTile).forEach(
+                                    ((monster) => {
+                                        var obj = monsterList[this.context][monster];
+                                        if(obj !== undefined) {
+                                            if(obj.hitWithProjectile(this.damage * this.splashRatio)) {
+                                                StateController.notifyTowerKilledMonster(this.parentId, this.context, obj.type);
+                                            }
                                         }
-                                    }
-                                })
-                            );
-                        } // end of hasMonsters
-                    } // end of col
-                } // end of row
-            } // end of splash
+                                    })
+                                );
+                            } // end of hasMonsters
+                        } // end of col
+                    } // end of row
+                } // end of splash
 
-            this.die(); // always disappear
-        } // end of hitTarget()
+                this.die(); // always disappear
+            } // end of hitTarget()
+        } else {
+            this.die();
+        }
     } // end of visible
 } // end of move()
 
@@ -151,32 +153,28 @@ ProjectileClass.prototype.draw = function() {
 }
 
 ProjectileClass.prototype.die = function() {
-    if(this.type === PROJECTILE_TYPE_2) {
+    if(this.type === PROJECTILE_TYPE_2 && this.target) {
         // explode!
         makeAnimation(EXPLOSION, this.target.x + TILE_W / 2, this.target.y + TILE_H / 2, 0, this.context);
     }
     delete projectileList[this.context][this.id];
 }
 
-function StraightProjectileClass(start, targetId, img, type, damage, speed, hits, tier, rotates, parent, context) {
-    ProjectileClass.call(this, start, targetId, img, type, damage, speed, tier, rotates, parent, context);
+function StraightProjectileClass(start, targetPoint, img, type, damage, speed, hits, tier, rotates, parent, context) {
+    ProjectileClass.call(this, start, -1, img, type, damage, speed, tier, rotates, parent, context);
     this.hits = hits;
     this.xVel = null, this.yVel = null;
+    this.targetPoint = targetPoint;
 }
 
 StraightProjectileClass.prototype = Object.create(ProjectileClass.prototype);  
 StraightProjectileClass.prototype.constructor = StraightProjectileClass; 
 
 StraightProjectileClass.prototype.move = function() {
-    if(this.target === undefined) {
-        this.die();
-        return;
-    }
-
     if(this.xVel === null) {
         // calculate initial velocity
-        var changeX = (this.target.x + TILE_W / 2) - this.x;
-        var changeY = (this.target.y + TILE_H / 2) - this.y;
+        var changeX = (this.targetPoint.x + TILE_W / 2) - this.x;
+        var changeY = (this.targetPoint.y + TILE_H / 2) - this.y;
 
         var magnitude = Math.sqrt(Math.abs(changeX * changeX + changeY * changeY));
 
