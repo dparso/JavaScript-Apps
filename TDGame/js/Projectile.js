@@ -49,6 +49,7 @@ function ProjectileClass(start, targetId, img, type, damage, speed, tier, rotate
     this.parentId = parent; // which tower fired
 
     this.angle = 0;
+    this.targetId = targetId;
     this.target = monsterList[this.context][targetId];
     this.type = type;
     this.visible = true;
@@ -91,12 +92,15 @@ ProjectileClass.prototype.move = function() {
         this.x += xDir * this.speed;
         this.y += yDir * this.speed;
 
-        if(this.target) {
+
+        if(monsterList[this.context][this.targetId]) {
             if(this.hitTarget()) {
+                // console.log("projectile " + this.type + " hitting " + this.targetId);
                 // monster might have died in travel time
-                if(this.target.health > 0) {
-                    if(this.target.hitWithProjectile(this.damage)) {
-                        StateController.notifyTowerKilledMonster(this.parentId, this.context, this.target.type);
+                if(this.target.alive) {
+                    var type = this.target.type;
+                    if(monsterList[this.context][this.targetId].hitWithProjectile(this.damage)) {
+                        StateController.notifyTowerKilledMonster(this.parentId, this.context, type);
                     }
                 }
                 if(splashes[this.type]) {
@@ -112,10 +116,10 @@ ProjectileClass.prototype.move = function() {
                             if(targetTile.hasMonsters()) {
                                 Object.keys(targetTile.monstersOnTile).forEach(
                                     ((monster) => {
-                                        var obj = monsterList[this.context][monster];
-                                        if(obj !== undefined) {
-                                            if(obj.hitWithProjectile(this.damage * this.splashRatio)) {
-                                                StateController.notifyTowerKilledMonster(this.parentId, this.context, obj.type);
+                                        var type = monsterList[this.context][monster].type;
+                                        if(monsterList[this.context][monster] !== undefined) {
+                                            if(monsterList[this.context][monster].hitWithProjectile(this.damage * this.splashRatio)) {
+                                                StateController.notifyTowerKilledMonster(this.parentId, this.context, type);
                                             }
                                         }
                                     })
@@ -126,9 +130,11 @@ ProjectileClass.prototype.move = function() {
                 } // end of splash
 
                 this.die(); // always disappear
+                return;
             } // end of hitTarget()
         } else {
             this.die();
+            return;
         }
     } // end of visible
 } // end of move()
@@ -205,10 +211,10 @@ StraightProjectileClass.prototype.move = function() {
                     this.die();
                     return;
                 }
-                var obj = monsterList[this.context][monster];
-                if(obj !== undefined) {
-                    if(obj.hitWithProjectile(this.damage)) {
-                        StateController.notifyTowerKilledMonster(this.parentId, this.context, obj.type);
+                if(monsterList[this.context][monster] !== undefined) {
+                    var type = monsterList[this.context][monster].type;
+                    if(monsterList[this.context][monster].hitWithProjectile(this.damage)) {
+                        StateController.notifyTowerKilledMonster(this.parentId, this.context, type);
                     }
                     this.hits--;
                 }
@@ -261,10 +267,12 @@ PortalClass.prototype.move = function() {
         // console.log(this.circleAngle % Math.PI);
         // console.log(this.x + ", " + this.y);
     } else if(this.state === PORTAL_TRACKING) {
+        this.target = monsterList[this.context][this.targetId];
         if(this.target === undefined) {
             this.becomeStationary();
             return;
         }
+
 
         // lead the target
         var trackPoint = {x: this.target.x, y: this.target.y};
@@ -307,8 +315,11 @@ PortalClass.prototype.move = function() {
             this.becomeStationary();
         }
     } else {
-        // check for monsters on the tile
-        if(this.currTile === undefined) return;
+        // wait & check for monsters on the tile
+        if(this.currTile === undefined) {
+            this.die();
+            return;
+        }
         if(this.currTile.hasMonsters()) {
             Object.keys(this.currTile.monstersOnTile).forEach(
                 ((monster) => {
@@ -316,13 +327,13 @@ PortalClass.prototype.move = function() {
                         this.die();
                         return;
                     }
-                    var obj = monsterList[this.context][monster];
-                    if(obj !== undefined) {
+                    if(monsterList[this.context][monster] !== undefined && monsterList[this.context][monster].alive) {
                         // deal damage, teleport if still alive
+                        var obj = monsterList[this.context][monster];
                         if(obj.hitWithProjectile(this.damage)) {
                             StateController.notifyTowerKilledMonster(this.parentId, this.context, obj.type);
                         } else {
-                            this.teleportMonster(obj.id);
+                            this.teleportMonster(monsterList[this.context][monster].id);
                         }
                         this.capacity--;
                     }
@@ -339,6 +350,7 @@ PortalClass.prototype.move = function() {
 }
 
 PortalClass.prototype.teleportMonster = function(monsterId) {
+    // debugger;
     let monster = monsterList[this.context][monsterId];
     if(this.pointInMonsterPath === null) {
         console.log("SEE PROJECTILE 370!");
@@ -363,7 +375,11 @@ PortalClass.prototype.teleportMonster = function(monsterId) {
 PortalClass.prototype.becomeStationary = function() {
     this.state = PORTAL_STATIONARY;
     let gridPos = pixelToGrid(this.x, this.y);
-    console.log(this.x + ", " + this.y + ", " + gridPos);
+    if(!gridInRange(gridPos.row, gridPos.col)) {
+        this.die();
+        return;
+    }
+    // console.log(this.x + ", " + this.y + ", " + gridPos);
     this.currTile = StateController.currLevel.tiles[this.context][gridPos.row][gridPos.col];
 
     // calculate where in the monsterPath you are

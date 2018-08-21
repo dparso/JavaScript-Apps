@@ -34,6 +34,7 @@ function MonsterClass(type, context) {
     this.pathPosition = monsterPath[this.context].length - 1; // current goal
     this.visible = false;
     this.type = type;
+    this.alive = true;
     this.level = monsterLevels[otherPlayer(this.context)][this.type];
     this.health = monsterHealths[otherPlayer(this.context)][type];
     this.maxHealth = this.health;
@@ -64,6 +65,12 @@ function MonsterClass(type, context) {
         for(dotId in this.dots) {
             this.dots[dotId].move();
         }
+        // these dots may have killed the monster: only move if still alove
+        if(!this.alive) return;
+
+        if(!this.alive || monsterList[this.context][this.id].currTile.row != this.currTile.row || monsterList[this.context][this.id].currTile.col != this.currTile.col) {
+            debugger;
+        }
 
         if(this.immobile) return;
         if(this.pathPosition >= 0) {
@@ -80,7 +87,10 @@ function MonsterClass(type, context) {
                 this.x += Math.sign(changeX) * this.speed;
                 this.y += Math.sign(changeY) * this.speed;
 
-                if(Math.abs(nextGoal.x - this.x) <= this.speed && Math.abs(nextGoal.y - this.y) <= this.speed) {
+                // within range of next goal
+                // console.log(this.speed);
+                // console.log(Math.abs(nextGoal.x - this.x) + ", " + Math.abs(nextGoal.y - this.y));
+                if(Math.abs(nextGoal.x - this.x) < this.speed && Math.abs(nextGoal.y - this.y) < this.speed) {
                     this.x = nextGoal.x;
                     this.y = nextGoal.y;
                     this.pathPosition--;
@@ -131,7 +141,7 @@ function MonsterClass(type, context) {
                 ctx[this.context].shadowColor = color;
                 ctx[this.context].globalAlpha = scale;
 
-                ctx[this.context].drawImage(img, (-img.width) / 2, (-img.height) / 2);
+                ctx[this.context].drawImage(img, Math.round(-img.width / 2), Math.round(-img.height / 2));
                 ctx[this.context].restore();
 
                 this.animationStage--;
@@ -150,7 +160,7 @@ function MonsterClass(type, context) {
                     // ctx[this.context].shadowBlur = 30; // too laggy!
                 // }
 
-                ctx[this.context].drawImage(img, this.x + xOff, this.y + yOff);
+                ctx[this.context].drawImage(img, Math.round(this.x + xOff), Math.round(this.y + yOff));
 
                 var color = this.reaperDot ? 'black' : 'red';
                 // health bar
@@ -185,8 +195,9 @@ function MonsterClass(type, context) {
     }
 
     this.die = function(killed) {
+        if(!this.alive) debugger;
+        this.alive = false;
         this.health = 0; // towers don't attack anymore
-
         if(killed) {
             // only reward player if it was killed (also dies at end)
             var obj = this.context === PLAYER ? player : enemy;
@@ -197,6 +208,9 @@ function MonsterClass(type, context) {
         sender.monsterStrength -= monsterCosts[otherPlayer(this.context)][this.type] * 4;
 
         StateController.currLevel.tiles[this.context][this.currTile.row][this.currTile.col].notifyMonsterDepart(this.id);
+        if(monsterList[this.context][this.id].currTile.row != this.currTile.row || monsterList[this.context][this.id].currTile.col != this.currTile.col) {
+            debugger;
+        }
         delete monsterList[this.context][this.id];
     }
 }

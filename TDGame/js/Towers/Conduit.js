@@ -19,7 +19,6 @@ ConduitClass.prototype.findChainTargets = function(fromTile) {
     // walk down the path finding jumps
     while(jumps < lightning_jumps[this.tier + 1] && jumpDistance < lightning_jump_dist[this.tier + 1] && index < fullMonsterPath[this.context].length) {
         var pos = fullMonsterPath[this.context][index].tile;
-
         var tile = StateController.currLevel.tiles[this.context][pos.row][pos.col];
         Object.keys(tile.monstersOnTile).forEach(
             ((monster) => {
@@ -71,31 +70,60 @@ ConduitClass.prototype.move = function() {
     this.timeSinceAttack++;
 }
 
+ConduitClass.prototype.getFirstTarget = function() {
+    // follow the path, end -> start, and attack the first monster in range
+    for(var tileNum = 0; tileNum < this.tilesInRange.length; tileNum++) {
+        var tilePos = this.tilesInRange[tileNum];
+        var tile = StateController.currLevel.tiles[this.context][tilePos.tile.row][tilePos.tile.col];
+        if(tile.hasMonsters()) {
+            // found target
+            this.targets[0] = monsterList[this.context][Object.keys(tile.monstersOnTile)[0]];
+            this.findChainTargets(tilePos.index, 0);
+            return;
+        }
+    }
+}
+
+ ConduitClass.prototype.getLastTarget = function() {
+    for(var tileNum = this.tilesInRange.length - 1; tileNum > 0; tileNum--) {
+        var tilePos = this.tilesInRange[tileNum].tile;
+        if(this.inRange(tilePos.row, tilePos.col)) {
+            var tile = StateController.currLevel.tiles[this.context][tilePos.row][tilePos.col];
+            if(tile.hasMonsters()) {
+                this.targets[0] = monsterList[this.context][Object.keys(tile.monstersOnTile)[0]];
+                this.findChainTargets(tileNum, 0);
+                return;
+            }
+        }
+    }
+}
+
 ConduitClass.prototype.attack = function() {
-    // var dmg = this.properties[DAMAGE];
-    // var atk = this.properties[ATTACK_SPEED];
-    // if(atk > fps) {
-    //     // could put this elsewhere to avoid computation every shot
-    //     // maximum shots per second is fps, so allow greater firing speed by adjusting damage
-    //     // solve for diff: dmg * atk = (dmg + diff) * fps
-    //     var diff = dmg * atk / fps - dmg;
-    //     dmg += diff;
-    // }
+    var dmg = this.properties[DAMAGE];
+    var atk = this.properties[ATTACK_SPEED];
+    if(atk > fps) {
+        // could put this elsewhere to avoid computation every shot
+        // maximum shots per second is fps, so allow greater firing speed by adjusting damage
+        // solve for diff: dmg * atk = (dmg + diff) * fps
+        var diff = dmg * atk / fps - dmg;
+        dmg += diff;
+    }
 
     var start = {x: this.x, y: this.y};
     var strength = lightning_strengths[this.tier + 1];
     for(var chain = 0; chain < this.targets.length; chain++) {
         var trgt = this.targets[chain];
-        if(!trgt) {
+        if(!trgt || !this.targets[chain].alive) {
             continue;
         }
         if(chain > 0) strength = 2; // reduce clutter for the chain
         var tar = {x: trgt.x + TILE_W / 2, y: trgt.y + TILE_H / 2};
         // lightning gets slightly less crazy as it jumps
         this.drawLightning(start, tar, Math.max(MAX_LIGHTNING_DIFFERENCE - chain * 5, 10), strength);
-        start = tar;   
-        if(this.targets[chain].hitWithProjectile(this.properties[DAMAGE] * Math.pow(this.dampening, chain))) {
-            StateController.notifyTowerKilledMonster(this.id, this.context, this.targets[chain].type);
+        start = tar;
+        var type = this.targets[chain].type;
+        if(this.targets[chain].hitWithProjectile(dmg * Math.pow(this.dampening, chain))) {
+            StateController.notifyTowerKilledMonster(this.id, this.context, type);
         }     
     }
 }

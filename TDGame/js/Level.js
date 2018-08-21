@@ -110,18 +110,10 @@ function LevelClass(levelType, levelGrids, drawFunction, loadFunction) {
 	            // console.log(currTile);
 	            // draw path under tile
 	            if(currTile.transparent) {
-            		ctx[context].drawImage(tilePics[TILE_PATH][0], drawTileX, drawTileY);
+            		bg_ctx[context].drawImage(tilePics[TILE_PATH][0], Math.round(drawTileX), Math.round(drawTileY));
             	}
 
-            	ctx[context].drawImage(currTile.img, drawTileX, drawTileY);
-
-	            // if(currTile.type >= TOWER_OFFSET_NUM) {
-	            //     // draw with rotation
-	            //     drawBitmapCenteredWithRotation(currTile.img, drawTileX + currTile.img.width / 2, drawTileY + currTile.img.height / 2, 0, context);
-	            // } else {
-	            //     ctx[context].drawImage(currTile.img, drawTileX, drawTileY);
-	            // }
-	            
+            	bg_ctx[context].drawImage(currTile.img, Math.round(drawTileX), Math.round(drawTileY));
 	            drawTileX += TILE_W;
 	        }
 	        drawTileY += TILE_H;

@@ -291,8 +291,10 @@ function keyPressed(evt) {
     if(gameWon) {
         return;
     }
-
-    if(evt.keyCode === 9) {
+    if(evt.keyCode === 192) {
+        // advance frame 1 by 1
+        advanceFrame();
+    } else if(evt.keyCode === 9) {
         // tab: cycle tower selection
         var keys = Object.keys(towerList[currCanvas]);
         if(selection[currCanvas] !== null) {

@@ -1,5 +1,5 @@
 const STARTING_LIVES = 5;
-const STARTING_GOLD = 100000000.0;
+const STARTING_GOLD = 10000000000.0;
 const STARTING_INCOME = 20.0;
 const INCOME_RATE = 10; // interval is x seconds
 

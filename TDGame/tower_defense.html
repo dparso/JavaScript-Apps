@@ -29,7 +29,7 @@
 			<li><button class="button">Options</button></li>
 		</ul>
 	</div>
-	<div id="levelconfig">
+	<div hidden id="levelconfig">
 		<div class="tab">
 			<button class="tablinks" onclick="selectTab(event, 'setup')" id="defaultOpen">Setup</button>
 			<button class="tablinks" onclick="selectTab(event, 'towers')">Towers</button>
@@ -78,6 +78,7 @@
 	<div hidden id="container">
 		<div class="split left">
 			<canvas id="gameCanvas" width="700" height="700"></canvas>
+			<canvas id="gameBackgroundCanvas" width="700" height="700"></canvas>
 			<div>
 				<table class="infotext">
 					<col width="90">
@@ -135,6 +136,7 @@
 		
 		<div class="split right">
 				<canvas id="enemyCanvas" width="700" height="700"></canvas>
+				<canvas id="enemyBackgroundCanvas" width="700" height="700"></canvas>
 
 				<!-- Center menu -->
 				<div id="optionsnav" class="centernav">

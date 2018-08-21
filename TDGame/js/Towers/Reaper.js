@@ -37,7 +37,7 @@ ReaperClass.prototype.attack = function() {
             Object.keys(targetTile.monstersOnTile).forEach(
                 ((monster) => {
                     var obj = monsterList[this.context][monster];
-                    if(obj !== undefined) {
+                    if(obj !== undefined && obj.alive) {
                         if(obj.hitWithProjectile(dmg)) {
                             StateController.notifyTowerKilledMonster(this.id, this.context, obj.type);
                         } else {

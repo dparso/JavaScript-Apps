@@ -12,7 +12,7 @@ function AetherClass(type, context) {
     this.floatYDirection = 1;
 
     // portals
-    this.portalGenerationRate = 1; // per second
+    this.portalGenerationRate = 5; // per second
     this.timeSincePortalGen = 0;
     this.maxPortals = 3;
     // create three portals to spin around
@@ -37,7 +37,7 @@ AetherClass.prototype.attack = function() {
     if(this.activePortals.length > 0) {
         var portal = this.activePortals.shift();
         portal.state = PORTAL_TRACKING;
-        portal.target = this.targets[0];
+        portal.targetId = this.targets[0].id;
         projectileList[this.context][portal.id] = portal;
     }
 }

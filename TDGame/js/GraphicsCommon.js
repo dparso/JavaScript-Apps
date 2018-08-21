@@ -11,7 +11,7 @@ function drawBitmapCenteredWithRotation(useBitmap, atX, atY, withAngle, context)
     ctx[context].save();
     ctx[context].translate(atX, atY);
     ctx[context].rotate(withAngle);
-    ctx[context].drawImage(useBitmap, -useBitmap.width / 2, -useBitmap.height / 2);
+    ctx[context].drawImage(useBitmap, Math.round(-useBitmap.width / 2), Math.round(-useBitmap.height / 2));
     ctx[context].restore();
 }
 

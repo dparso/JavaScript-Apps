@@ -19,24 +19,43 @@
     /* meet at the middle edges */
     border-top-left-radius: 1%;
     border-bottom-left-radius: 1%;
+    z-index: 1;
+}
+
+#gameBackgroundCanvas {
+    left: 20px;
+    /* meet at the middle edges */
+    border-top-left-radius: 1%;
+    border-bottom-left-radius: 1%;
+    z-index: 0;
 }
 
 #enemyCanvas {
     right: 20px;
     border-top-right-radius: 1%;
     border-bottom-right-radius: 1%;
+    z-index: 1;
+}
+
+#enemyBackgroundCanvas {
+    right: 20px;
+    border-top-right-radius: 1%;
+    border-bottom-right-radius: 1%;
+    z-index: 0;
 }
 
 #killmonsters {
     position: absolute;
     top: 40px;
     left: 20px;
+    z-index: 2;
 }
 
 #destroytowers {
     position: absolute;
     top: 40px;
     left: 160px;
+    z-index: 2;
 }
 
 #pausebutton {
@@ -88,6 +107,8 @@
     font-family: Ready;
     font-size: 24px;
     pointer-events: none;
+
+    z-index: 2;
 }
 
 .icon {
@@ -113,10 +134,12 @@
    
     color: white;
     font-family: Ready;
-	font-size: 25px;
+	font-size: 20px;
     letter-spacing: 1px;
     font-weight: lighter;
 	text-align: left;
+
+    z-index: 2;
 }
 
 .button {

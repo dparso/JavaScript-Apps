@@ -22,7 +22,7 @@ function DoTClass(monsterId, damage, rate, duration, parent, context) {
 	}
 
 	this.attack = function() {
-		if(this.target.health > 0) {
+		if(this.target !== undefined && this.target.alive) {
 	        if(this.target.hitWithProjectile(this.damage)) {
 	            StateController.notifyTowerKilledMonster(this.parent, this.context, this.target.type);
 	            this.die();

@@ -21,7 +21,7 @@ var AGGRESSIVE = 150;
 const RELAXED = 0.5;
 const NORMAL = 1;
 const URGENT = 5;
-const RAPID = 15;
+const RAPID = 10;
 var ENEMY_URGENCY = NORMAL;
 const ENEMY_EVALUATE_RATE = 1; // evaluate once per second
 
@@ -129,13 +129,13 @@ function evaluateComfort() {
 		if(defensiveComfort < -benchmark) {
 			if(defensiveComfort < -10 * benchmark) {
 				// DEFENSIVE
-				// console.log("I'm DEFENSIVE");
+				console.log("I'm DEFENSIVE");
 				ENEMY_URGENCY = RAPID;
 				enemyTowerProbability = 0.9;
 				enemyUpgradeProbability = 0.9;
 			} else {
 				// CAUTIOUS
-				// console.log("I'm CAUTIOUS");
+				console.log("I'm CAUTIOUS");
 				ENEMY_URGENCY = URGENT;
 				enemyTowerProbability = 0.7;
 				enemyUpgradeProbability = 0.8;
@@ -143,12 +143,12 @@ function evaluateComfort() {
 		} else if(defensiveComfort > benchmark) {
 			if(defensiveComfort > 10 * benchmark) {
 				// AGRESSIVE
-				// console.log("I'm AGGRESSIVE");
+				console.log("I'm AGGRESSIVE");
 				ENEMY_URGENCY = RAPID;
 				enemyTowerProbability = 0.1;
 			} else {
 				// CONFIDENT
-				// console.log("I'm CONFIDENT");
+				console.log("I'm CONFIDENT");
 				ENEMY_URGENCY = URGENT;
 				enemyTowerProbability = 0.3;
 			}

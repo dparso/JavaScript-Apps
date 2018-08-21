@@ -7,19 +7,6 @@ function JurorClass(type, context) {
 JurorClass.prototype = Object.create(TowerClass.prototype);  
 JurorClass.prototype.constructor = JurorClass; 
 
-JurorClass.prototype.getRandomTarget = function() {
-    var startIndex = Math.floor(Math.random() * this.tilesInRange.length);
-    for(var i = this.tilesInRange.length - 1; i >= 0; i--) {
-        var index = (i + startIndex) % this.tilesInRange.length;
-        var tilePos = this.tilesInRange[index].tile;
-        var tile = StateController.currLevel.tiles[this.context][tilePos.row][tilePos.col];
-        if(tile.hasMonsters()) {
-            this.targets.push(monsterList[this.context][Object.keys(tile.monstersOnTile)[0]]);
-            return;
-        }
-    }
-}
-
 JurorClass.prototype.findTarget = function() {
     this.targets = [];
     if(this.targetPriority === TARGET_FIRST) {
@@ -47,7 +34,7 @@ JurorClass.prototype.attack = function() {
     // technically, Juror doesn't check range of secondary targets, but it'll recalculate them every once in a while, which is fine
     for(var target = 0; target < this.targets.length; target++) {
         if(this.targets[target]) {
-            var projectile = new ProjectileClass({x: this.x, y: this.y}, this.targets[target].id, projectilePics[this.type][0], this.type, dmg, projectileSpeeds[this.type], this.tier, true, this.id, this.context);
+            var projectile = new ProjectileClass({x: this.x, y: this.y}, this.targets[target].id, projectilePics[this.type][0], this.type, dmg, projectileSpeeds[this.type], this.tier, false, this.id, this.context);
             projectileList[this.context][projectile.id] = projectile;
         }
     }

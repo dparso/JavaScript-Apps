@@ -58,7 +58,7 @@ const LEVELS = [levelOne, levelTwo, levelThree, levelFour, levelFive, levelSix];
 
 // generalized function for drawing a playable level
 function drawGridLevel(level, context) {
-    level.tilesDraw(context);
+    ctx[context].clearRect(0, 0, canvas[context].width, canvas[context].height);
 
     for(id in projectileList[context]) {
         projectileList[context][id].draw();

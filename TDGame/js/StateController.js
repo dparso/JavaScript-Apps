@@ -16,12 +16,13 @@ function StateControllerClass(startLevel) {
 
     this.placeTower = function(ofType, onSide, atGrid) {
         var tower;
+
         switch(ofType) {
-            case CANNON:
-                tower = new CannonClass(ofType, onSide);
-                break;
             case SHOOTER:
                 tower = new ShooterClass(ofType, onSide);
+                break;
+            case CANNON:
+                tower = new CannonClass(ofType, onSide);
                 break;
             case GLAIVE:
                 tower = new GlaiveClass(ofType, onSide);
@@ -55,6 +56,8 @@ function StateControllerClass(startLevel) {
             case GENERATOR:
                 tower = new GeneratorClass(ofType, onSide);
                 break;
+            default:
+                return;
         }
 
         var pixelPos = gridToPixel(atGrid.row, atGrid.col);
@@ -94,18 +97,19 @@ function StateControllerClass(startLevel) {
 
     this.sendMonster = function(ofType, toSide, usedHotkey = false, fromBarracks = false) {
         toSide = PLAYER;
+        // ofType = 6;
         var sender = otherPlayer(toSide);
         monsterCounts[sender][ofType]++;
         // level up
-        if(monsterCounts[sender][ofType] > 100 * monsterLevels[sender][ofType]) {
-            monsterLevels[sender][ofType]++;
-            monsterCounts[sender][ofType] = 0;
+        // if(monsterCounts[sender][ofType] > 100 * monsterLevels[sender][ofType]) {
+        //     monsterLevels[sender][ofType]++;
+        //     monsterCounts[sender][ofType] = 0;
 
-            monsterCosts[sender][ofType] *= 1.5;
-            monsterHealths[sender][ofType] *= 2;
-            monsterSpeeds[sender][ofType] += (1 / monsterLevels[sender][ofType]);
-            queueMessage(monsterNames[ofType] + ": level " + monsterLevels[sender][ofType], canvas[sender].width / 2, canvas[sender].height / 2, sender, 'gold');
-        }
+        //     monsterCosts[sender][ofType] *= 1.5;
+        //     monsterHealths[sender][ofType] *= 2;
+        //     monsterSpeeds[sender][ofType] += (1 / monsterLevels[sender][ofType]);
+        //     queueMessage(monsterNames[ofType] + ": level " + monsterLevels[sender][ofType], canvas[sender].width / 2, canvas[sender].height / 2, sender, 'gold');
+        // }
 
         var monster = new MonsterClass(ofType, toSide);
         monster.reset();
@@ -259,7 +263,7 @@ function StateControllerClass(startLevel) {
             }
             if(player.gold >= monsterCosts[PLAYER][type]) {
                 this.sendMonster(type, ENEMY, true);
-                this.sendMonster(type, PLAYER, true);
+                // for(var i = 0; i < 10; i++) this.sendMonster(type, PLAYER, true);
             } else {
                 queueMessage("Insufficient gold!", mouseX, mouseY, currCanvas);
             }

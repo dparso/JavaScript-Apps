@@ -113,10 +113,10 @@ SolarPrinceClass.prototype.attack = function() {
 
     var count = 0;
     var i = index;
-    if(tiles.tilesInRadialOrder.length == 0) {
+    if(this.tilesInRadialOrder.length == 0) {
         console.log("no tiles");
     }
-    
+
     while(count < this.tilesInRadialOrder.length) { // count at most all tiles
         tileObj = this.tilesInRadialOrder[i];
         if(tileObj === undefined) {
@@ -149,18 +149,7 @@ SolarPrinceClass.prototype.attack = function() {
         var tile = StateController.currLevel.tiles[this.context][tilePos.row][tilePos.col];
         // damage all monsters on this tile
         if(tile.hasMonsters()) {
-            Object.keys(tile.monstersOnTile).forEach(
-                ((monster) => {
-                    var obj = monsterList[this.context][monster];
-                    if(obj !== undefined) {
-                        if(obj.health > 0) {
-                            if(obj.hitWithProjectile(this.properties[DAMAGE])) {
-                                StateController.notifyTowerKilledMonster(this.id, this.context, obj.type);
-                            }
-                        }
-                    }
-                })
-            );
+            this.damageMonstersOnTile(tile);
         }
 
         i++;

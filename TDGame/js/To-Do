@@ -1,6 +1,12 @@
 To-Do:
 
-Solar prince while loop
+Create a dictionary to map row, col to position in monster path -- use for projectile leading
+
+Portals follow based on path position
+
+Monster levels still carry through levels
+
+Don't hide elements onload - leads to flashing
 
 Try pressing ready then spamming mouse: input errors, tiles not defined yet
 Towers recalculate target upon killing current target (see Juror level 6, sputters between rounds)
@@ -8,7 +14,7 @@ Enter key for "Ready"
 
 Aether tiers increase "strength", strongest monster it can teleport. Others break the portal
 
-Design lava tiles to match directions like tile
+Design lava tiles to match directions like cobblestone
 
 Transition: zoom in until blurry, zoom out to different maze
 
@@ -167,6 +173,8 @@ Target priorities! Last, first, close, strong
 Ideas for tier trees: single target, AOE, and support (e.g., hits do not more damage, but slow run speed or increase damage taken from other sources)
 
 Check projectiles' magnitude: if ever zero, division is NaN!
+
+Check out console's "Performance" tab
 
 If I were a rich man:
 	Convert to a single canvas -- would make drag and drop from tower menu easier, like the previous method

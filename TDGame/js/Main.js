@@ -1,4 +1,4 @@
-var canvas = [], ctx = [];
+var canvas = [], ctx = [], bg_canvas = [], bg_ctx = [];
 
 var PLAYER = 0, ENEMY = 1;
 
@@ -41,14 +41,19 @@ window.onload = function() {
     canvas[PLAYER] = document.getElementById('gameCanvas');
     canvas[ENEMY] = document.getElementById('enemyCanvas');
 
+    // tiles will be drawn to the background only once, or unless some change occurs
+    bg_canvas[PLAYER] = document.getElementById('gameBackgroundCanvas');
+    bg_canvas[ENEMY] = document.getElementById('enemyBackgroundCanvas');
+
     ctx[PLAYER] = canvas[PLAYER].getContext('2d');
     ctx[ENEMY] = canvas[ENEMY].getContext('2d');
+    bg_ctx[PLAYER] = bg_canvas[PLAYER].getContext('2d');
+    bg_ctx[ENEMY] = bg_canvas[ENEMY].getContext('2d');
 
     // disable right click
     $('body').on('contextmenu', '#gameCanvas', function(e){ return false; });
     $('body').on('contextmenu', '#enemyCanvas', function(e){ return false; });
-    // $('#container').hide();
-    $('#levelconfig').hide();
+
     openSelect();
 
     currCanvas = PLAYER;
@@ -93,11 +98,15 @@ function playGame() {
 
     // StateController.changeState(STATE_START, welcomeScreen);
     StateController.changeState(STATE_PLAY, LEVELS[0]);
-    // ctx[PLAYER].scale(0.5, 0.5);
-
+    refreshBackground();
 }
 
-function updateAll() {
+function refreshBackground() {
+    StateController.currLevel.tilesDraw(PLAYER);
+    StateController.currLevel.tilesDraw(ENEMY);
+}
+
+function updateAll(override = false) {
     if(gameWon) {
         // display win message
         drawAll(PLAYER);
@@ -120,7 +129,7 @@ function updateAll() {
         return;
     }
 
-    if(!game_paused) {
+    if(!game_paused || override) {
         playerIncome();
         enemyActions();
 
@@ -137,6 +146,24 @@ function updateAll() {
     drawAll(ENEMY);
     // drawTooltip();
 
+}
+
+function validateMonsters() {
+    // make sure that monsterIDs on tiles correspond to real monsters in monsterList
+    for(var row = 0; row < TILE_ROWS; row++) {
+        for(var col = 0; col < TILE_COLS; col++) {
+            let tile = StateController.currLevel.tiles[PLAYER][row][col];
+            if(tile.hasMonsters()) {
+                Object.keys(tile.monstersOnTile).forEach(
+                    ((monster) => {
+                        if(monsterList[PLAYER][monster] === undefined) {
+                            debugger;
+                        }
+                    })
+                );
+            }
+        }
+    }
 }
 
 var timeScale = 0;
@@ -168,22 +195,18 @@ var timeSinceLastRelease = [0, 0];
 function monsterUpdate(context) {
     var len = StateController.monstersWaiting[context].length;
     if(len > 0) {
-        // console.log(len + ", " + Object.keys(monsterList[context]).length);
-        // if(timeSinceLastRelease[context] > 0.05 * fps) {
-            var monster = StateController.monstersWaiting[context].pop();
+        if(timeSinceLastRelease[context] > 0.05 * fps) {
+            var monster = StateController.monstersWaiting[context].shift();
             monsterList[context][monster.id] = monster;
             monster.visible = true;
             timeSinceLastRelease[context] = 0;
-        // }
+        }
     }
 
     timeSinceLastRelease[context]++;
 }
 
 function moveAll(context) {
-    var t = StateController.currLevel.tiles[PLAYER][7][1];
-    // console.log("has " + Object.keys(t.monstersOnTile).length);
-
     for(id in monsterList[context]) {
       monsterList[context][id].move();
     }
@@ -321,6 +344,8 @@ function nextLevel() {
     StateController.monstersWaiting = [[], []];
     availableTowerLocations = [];
     upgradeableTowers = [];
+    game_speed = 1;
+
     monsterCounts = [[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0]];
     monsterLevels = [[1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1]];
     REAPER_UNIQUE = [0, 0]; // only one reaper per side
@@ -414,6 +439,7 @@ function killMonsters() {
             monsterList[context][monster].die(true);
         }
     }
+    StateController.monstersWaiting = [[], []];
 }
 
 function destroyTowers() {
@@ -585,4 +611,8 @@ function hideMenu() {
 
         $('#start').fadeIn(500);
     }    
+}
+
+function advanceFrame() {
+    updateAll(true);
 }

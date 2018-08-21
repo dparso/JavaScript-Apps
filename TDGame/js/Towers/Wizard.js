@@ -9,13 +9,14 @@ WizardClass.prototype.constructor = WizardClass;
 // override to allow multiple targeting
 WizardClass.prototype.findTarget = function() {
     this.targets = [];
-    if(this.tier === tier_costs[this.type].length - 1) {
-        // wizard: two targets!
-        this.getFirstTarget(0);
-        this.getLastTarget(1);
-    } else if(this.targetPriority === TARGET_FIRST) {
-        this.getFirstTarget(0);
-    } else {
-        this.getLastTarget(0);
+
+    this.getFirstTarget();
+    // if(this.tier > 4) {
+    //     for(var i = 0; i < (this.tier + 1) / 2; i++) {
+    //         this.getRandomTarget();
+    //     }
+    // }
+    if(this.tier > 3) {
+        this.getLastTarget();
     }
 }
