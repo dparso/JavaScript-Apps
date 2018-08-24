@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<title>Other TD</title>
+
+<head>
+	<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+	<meta content="utf-8" http-equiv="encoding">
+	<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
+	<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body onresize="setCanvasScale()">
+
+<!-- <div id="mySidenav" class="sidenav">
+  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+  <a href="#">About</a>
+  <a href="#">Services</a>
+  <a href="#">Clients</a>
+  <a href="#">Contact</a>
+</div>
+	  <h2>Sidenav Push Example</h2>
+	  <p>Click on the element below to open the side navigation menu, and push this content to the right.</p>
+	  <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776; open</span> -->
+
+<div id="main">
+	<div id="start">
+		<ul>
+			<li><button class="button" onclick="startGame()">Play</button></li>
+			<li><button class="button">Options</button></li>
+		</ul>
+	</div>
+	<div hidden id="levelconfig">
+		<div class="tab">
+			<button class="tablinks" onclick="selectTab(event, 'setup')" id="defaultOpen">Setup</button>
+			<button class="tablinks" onclick="selectTab(event, 'towers')">Towers</button>
+			<button class="tablinks" onclick="selectTab(event, 'monsters')">Monsters</button>
+		</div>
+
+		<div id="setup" class="tabcontent">
+			<h1>Configure your game!</h1>
+			<div id="diffselect">
+				<p id="choosediff">Choose difficulty:</p><br>
+				<!--surround the select box with a "custom-select" DIV element. Remember to set the width:-->
+				<div class="custom-select" style="width:150px;">
+					<select>
+						<!-- <option value="0">Difficulty:</option> -->
+						<option value="0">Easy</option>
+						<option value="1">Normal</option>
+						<option value="2">Hard</option>
+						<option value="3">Insane</option>
+					</select>
+				</div>
+				<p id="diffdescription"></p>
+			</div>
+			<div id="raceselect">
+				<p id="chooserace">Choose your race:</p>
+				<label id="raceswitch" class="switch">
+					<input type="checkbox" onclick="switchRace()">
+					<span class="slider"></span>
+				</label>
+				<p id="racedescription"></p>
+			</div>
+			<button id="readybutton" class="button" onclick="playGame()">Ready!</button>
+			<button id="backbutton" class="button" onclick="hideMenu()">Back</button>
+		</div>
+
+		<div id="towers" class="tabcontent">
+			<h1>Towers</h1>
+			<p>See info about towers.</p> 
+		</div>
+
+		<div id="monsters" class="tabcontent">
+			<h1>Monsters</h1>
+			<p>See info about monsters.</p>
+		</div>
+
+	</div>
+	<div hidden id="container">
+		<div class="split left">
+			<canvas id="gameCanvas" width="1400" height="700"></canvas>
+			<canvas id="gameBackgroundCanvas" width="1400" height="700"></canvas>
+			<div>
+				<table class="infotext">
+					<col width="90">
+					<col width="80">
+					<col width="50">
+					<tr>
+						<td id="incometext">Income:</td>
+						<td id="livestext">Lives:</td>
+					</tr>
+					<tr>
+						<td id="timetext">Time until income:</td>
+						<td id="goldtext">Gold:</td>
+					</tr>
+				</table>
+			</div>
+
+			<img id="pausebutton" onclick="pauseGame()" src="images/pause.png">
+			<img id="fastforwardbutton" onclick="fastGame()" src="images/fast-forward.png">
+
+			<button id="killmonsters" onclick="killMonsters()" class="button">Monsters</button>
+			<button id="destroytowers" onclick="destroyTowers()" class="button">Towers</button>
+
+			<table id="userinfopane" class="infopane">
+				<col width="140">
+				<col width="120">
+				<col width="90">
+				<col width="60">
+				<tr>
+					<th id="nametext">Name:</th>
+					<th id="atktext">Attack Speed:</th>
+					<th><center>Upgrades:</center></th>
+					<th><img class="icon" src="images/Towers/gunner.png" alt="icon" id="infopaneicon"></th>
+				</tr>
+				<tr>
+					<th id="costtext">Cost:</th>
+					<th id="killtext">Kills:</th>
+					<!-- Remember to change the span in InfoPane.js where the content is written! -->
+					<th><button id="tierbutton" onmouseover="showPlayerTierText()" onmouseout="hidePlayerTierText()" class="infobutton hoverbutton tooltip" onclick="upgradePressed()">Tier (0/5)<span class="tooltiptext tooltip-top" id="upgradecosttext">Blank!</span></button></th>
+					<th></th>
+				</tr>
+				<tr>
+					<th id="rangetext">Range:</th>
+					<th></th>
+					<th><button class="infobutton hoverbutton">Empty</button></th>
+					<th><button id="targetbutton" class="infobutton hoverbutton" onclick="targetPressed()">Target: first</button></th>
+				</tr>
+				<tr>
+					<th id="damagetext">Damage:</th>
+					<th></th>
+					<th><button class="infobutton hoverbutton">Empty</button></th>
+					<th><button id="sellbutton" class="sellbutton" onclick="sellPressed()">Sell:</button></th>
+				</tr>
+			</table>
+		</div>
+		<table class="infotext">
+			<col width="90">
+			<col width="80">
+			<tr>
+				<td id="enemyincometext">Income:</td>
+				<td id="enemylivestext">Lives:</td>
+			</tr>
+			<tr>
+				<td id="enemytimetext">Time until income:</td>
+				<td id="enemygoldtext">Gold:</td>
+			</tr>
+		</table>
+	</div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="js/Animation.js"></script>
+<script src="js/AStarSearch.js"></script>
+<script src="js/Level.js"></script>
+<script src="js/Player.js"></script>
+<script src="js/Enemy.js"></script>
+<script src="js/Grids.js"></script>
+<script src="js/InfoPane.js"></script>
+<script src="js/Draggable.js"></script>
+<script src="js/Util.js"></script>
+<script src="js/Monster.js"></script>
+<script src="js/GraphicsCommon.js"></script>
+<script src="js/ImageLoading.js"></script>
+<script src="js/Input.js"></script>
+<script src="js/Tile.js"></script>
+<script src="js/DoT.js"></script>
+<script src="js/Projectile.js"></script>
+<script src="js/Towers/Tower.js"></script>
+<script src="js/Towers/Aether.js"></script>
+<script src="js/Towers/Cannon.js"></script>
+<script src="js/Towers/Conduit.js"></script>
+<script src="js/Towers/Glaive.js"></script>
+<script src="js/Towers/Juror.js"></script>
+<script src="js/Towers/MonsterGenerator.js"></script>
+<script src="js/Towers/Reaper.js"></script>
+<script src="js/Towers/Shooter.js"></script>
+<script src="js/Towers/SolarPrince.js"></script>
+<script src="js/Towers/Wizard.js"></script>
+<script src="js/StateController.js"></script>
+<script src="js/Main.js"></script>
+<script>
+function openNav() {
+    document.getElementById("mySidenav").style.width = "250px";
+    document.getElementById("main").style.marginLeft = "250px";
+}
+
+function closeNav() {
+    document.getElementById("mySidenav").style.width = "0";
+    document.getElementById("main").style.marginLeft= "0";
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,761 @@
+
+#start {
+    position: absolute;
+    left: 160px;
+    bottom: 120px;
+    user-select: none;
+}
+
+#container {
+  height: 700px;
+  position: relative;
+  width: 700px;
+  /*display: 'none';*/
+  user-select: none; /* no highlight for buttons */
+}
+
+#gameCanvas {
+    left: 20px;
+    /* meet at the middle edges */
+    border-top-left-radius: 1%;
+    border-bottom-left-radius: 1%;
+    z-index: 1;
+}
+
+#gameBackgroundCanvas {
+    left: 20px;
+    /* meet at the middle edges */
+    border-top-left-radius: 1%;
+    border-bottom-left-radius: 1%;
+    z-index: 0;
+}
+
+#killmonsters {
+    position: absolute;
+    top: 40px;
+    left: 20px;
+    z-index: 2;
+}
+
+#destroytowers {
+    position: absolute;
+    top: 40px;
+    left: 160px;
+    z-index: 2;
+}
+
+#pausebutton {
+    position: absolute;
+    right:20px;
+    top: 40px;
+    width: 50px;
+    height: 50px;
+    z-index: 2;
+}
+
+#fastforwardbutton {
+    position: absolute;
+    right: 3px;
+    top: 90px;
+    width: 55px;
+    height: 35px;
+    z-index: 2;
+}
+
+.split {
+    height: 100%;
+    width: 100%;
+    position: fixed;
+/*    z-index: 1;
+*/    top: 0;
+    /*overflow-x: hidden;*/
+    padding-top: 20px;
+}
+
+.left {
+    left: 0;
+    /*padding-right: 10px;*/
+    background-color: #111;
+}
+
+.right {
+    right: 0;
+    /*padding-left: 10px;*/
+    background-color: #111;
+}
+
+.infotext {
+    table-layout: fixed;
+    position: absolute;
+    top: 40px;
+    right: 0px;
+    width: 55%;
+
+    color: white;
+    font-family: Ready;
+    font-size: 24px;
+    pointer-events: none;
+
+    z-index: 2;
+}
+
+.icon {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    position: absolute;
+    right: 12px;
+    top: 0px;
+    max-width: 40px;
+    max-height: 40px;
+}
+
+/* box for selected tower */
+.infopane {
+	top: 575px;
+	right: 12.5%;
+	position: absolute;
+	width: 75%;
+	height: 100px;
+  	background-color: #7a4414;
+    border: 5px solid #7a4414;
+   
+    color: white;
+    font-family: Ready;
+	font-size: 20px;
+    letter-spacing: 1px;
+    font-weight: lighter;
+	text-align: left;
+
+    z-index: 2;
+}
+
+.button {
+	display: block;
+	width: 130px;
+	margin: 0 auto;
+	height: 30px;
+    cursor: pointer;
+    /*padding-bottom: 20px;*/
+	/*line-height: 30px;*/
+	border: 1px solid #293342;
+	border-radius: 1px;
+	/*background: linear-gradient(#152030, #54637a);*/
+    background-color: #2d3342;
+	color: black;
+}
+
+button:focus, input[type="button"]:focus, input[type="image"]:focus {
+    outline: none;
+}
+
+.button:hover {
+    /*background: linear-gradient(#4a6287, #5f7ead);*/
+    background: linear-gradient(#242a33, #424a56);
+}
+
+
+/* tooltips */
+/* https://www.w3schools.com/css/css_tooltip.asp */
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+    /*border-bottom: 1px dotted black;*/
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+    /*background: #111;*/
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    position: absolute;
+    width: 200px;
+
+    font-family: Ready;
+    font-size: 24px;
+    color: #fff;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 6px;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity .6s;
+}
+
+.tooltiptext {
+    pointer-events: none;
+}
+
+.tooltip-left {
+    background-color: #5c526d;
+    top: 10px;
+    bottom:auto;
+    right: 128%;  
+}
+
+.tooltip-left::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    margin-top: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent transparent #555;
+}
+
+.tooltip-top {
+    background-color: #e29034;
+    bottom: 125%;
+    left: 50%;  
+    margin-left: -60px;
+}
+
+.tooltip-top::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #e29034 transparent transparent transparent;
+}
+
+.tooltip-right {
+    background-color: #5c526d;
+    top: 10px;
+    left: 125%;  
+}
+
+.tooltip-right::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 100%;
+    margin-top: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent #555 transparent transparent;
+}
+/* end tooltips */
+
+
+.selecticon {
+    max-width: 40px;
+    max-height: 45px;
+    display: block;
+}
+
+
+.infobutton {
+	display: block;
+	width: 120px;
+	margin: 0 auto;
+	height: 25px;
+	/*line-height: 30px;*/
+	border: 1px solid #c47d2d;
+	border-radius: 1px;
+	background: linear-gradient(#c47d2d, #c47d2d);
+    text-align: center;
+    letter-spacing: 2px;
+    color: white;
+}
+
+.hoverbutton:hover {
+    visibility: visible;
+	background: #e29034;
+}
+
+.sellbutton {
+	display: block;
+	width: 120px;
+	margin: 0 auto;
+	height: 25px;
+	/*line-height: 30px;*/
+	border: 1px solid #d20000;
+	border-radius: 1px;
+	background: #d20000;
+    color: white;
+}
+
+.sellbutton:hover {
+	background: #ef0000;
+}
+
+.sidenav {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: #111;
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 60px;
+}
+
+.sidenav a {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #818181;
+    display: block;
+    transition: 0.3s;
+}
+
+.sidenav a:hover {
+    color: #f1f1f1;
+}
+
+
+#main {
+    transition: margin-left .5s;
+    padding: 16px;
+}
+
+@media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+}
+
+.active {
+    background-color: #777373;
+}
+
+.nav {
+/*    list-style: none;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;*/
+    display: inline;
+    background-color: #333;
+    position: absolute;
+    top: 0px;
+    /*left: 28%;*/
+    width: 100%;
+}
+/*
+.nav li {
+    float: left;
+}*/
+
+#infopanelabel {
+    position: absolute;
+    font-family: Raven;
+    /*display: inline;*/
+    top: -20px;
+    left: 24%;
+    text-align: right;
+    pointer-events: none;
+}
+
+#leftbutton {
+    /*display: block;*/
+    position: absolute;
+    width: 30px;
+    margin: 0 auto;
+    height: 60px;
+    /*line-height: 30px;*/
+    border: 2px solid #333;
+    border-radius: 5px;
+    background: #333;
+
+    color: gray;
+    text-align: left;
+    font-size: 54px;
+    z-index: 1;
+}
+
+#leftbutton:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+#rightbutton {
+    /*display: block;*/
+    position: absolute;
+    width: 30px;
+    margin: 0 auto;
+    height: 60px;
+    right: 0%;
+    /*line-height: 30px;*/
+    border: 2px solid #333;
+    border-radius: 5px;
+    background: #333;
+
+    color: gray;
+    text-align: right;
+    font-size: 54px;
+    z-index: 1;
+}
+
+#rightbutton:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.centernav {
+    position: fixed;
+    left: 45%;
+    top: 40px;
+    width: 10%;
+    background-color: #333;
+    height: 89.7%;
+    z-index: 2;
+}
+
+
+
+/* grid */
+.grid-container {
+    position: absolute;
+    display: grid;
+    font-size: 12px;
+
+    grid-template-columns: auto auto;
+    background-color: #777373;
+    padding: 10px;
+    top: 8%;
+    left: 2%;
+    width: 96%;
+    /*left: 37.5%;*/
+    z-index: 2  ;
+}
+
+.left-grid-item {
+    /*grid-column: 1 / span 2;*/
+    background-color: #777373;
+    /*border: 1px solid rgba(0, 0, 0, 0.8);*/
+    padding: 10px;
+    text-align: center;
+    /*width: 10%;*/
+    outline: none;
+    cursor: pointer;
+}
+
+.left-grid-item:hover {
+    background-color: #a4a3a8;
+}
+
+.right-grid-item {
+    /*grid-column: 2 / span 2;*/
+    background-color: #777373;
+    /*border: 1px solid rgba(0, 0, 0, 0.8);*/
+    padding: 10px;
+    text-align: center;
+    /*width: 10%;*/
+    outline: none;
+    cursor: pointer;
+}
+
+.right-grid-item:hover {
+    background-color: #a4a3a8;
+}
+
+
+
+/* drop-down select */
+/*the container must be positioned relative:*/
+.custom-select {
+    position: relative;
+/*  font-family: Zombie;
+*/}
+
+.custom-select select {
+    display: none; /*hide original SELECT element:*/
+}
+
+.select-selected {
+    background-color: #2d3342;
+}
+
+/*style the arrow inside the select element:*/
+.select-selected:after {
+    position: absolute;
+    content: "";
+    top: 14px;
+    right: 10px;
+    width: 0;
+    height: 0;
+    border: 6px solid transparent;
+    border-color: #000000 transparent transparent transparent;
+}
+
+/*point the arrow upwards when the select box is open (active):*/
+.select-selected.select-arrow-active:after {
+    border-color: transparent transparent #000000 transparent;
+    top: 7px;
+}
+
+/*style the items (options), including the selected item:*/
+.select-items div,.select-selected {
+    color: #000000; /* text color */
+    padding: 8px 16px;
+    border: 1px solid transparent;
+    border-color: transparent transparent rgba(0, 0, 0, 0.1) transparent;
+    cursor: pointer;
+    user-select: none;
+}
+
+/*style items (options):*/
+.select-items {
+    position: absolute;
+    background-color: #2d3342;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 99;
+}
+
+/*hide the items when the select box is closed:*/
+.select-hide {
+    display: none;
+}
+
+.select-items div:hover, .same-as-selected {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+/* end drop-down */
+
+
+/* tabs */
+/* Style the tab */
+#levelconfig {
+    position: absolute;
+    width: 70%;
+    height: 70%;
+    top: 15%;
+    left: 15%;
+}
+
+.tab {
+    overflow: hidden;
+    border: 1px solid #293340;
+    background-color: #2d3342;
+    font-size: 30px;
+}
+
+/* Style the buttons inside the tab */
+.tab button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+    font-size: 44px;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+    background: linear-gradient(#242a33, #424a56);
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+    background: linear-gradient(#242a33, #424a56);
+}
+
+
+/* Style the tab content */
+.tabcontent {
+    position: absolute;
+    display: none;
+    width: 100%;
+    height: 80%;
+
+    padding: 6px 12px;
+    border: 1px solid #293340;
+    border-top: none;
+    color: #000000;
+    background-color: rgb(74, 84, 109, 0.75);
+}
+
+#diffselect {
+    position: relative;
+    top: 20%;
+    left: 3%;
+}
+
+#choosediff {
+    display: inline;
+    left: 0px;
+}
+
+#diffdescription {
+    position: absolute;
+    top: -40%;
+    left: 170px;
+    width: 200px;
+    font-size: 48px;
+}
+
+#raceselect {
+    position: absolute;
+    left: 50%;
+    top: 30%;
+}
+
+#chooserace {
+    display: inline;
+    left: 0px;
+    bottom: 10px;
+}
+
+#raceswitch {
+    position: absolute;
+    top: 52%;
+}
+
+#racedescription {
+    position: absolute;
+    /*display: inline;*/
+    top: -45%;
+    left: 150px;
+    width: 200px;
+    font-size: 48px;
+}
+
+#readybutton {
+    position: absolute;
+    right: 1%;
+    bottom: 3%;
+}
+
+#backbutton {
+    position: absolute;
+    left: 1%;
+    bottom: 3%;
+}
+/* end tabs */
+
+/* switch & sliders */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 125px;
+    height: 34px;
+    margin-top: 15px;
+    border-radius: 2px;
+}
+
+.switch input {display:none;}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #2d3342;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 40px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+    border-radius: 2px;
+
+}
+
+input:checked + .slider {
+    /*background-color: #2000af;*/
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px #1c0000;
+}
+
+input:checked + .slider:before {
+    -webkit-transform: translateX(77px);
+    -ms-transform: translateX(77px);
+    transform: translateX(77px);
+    background-color: black;
+}
+/* end switch & sliders */
+
+
+
+li {
+    padding: 5px;
+}
+
+li a {
+    display: block;
+    text-align: center;
+    padding: 10px 8px;
+    text-decoration: none;
+}
+
+li a:hover:not(.active) {
+    background-color: #111;
+}
+
+ul {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+h1 {
+    font-family: Stranger;
+    /*font-variant: small-caps;*/
+    font-size: 52px;
+    font-weight: lighter;
+    letter-spacing: 1.5px;
+    line-height: 24px;
+}
+
+html, body {
+  width:  100%;
+  height: 100%;
+  margin: 0px;
+}
+
+body {
+    font-family: Stranger;
+    /*font-variant: small-caps;*/
+    font-size: 36px;
+    font-weight: lighter;
+    letter-spacing: 1.5px;
+    line-height: 24px;
+    /*color: white;*/
+    background-color: black;
+    background-image: url("images/monster.jpg");
+}
+
+canvas {
+    /*padding-right: 10px;*/
+    position: absolute;
+    top: 40px;
+}
+
+
+
+@font-face { font-family: Zombie; src: url('fonts/zombified/Zombified.ttf'); } /* great, no symbols */
+@font-face { font-family: Raven; src: url('fonts/ravenscroft/Ravenscroft.ttf'); } /* good */
+@font-face { font-family: Stranger; src: url('fonts/stranger/Stranger.ttf'); } /* better */
+@font-face { font-family: Ready; src: url('fonts/better-get-ready/Ready.ttf'); } /* better */
+/*@font-face { font-family: Delicious; font-weight: bold; src: url('Delicious-Bold.otf');}*/
+
+ /*h3 { font-family: Delicious, sans-serif; }*/

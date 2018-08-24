@@ -1,0 +1,287 @@
+To-Do:
+
+When a tower is placed, recalculate paths for TILES, then give each monster on those tiles the same path
+	Instead of recalculating, could instead recalculate start-end, and then do a BFS for monsters, looking for any node that is in the new path
+
+Indicator with little icons for how many of a monster are in a wave
+
+Reduce reaper fire rate, remove shadow blur from lightning
+
+Create a dictionary to map row, col to position in monster path -- use for projectile leading
+
+Portals follow based on path position
+
+Monster levels still carry through levels
+
+Don't hide elements onload - leads to flashing
+
+Try pressing ready then spamming mouse: input errors, tiles not defined yet
+Towers recalculate target upon killing current target (see Juror level 6, sputters between rounds)
+Enter key for "Ready"
+
+Aether tiers increase "strength", strongest monster it can teleport. Others break the portal
+
+Design lava tiles to match directions like cobblestone
+
+Transition: zoom in until blurry, zoom out to different maze
+
+When pressing play button, configure screen comes up to align with the play button. So, clicking play twice starts the game. No back button, Play can change to Ready!
+Enemy bought tower too expensive
+
+On out of range, get new target!
+
+Probably because when tower doesn't have a target, it calls findTarget then move() is over -- could repeat frame after frame
+Aether portals track based on next tile
+Clean up how monsters are created. Currently added both to monsterList and monstersWaiting
+
+Tracking projectiles like Juror arrow find new target if died
+
+Solar prince stopped attacking anything after a while -- when lots of towers are moving out of range
+
+Prioritize most expensive upgrades
+
+Towers initialize x, y, currTile on construction
+
+Scale monster health better (big gaps between the higher monsters)
+
+Give towers their own damage, atk, and range upgrade arrays! 
+
+Change info pane colors to match theme
+
+Highlight selection should be less bright
+
+Reaper does weird target checking, try tier 5 and spam monster 7
+Allow dot stacking from reaper (tower line 754, increase the damage by factor)
+
+Attack right away on target swap (conduit is very slow when attacking monsters moving outside its range)
+
+Make tower starting costs very high, but upgrade costs _lower_ -- incentivize fewer towers, more upgrades
+
+Note: using aether image normal size and scaled 0.5, it looks like the stars are sparkling! Use this
+
+Alpha fading in and out for towers
+
+Monsters send in groups
+Waves -- wave countdowns like 10 or 20 seconds, and you get a non-cumulative bonus for how much you sent that wave
+So you could get 0 in a wave if you didn't send anything (isn't that just like having cheaper monsters? Money back? No incentive over the long term)
+
+Add "canAfford" method to Util to reduce clutter of cost checks
+
+Pause animations during pause
+
+Separate tower classes into their own files
+
+Randomize tree generation, where harder levels have higher probability (how to keep it fair between sides?)
+
+Only one selection across canvases: cleaner
+
+Different difficulties should change the effect of urgency -- easier is slower, harder is faster
+
+Reduce clutter by not sending lower cost monsters (can be done just by walking down the monster list by price and buying as many as possible of the most expensive before running out)
+
+Monsters keep a list of the types of dots applied, helps in preventing duplicates
+
+Pause: stop rotations & hovering
+
+Reaper DoT "spirit drain"
+
+DoT: include in a monster's move, rather than having a whole new list of things to iterate
+Stacking shouldn't add a new object, but increase the damage of the current DoT (unless overlapping durations)
+
+Draw arrow indicating monster path
+
+Blur monsters out with shadowColor white
+
+Setting shadow color and blur on the whole canvas is actually awesome for tiles!
+
+https://thorbjorn.itch.io/tiled
+
+Water tile
+
+Can always draw boss with shadow effects!
+
+At top tier, conduit mouse controls stream, damages on tile
+
+Aether portals have to calculate where in the monsterPath they are, potential source of over-complexity
+
+You get more from sending monsters than you do from killing them
+
+Tab to cycle towers
+
+Add text showing how much will be added when upgrade button hovers
+
+Animate monster movement (can just be shifting between tilts), tower attacks? 
+
+Color upgrade color based on if you have enough
+
+Stronger monsters take more lives
+
+Player classes: attacker, defender, neutral, get certain bonuses to that specialization (monster speed, health, tower price, etc.), and some special unlockable only for that class -- a tier 6 of towers, a monster boss, etc.
+
+Cannon top tier is slower, huge, big splash, ginormous explosion
+
+Define tower-specific upgrades by giving each class its own upgrade array
+
+Try to design the monster on the front page as a boss!
+
+Modify lightning code for awesome looking laser beam (red)! Turn maxDifference down
+
+As it stands, monsters can't be attacked in their original square, as they haven't yet notified the tile of their presence
+
+Tower type: line directly to monster, damages per second
+
+Press keys to select a tower type to buy/monster type to send (press 1 means tower type 1 appears at mouseX, mouseY if enough gold)
+
+Wizard can attack #tier targets
+
+Increase tower building probability the more monsters are on screen
+
+Money if monster reaches end (lives?)
+
+Tower targeting: update if a monster passes their target
+
+Info pane is constant on the right side, changes context based on what's selected
+
+Highlight tower & monster different color if you can afford
+
+
+If this turns into a bigger game, can have two campaign paths: first you do normal TD, then you do sending monsters, then you get the combined mode
+
+Customize enemy probabilities based on difficulty
+
+Find a way to prioritize tower placement to the middle
+
+Calculate some sort of "safety" ratio for the enemy. The more safe it feels, the more likely it is to perform offensive actions
+
+Select from one tower to another
+
+Consider highlighting drag & drop all white or red based on whether current tile is valid
+
+Increase efficiency of random selection: instead of while(1000), pick a spot randomly and iterate across the list until found -- better worst case, similar average
+
+Change tower upgrades into a single upgrade that improves various aspects -- tiers
+
+Fix snapping at corners during monster movement
+
+Enemy starts off with some towers? (prevents rushes)
+
+Only draw explosion animation if tower is upgraded to splash
+
+Alternate enemy behaviour: randomly choose something to do, and save up enough money to do it!
+
+Format numbers to have commas
+
+Prioritize towers less as you have more
+
+Some sort of "leading" for the non-tracking projectiles (otherwise they lag)
+
+Target priorities! Last, first, close, strong
+
+Ideas for tier trees: single target, AOE, and support (e.g., hits do not more damage, but slow run speed or increase damage taken from other sources)
+
+Check projectiles' magnitude: if ever zero, division is NaN!
+
+Check out console's "Performance" tab
+
+If I were a rich man:
+	Convert to a single canvas -- would make drag and drop from tower menu easier, like the previous method
+
+	Tower tiers look different
+	Instead of highlighting the square a tower is on, overlay a shade onto the image itself
+
+	Ready... set... go!
+
+	Ctrl-1 cycles through towers of type 1, etc.
+
+	Play around with cos & sin of straight projectile trajectories 
+	(this.x += Math.sin(this.time) * 10;
+	 this.y += Math.cos(this.time) * 10;)
+	    for some crazy storms and patterns
+
+	Animate monster health bar reductions (speed proportional to health lost)
+
+	Sides have light & dark, so towers and monsters from each side are shadowed differently
+	Enemy prioritizes tower placement in good spots (perhaps defined by the number of road tiles it touches, and if none then the distance to a road tile)
+
+	Losing a life sends enemy into urgent
+	Enemy also takes into account number of monsters on his side
+	Enemy increases urgency the closer monsters get to the end
+	Enemy prioritizes tiles for specific towers -- a position for a shooter (with high range) might be better than a low-range conduit
+
+
+Notes for reducing lag:
+	Reduce lightning height & strength (how many times render runs)
+	Reduce the number of times each tower checks targets
+	Calculate tower range for each tower, only check in that range
+	Reduce attack speeds, increase projectile velocities (fewer on screen at once)
+	Remove shadow, movement, & rotation effects from monsters, towers, projectiles
+	Reduce number of save/restores, try out the drawSprite method in Tower.js
+	Reduce garbage collection of projectiles and monsters by repurposing objects
+	Aether's portals use two save and restores per draw frame when circling
+
+Sabotage ideas:
+	Enemy towers disabled for x seconds
+	Monster speed up
+	Monster health booster
+Powerup ideas:
+	Tower damage boost
+	You don't gain income for 30 seconds, but at the end, your monsters run twice as fast (or something)
+	Overall upgrades: Monster Armor levels (unlike current levels, this wouldn't increase monster costs)
+					  Monster Shoes
+
+Tower ideas:
+	Light:
+		Javelin thrower, thin arrow with white light blur, javelin disappears from hand when thrown until next throw
+	Dark:
+		http://www.pinsdaddy.com/grim-reaper-hood_Q0Hz1ZcdFMIu1PaxpXR%7CF*DN4hGca3DLqKaC0yVKwso/
+		Grim reaper: scythe
+
+	Reaper & some sort of God/Archon/Angel are the 'heroes' of their side, only 1, top tier
+		OR, always there, and *lots* of custom upgrades for them along campaign
+		Like a commander as you fight the battle -- always in the battle, but start off fairly weak
+		You don't upgrade them during the fight, but between battles as you earn experience
+
+	Portal-master: you choose two locations where it occasionally places portals. A certain number of monsters walk through one and are teleported to the other (presumably, back)
+
+	Do the monster mash...
+
+	Tower that generates little soldiers of your side (the ones who would be running through the other maze) to fight monsters on the track
+	Or, the towers that generate monsters generate them on your side when enemies pass!!
+
+
+Monster ideas:
+	Hounds -- the beasts of the Reaper
+	The point shouldn't just to be to gain money to spend more money on monsters that are just faster/stronger versions of previous monsters. Even in the late-game, the most basic monsters should still have a purpose, like zerglings. Monsters should have abilities and properties that can combine in interesting ways, encouraging creative use of each one, not just spamming the most expensive one.
+	Only one boss alive at a time?
+
+	Immune to portals, crushes them -- dispel magic
+
+Game Mode ideas:
+	Be the first to collect X gold (stockpile or cumulative)
+	Be the first to X towers
+	Things that emphasize the balance between sending monsters for income and building defense with towers
+	Allies: both sides defend against a third wave sender, can transfer money & (maybe?) place towers on each other's canvases
+
+Steps to creating a new tower:
+	Add new costs and upgrade effects in Tower.js
+	Add const name in Tower.js (e.g., const NEW_TOWER = x;)
+	Add new projectile speed & splash in Projectile.js
+	Add TILE_TOWER_X in Grid.js
+	Increment NUM_TOWERS in Grid.js
+	Add the tower to grids in Grid.js
+	If desired, create new class to specially override functions
+	Update StateController's placeTower to include the option for new tower with class if applicable
+	Add image in ImageLoading.js
+	If new projectile image, add that to images as well
+	Show image in the towerselections HTML table
+
+
+Consider an alternative type of game:
+	Tug of war. Soldiers are spawned from each side, and walk along path towards the enemy gate. Towers are placed as support to the soldiers being spawned, and can be attacked by the enemy units as they pass by
+
+Notes:
+Cannon explosion animation from https://www.photopea.com/, select region with lasso, move with V -- make sure specific layer is selected
+
+Images:
+http://silhouettesfree.com/s.php?silhouette=Monster
+http://www.stickpng.com/img/games/evolve/evolve-monster-side-view
