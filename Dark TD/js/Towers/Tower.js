@@ -16,7 +16,6 @@ var REAPER_UNIQUE = [0, 0]; // only one reaper per side
 var SOLAR_PRINCE_UNIQUE = [0, 0]; // only one reaper per side
 
 const NUM_TIERS = 6;
-                 // [50.0, 75.0, 120.0, 150.0, 150.0, 200.0, 750.0, 3000.0, 1000.0]
 
 const tier_costs = [[75.0, 100.0, 175.0, 500.0, 1500.0, 12000.0], // shooter
                     [130.0, 275.0, 450.0, 1000.0, 8000.0, 30000.0], // cannon
@@ -36,9 +35,8 @@ const dmg_upgrade_effects = [[5.0, 2.0, 1.75, 2.0, 7.5, 45.0], // shooter
                              [1.5, 2.0, 3.0, 7.0, 13.0, 80.0], // wizard
                              [1.5, 2.0, 4.0, 3.0, 5.0, 200.0], // conduit
                              [3.0, 3.5, 4.0, 12.0, 18.0, 25.0], // juror
-                             [3.5, 6.0, 8.0, 10.0, 12.0, 20.0], // reaper
+                             [3.5, 6.0, 8.0, 14.0, 22.0, 30.0], // reaper
                              [3.5, 6.0, 8.0, 10.0, 13.0, 18.0], // solar prince
-                             // [3.5, 6.0, 8.0, 10.0, 1300.0, 18000.0], // solar prince
                              [3.5, 6.0, 9.0, 12.0, 150.0, 200.0], // aether
                              [3.5, 6.0, 9.0, 12.0, 15.0, 20.0]]; // generator
 
@@ -48,8 +46,8 @@ const rng_upgrade_effects = [[1, 0, 1, 0, 2, 1], // shooter
                              [1, 1, 0, 1, 0, 2], // wizard
                              [1, 1, 0, 0, 0, 2], // conduit
                              [1, 1, 0, 0, 0, 2], // juror
-                             [1, 1, 0, 0, 0, 0], // solar prince
-                             [1, 0, 0, 1, 0, 1], // reaper
+                             [1, 1, 0, 0, 0, 0], // reaper
+                             [1, 0, 0, 1, 0, 1], // solar prince
                              [1, 1, 1, 2, 1, 1], // aether
                              [1, 1, 1, 2, 1, 1]]; // generator
 
@@ -59,8 +57,8 @@ const atk_upgrade_effects = [[1.5, 1.5, 2.0, 2.5, 1.5, 1.5], // shooter
                              [1.5, 1.5, 1.5, 1.2, 1.2, 1.0], // wizard
                              [1.5, 1.5, 1.5, 2.5, 3.5, 2.0], // conduit
                              [2.0, 1.2, 1.2, 2.0, 1.5, 1.5], // juror
-                             [1.5, 1.5, 1.5, 1.5, 1.5, 1.5], // solar prince
-                             [1, 1, 1, 1, 1, 1], // reaper
+                             [1.5, 1.5, 1, 1.2, 1.2, 1.2], // reaper
+                             [1, 1, 1, 1, 1, 1], // solar prince
                              [1, 1, 1, 1, 1, 1], // aether
                              [1, 1, 1, 1, 1, 1]]; // generator
 
@@ -74,10 +72,11 @@ var towerAttackSpeeds = [1, // shooter
                          2, // wizard
                          3, // conduit
                          1, // juror
-                         1, // solar prince
-                         10, // reaper
+                         1, // reaper
+                         10, // solar prince
                          2, // aether
                          1]; // generator
+
 var towerCosts = [50.0, 75.0, 120.0, 150.0, 150.0, 200.0, 750.0, 3000.0, 1000.0, 100.0];
 var towerNames = ["Shooter", "Cannon", "Glaive", "Wizard", "Conduit", "Juror", "Reaper", "Solar Prince", "Aether", "Barracks"];
 var towerDescriptions = ["Basic tower. Deals low single-target damage.",
@@ -90,23 +89,6 @@ var towerDescriptions = ["Basic tower. Deals low single-target damage.",
                          "Arbiter of light. Deals extremely high damage in a cone.",
                          "Portal master.",
                          "Trains and sends monsters on the enemy's side."];
-
-
-// conduit
-var lightning_strengths = [2, 2, 3, 3, 3, 3, 4];
-var lightning_jump_dist = [2, 3, 5, 10, 15, 30, 80];
-var lightning_jumps = [1, 3, 8, 15, 30, 80, 120];
-const MAX_LIGHTNING_DIFFERENCE = 60;
-
-// juror
-var juror_num_targets = [1, 2, 3, 4, 8, 12, 20];
-
-// reaper
-var scythe_speeds = [0.1, 0.2, 0.2, 0.3, 0.3, 0.4, 0.4];
-var reaper_dot_durations = [4, 8, 10, 12, 14, 16, 30]; // seconds
-var reaper_dot_ratio = 0.75; // ratio of total damage to apply
-var reaper_dot_rates = [1, 2, 3, 6, 10, 30, 80]; // rate of apply
-var reaper_dot_stacks = [1, 3, 5, 10, 20, 30, 40]; // how many can be on a target
 
 const TARGET_FIRST = 0;
 const TARGET_LAST = 1;

@@ -83,7 +83,6 @@ function startGame() {
     }
 }
 
-
 function playGame() {
     started = true;
     if(waitingToStart) return;
@@ -130,13 +129,10 @@ function updateAll(override = false) {
     }
 
     if(!game_paused || override) {
-        playerIncome();
+        sendWave();
         enemyActions();
 
         // scale();
-
-        monsterUpdate(PLAYER);
-        monsterUpdate(ENEMY);
 
         moveAll(PLAYER);
         moveAll(ENEMY);
@@ -178,32 +174,49 @@ function scale() {
     timeScale++;
 }
 
-
-var timeSinceLastIncome = 0;
 function playerIncome() {
-    if(StateController.state !== STATE_PLAY) return;
-
-    if(timeSinceLastIncome > 1000 / fps * INCOME_RATE) {
-        player.gainGold(player.income);
-        enemy.gainGold(enemy.income);
-        timeSinceLastIncome = 0;
-    }
-    timeSinceLastIncome++;
+    player.gainGold(player.income);
+    enemy.gainGold(enemy.income);
 }
 
-var timeSinceLastRelease = [0, 0];
+var timeSinceLastWave = 0;
+var gaveIncome = false;
+function sendWave() {
+    if(timeSinceLastWave > WAVE_RATE * fps) {
+        if(!gaveIncome) {
+            playerIncome();
+            gaveIncome = true;
+        }
+
+        if(monsterUpdate(PLAYER) && monsterUpdate(ENEMY)) {
+            timeSinceLastWave = 0;
+            gaveIncome = false;
+        }
+    }
+    timeSinceLastWave++;
+}
+
+var monsterReleaseSpeed = 0.15;
+var timeSinceLastRelease = [monsterReleaseSpeed * fps + 1, monsterReleaseSpeed * fps + 1];
+
 function monsterUpdate(context) {
     var len = StateController.monstersWaiting[context].length;
     if(len > 0) {
-        if(timeSinceLastRelease[context] > 0.05 * fps) {
+        if(timeSinceLastRelease[context] > monsterReleaseSpeed * fps) {
+            console.log("Releasing monsters");
+            // while(StateController.monstersWaiting[context].length > 0) {
             var monster = StateController.monstersWaiting[context].shift();
             monsterList[context][monster.id] = monster;
             monster.visible = true;
+            // }
             timeSinceLastRelease[context] = 0;
         }
+    } else {
+        return true;
     }
 
     timeSinceLastRelease[context]++;
+    return false;
 }
 
 function moveAll(context) {
@@ -278,14 +291,19 @@ function textDraw(context) {
         drawMessage(message.text, 1.0, -0.008, xPos, message.y, message.color, message.ctx);
     }
 
-    var time = (INCOME_RATE - Math.floor(timeSinceLastIncome * fps / 1000));
+    var time = Math.max(0, (WAVE_RATE - Math.floor(timeSinceLastWave * fps / 1000)));
+    let timeText = "Next wave in " + time;
+    if(time == 0) {
+        timeText = "Releasing wave!";
+    }
+
     document.getElementById('incometext').innerHTML = "Income: " + player.income.toLocaleString();
-    document.getElementById('timetext').innerHTML = "Time until income: " + time;
+    document.getElementById('timetext').innerHTML = timeText;
     document.getElementById('livestext').innerHTML = "Lives: " + player.lives;
     document.getElementById('goldtext').innerHTML = "Gold: " + Math.floor(player.gold).toLocaleString();
 
     document.getElementById('enemyincometext').innerHTML = "Income: " + enemy.income.toLocaleString();
-    document.getElementById('enemytimetext').innerHTML = "Time until income: " + time;
+    document.getElementById('enemytimetext').innerHTML = timeText;
     document.getElementById('enemylivestext').innerHTML = "Lives: " + enemy.lives;
     document.getElementById('enemygoldtext').innerHTML = "Gold: " + Math.floor(enemy.gold).toLocaleString();
 }

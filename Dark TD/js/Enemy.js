@@ -183,7 +183,7 @@ function evaluateComfort() {
 
 var startOfGame = 0;
 function enemyActions() {
-	return;
+	// return;
 	if(StateController.state !== STATE_PLAY) return;
 
 	evaluateComfort();
@@ -274,10 +274,12 @@ function buyTower() {
 				continue; // don't keep trying to buy the unique towers
 			}
 			type = t;
+			console.log("I have gold " + enemy.gold + ", " + t + " costs " + towerCosts[t]);
 			if(enemy.gold >= towerCosts[t]) {
 				// tend towards buying the most expensive, but occasionally buy others
 				if(Math.random() < enemyRandomTowerProbability) {
 					var type = Math.floor(Math.random() * t);
+					console.log("ended up with " + type);
 				}
 				break;
 			}

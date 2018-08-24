@@ -159,8 +159,8 @@ SolarPrinceClass.prototype.attack = function() {
 
     for(var degree = -this.attackAngle; degree <= this.attackAngle; degree += 5) {
         var rad = degree * (Math.PI / 180) + myAngle;
-        var xOff = Math.cos(rad) * 1000; 
-        var yOff = Math.sin(rad) * 1000;
+        var xOff = Math.cos(rad) * canvas[this.context].width; 
+        var yOff = Math.sin(rad) * canvas[this.context].width;
         this.drawLightning(start, {x: this.x + xOff, y: this.y + yOff}, 20, 10);
     }
 }

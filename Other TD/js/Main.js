@@ -81,7 +81,8 @@ function startGame() {
 }
 
 var pth;
-var solver = new AStarSearcher(LEVELS[0].grid, {row: 10, col: 10}, {row: 11, col: 1});
+var diagonals = true;
+var solver = new AStarSearcher(LEVELS[0].grid, MONSTER_START, MONSTER_END, diagonals);
 var found = false;
 function playGame() {
     started = true;
@@ -136,12 +137,14 @@ function updateAll(override = false) {
 
     drawAll();
     // drawTooltip();
-    if(!found) {
-        found = solver.findPath();
-    } else {
-        pth = solver.makePath();
-        for(var i = 0; i < pth.length; i++) {
-            highlightTile(pth[i].row, pth[i].col, 'red', 0.5);
+    if(!game_paused) {
+        if(!found) {
+            found = solver.findPath();
+        } else {
+            pth = solver.makePath();
+            for(var i = 0; i < pth.length; i++) {
+                highlightTile(pth[i].row, pth[i].col, 'red', 0.5);
+            }
         }
     }
 

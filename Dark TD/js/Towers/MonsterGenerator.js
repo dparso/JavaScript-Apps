@@ -1,5 +1,3 @@
-
-
 // monster generator
 function GeneratorClass(type, context) {
     TowerClass.call(this, type, context);
@@ -7,7 +5,7 @@ function GeneratorClass(type, context) {
 
     // console.log(this.monsterType + ", " + this.context);
 
-    this.generationRate = 1.0;
+    this.generationRate = 1.0; // one per wave
     this.timeSinceGenerate = 0;
 }
 
@@ -16,7 +14,7 @@ GeneratorClass.prototype.constructor = GeneratorClass;
 
 
 GeneratorClass.prototype.move = function() {
-    if(this.timeSinceGenerate > 1000.0 / fps / this.generationRate) {
+    if(this.timeSinceGenerate > 1000.0 / fps / this.generationRate * WAVE_RATE) {
         this.generateMonster();
         this.timeSinceGenerate = 0;
     }

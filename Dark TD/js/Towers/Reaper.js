@@ -1,4 +1,10 @@
 // reaper
+var scythe_speeds = [0.1, 0.2, 0.2, 0.3, 0.3, 0.4, 0.4];
+var reaper_dot_durations = [4, 8, 10, 12, 14, 16, 30]; // seconds
+var reaper_dot_ratio = 0.75; // ratio of total damage to apply
+var reaper_dot_rates = [1, 2, 3, 6, 10, 30, 80]; // rate of apply
+var reaper_dot_stacks = [1, 3, 5, 10, 20, 30, 40]; // how many can be on a target
+
 function ReaperClass(type, context) {
     TowerClass.call(this, type, context);
     this.floatY = 0;

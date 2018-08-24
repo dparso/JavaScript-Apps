@@ -96,7 +96,7 @@ function StateControllerClass(startLevel) {
     }
 
     this.sendMonster = function(ofType, toSide, usedHotkey = false, fromBarracks = false) {
-        toSide = PLAYER;
+        // toSide = PLAYER;
         // ofType = 6;
         var sender = otherPlayer(toSide);
         monsterCounts[sender][ofType]++;

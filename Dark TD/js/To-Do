@@ -1,5 +1,11 @@
 To-Do:
 
+FF button is beneath center panel. Highlight FF instead of adding arrow
+
+Indicator with little icons for how many of a monster are in a wave
+
+Reduce reaper fire rate, remove shadow blur from lightning
+
 Create a dictionary to map row, col to position in monster path -- use for projectile leading
 
 Portals follow based on path position
@@ -267,6 +273,10 @@ Steps to creating a new tower:
 	Add image in ImageLoading.js
 	If new projectile image, add that to images as well
 	Show image in the towerselections HTML table
+
+
+Consider an alternative type of game:
+	Tug of war. Soldiers are spawned from each side, and walk along path towards the enemy gate. Towers are placed as support to the soldiers being spawned, and can be attacked by the enemy units as they pass by
 
 Notes:
 Cannon explosion animation from https://www.photopea.com/, select region with lasso, move with V -- make sure specific layer is selected

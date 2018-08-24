@@ -106,7 +106,7 @@ function handleMouseDown(evt) {
             break;
 
         case STATE_PLAY:
-            solver = new AStarSearcher(LEVELS[0].grid, {row: 10, col: 10}, {row: tileClicked.row, col: tileClicked.col});
+            solver = new AStarSearcher(LEVELS[0].grid, MONSTER_START, {row: tileClicked.row, col: tileClicked.col}, diagonals);
             found = false;
             if(!isDragging) {
                 // selected a tower to build

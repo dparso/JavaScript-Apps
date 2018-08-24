@@ -95,7 +95,7 @@ function drawGridLevel(level) {
                     for(var col = objectTile.col - dragObject.range; col <= objectTile.col + dragObject.range; col++) {
                         if(gridInRange(row, col)) { // in bounds
                             var tile = StateController.currLevel.tiles[row][col];
-                            if(tile.type !== TILE_WALL || tile.hasTower()) {
+                            if(!canPlaceTower(row, col)) {
                                 // color red
                                 highlightTile(row, col, 'red', 0.5);                      
                             } else {
@@ -147,7 +147,7 @@ function gridInRange(row, col) {
 
 function canPlaceTower(row, col) {
     var tile = StateController.currLevel.tiles[row][col];
-    if(tile.type === TILE_WALL && !tile.hasTower()) {
+    if((tile.type === TILE_WALL || tile.type == TILE_PATH) && !tile.hasTower()) {
         return true;
     }
     return false;

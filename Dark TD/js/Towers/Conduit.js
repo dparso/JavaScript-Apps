@@ -1,4 +1,9 @@
 // conduit
+var lightning_strengths = [2, 2, 3, 3, 3, 3, 4];
+var lightning_jump_dist = [2, 3, 5, 7, 10, 15, 20];
+var lightning_jumps = [1, 3, 6, 10, 15, 20, 30];
+const MAX_LIGHTNING_DIFFERENCE = 60;
+
 function ConduitClass(type, context) {
     TowerClass.call(this, type, context);
 
@@ -128,6 +133,13 @@ ConduitClass.prototype.attack = function() {
     }
 }
 
+// var evilRed = "#d3061e";
+// var strongerBlue = "#5947ff";
+var lightBlue = "#429af7";
+// var palpatinePurple = "#692baf";
+// var pink = "#a80b5a";
+// var colors = [evilRed, strongerBlue, lightBlue, palpatinePurple, pink];
+
 ConduitClass.prototype.drawLightning = function(from, to, maxDiff, strength) {
     // https://codepen.io/mcdorli/post/creating-lightnings-with-javascript-and-html5-canvas
     var direction = 0; // 0 corresponds to y variation, 1 to x
@@ -138,13 +150,9 @@ ConduitClass.prototype.drawLightning = function(from, to, maxDiff, strength) {
     var max = Math.max(Math.abs(from.x - to.x), Math.abs(from.y - to.y));
     var segmentHeight = 50;
 
-    render(from, to, direction, maxDiff, segmentHeight, this.context, strength, "#d3061e");
+    render(from, to, direction, maxDiff, segmentHeight, this.context, strength, lightBlue);
 }
 
-// light blue: #429af7
-// stronger blue: #5947ff
-// palpatine purple: #692baf
-// evil red: #d3061e
 
 const minSegmentHeight = 5;
 const roughness = 2;
@@ -155,12 +163,12 @@ function render(source, target, direction, maxDifference, segmentHeight, context
     var lightning = createLightning(source, target, direction, maxDifference, segmentHeight);
 
     ctx[context].save();
-    ctx[context].globalCompositeOperation="source-over";
+    ctx[context].globalCompositeOperation = "source-over";
     ctx[context].globalCompositeOperation = "lighter";
 
     ctx[context].strokeStyle = color;
-    ctx[context].shadowColor = color;
-    ctx[context].shadowBlur = 15;
+    // ctx[context].shadowColor = color;
+    // ctx[context].shadowBlur = 15;
 
     ctx[context].fillStyle = color;
     ctx[context].fillStyle = "hsla(0, 0%, 10%, 0.2)";

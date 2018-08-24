@@ -5,7 +5,7 @@ function SearchNode(gridPos, value) {
 
 SearchNode.prototype.valueOf = function() {return this.value};
 
-function AStarSearcher(grid, begin, goal) {
+function AStarSearcher(grid, begin, goal, diagonals) {
 	this.grid = grid; // 2D grid of (x, y)
 	this.begin = begin;
 	this.goal = goal;
@@ -15,23 +15,11 @@ function AStarSearcher(grid, begin, goal) {
 	// note that this is a max priority queue
 	// to get min, all values are multiplied by -1
 
-	// let a = {dist: -10};
-	// let b = {dist: -2};
-	// let c = {dist: -8};
-	// let d = {dist: -25};
-	// let e = {dist: 2};
-
-	// openSet.push(a, b, c, d, e);
-	// console.log('Top:', openSet.peek()); //=> 50
-	// console.log('Size:', openSet.size()); //=> 5
-	// console.log('Contents:');
-	// while (!openSet.isEmpty()) {
-	//   console.log(openSet.pop()); //=> 40, 30, 20, 10
-	// }
-
+	this.allowDiagonals = diagonals;
 
 	this.heuristic = function(row, col) {
-		// return -Math.abs(row - this.goal.row) - Math.abs(col - this.goal.col);
+		if(this.allowDiagonals) return -Math.abs(row - this.goal.row) - Math.abs(col - this.goal.col);
+		
 		let x = col - this.goal.col;
 		let y = row - this.goal.row;
 
@@ -71,11 +59,16 @@ function AStarSearcher(grid, begin, goal) {
 		for(var rowOff = -1; rowOff <= 1; rowOff++) {
 			for(var colOff = -1; colOff <= 1; colOff++) {
 				// if(Math.abs(rowOff) == Math.abs(colOff)) continue; // no diagonals: only (1, 0), (0, 1), (-1, 0), (0, -1)
-				if(Math.abs(rowOff) == 0 && Math.abs(colOff) == 0) continue; // no diagonals: only (1, 0), (0, 1), (-1, 0), (0, -1)
+				if(this.allowDiagonals) {
+					if(rowOff == 0 && colOff == 0) continue;
+				} else {
+					if(Math.abs(rowOff) == Math.abs(colOff)) continue;// no diagonals: only (1, 0), (0, 1), (-1, 0), (0, -1)
+				}
 				let r = row + rowOff;
 				let c = col + colOff;
 				// console.log("neighbor " + r + ", " + c);
 				if(gridInRange(r, c)) {
+					if(!monsterCanWalk(r, c)) continue;
 					if(this.tracker[r][c].visited) {
 						// console.log("visited");
 						continue;
@@ -102,7 +95,7 @@ function AStarSearcher(grid, begin, goal) {
 	    this.totalPath = [this.goal];
 	    let parent = this.tracker[this.goal.row][this.goal.col].cameFrom;
 	    // console.log(parent);
-	    while(parent != undefined) {
+	    while(parent != null) {
 	    	// console.log(parent);
 	    	this.totalPath.push(parent);
 	    	parent = this.tracker[parent.row][parent.col].cameFrom;

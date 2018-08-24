@@ -71,6 +71,7 @@ function keySet(evt, car, setTo) {
 }
 
 function keyPressed(evt) {
+    console.log(evt.keyCode);
     if(gameWon) {
         return;
     }
