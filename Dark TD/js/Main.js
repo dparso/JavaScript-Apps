@@ -21,6 +21,7 @@ var started = false;
 
 var player = new PlayerClass(PLAYER);
 var enemy = new PlayerClass(ENEMY);
+player.gold = 100000000;
 // enemy.gold = 20;
 // enemy.income = 5.0;
 
@@ -275,10 +276,10 @@ function drawSelection(context) {
 }
 
 function textDraw(context) {
-    var tile = pixelToGrid(mouseX, mouseY);
-    ctx[currCanvas].fillStyle = 'white';
+    // var tile = pixelToGrid(mouseX, mouseY);
+    // ctx[currCanvas].fillStyle = 'white';
     // ctx[currCanvas].fillText(mouseX + ", " + mouseY, mouseX + 10, mouseY + 30);
-    ctx[currCanvas].fillText(tile.row + ", " + tile.col, mouseX + 10, mouseY + 10);
+    // ctx[currCanvas].fillText(tile.row + ", " + tile.col, mouseX + 10, mouseY + 10);
 
     // draw all queued messages
     while(messages.length > 0) {

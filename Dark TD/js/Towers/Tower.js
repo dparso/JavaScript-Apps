@@ -77,7 +77,7 @@ var towerAttackSpeeds = [1, // shooter
                          2, // aether
                          1]; // generator
 
-var towerCosts = [50.0, 75.0, 120.0, 150.0, 150.0, 200.0, 750.0, 3000.0, 1000.0, 100.0];
+var towerCosts = [50.0, 75.0, 120.0, 150.0, 150.0, 200.0, 750.0, 3000.0, 3000.0, 3500.0];
 var towerNames = ["Shooter", "Cannon", "Glaive", "Wizard", "Conduit", "Juror", "Reaper", "Solar Prince", "Aether", "Barracks"];
 var towerDescriptions = ["Basic tower. Deals low single-target damage.",
                          "Slow but powerful. Deals medium area-of-effect damage.", 
