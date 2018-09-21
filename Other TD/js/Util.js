@@ -113,10 +113,9 @@ function drawGridLevel(level) {
 
 function monsterCanWalk(row, col) {
     let tile = StateController.currLevel.tiles[row][col];
-    if(!tile.hasTower() && (tile.type == TILE_PATH || tile.type == MONSTER_START || tile.type == MONSTER_END)) {
+    if(!tile.hasTower() && (tile.type == TILE_PATH || tile.type == TILE_MONSTER_START || tile.type == TILE_MONSTER_END)) {
         return true;
     }
-    console.log(row + ", " + col + " false");
     return false;
 }
 

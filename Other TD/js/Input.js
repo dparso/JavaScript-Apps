@@ -85,6 +85,7 @@ function handleMouseDown(evt) {
     isDown = true;
 
     var tileClicked = pixelToGrid(mouse.x, mouse.y);
+    // showTile = tileClicked;
 
     switch(StateController.state) {
         case STATE_SELECT:
@@ -106,8 +107,6 @@ function handleMouseDown(evt) {
             break;
 
         case STATE_PLAY:
-            solver = new AStarSearcher(LEVELS[0].grid, MONSTER_START, {row: tileClicked.row, col: tileClicked.col}, diagonals);
-            found = false;
             if(!isDragging) {
                 // selected a tower to build
                 var tile = StateController.currLevel.tiles[tileClicked.row][tileClicked.col];
@@ -280,6 +279,9 @@ function keyPressed(evt) {
     } else if(evt.keyCode === 70) {
         // fast forward
         fastGame();
+        evt.preventDefault();
+    } else if(evt.keyCode == 86) {
+        displayVectorField = !displayVectorField;
         evt.preventDefault();
     } else {
         keySet(evt, true);

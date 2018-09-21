@@ -44,6 +44,32 @@ function fadeOut(toState, toLevel) {
     }
 }
 
+var tileDelta = 0.01;
+function tileFlash(row, col, opacity, delta) {
+    // console.log(opacity);
+    if(opacity >= 1) {
+        delta *= -1;
+    } else if(opacity < 0) {
+        return;
+    } else {
+        highlightTile(row, col, 'white', opacity);
+    }
+
+    requestAnimationFrame(function() {
+        tileFlash(row, col, opacity + delta, delta);
+    });  
+}
+
+// function tileFlash2(row, col, opacity) {
+//     setInterval(function() {
+//         highlightTile(row, col, 'white', opacity);
+//     }, 1000 / fps);
+   
+//             timerId = setInterval(updateAll, 1000 / fps); // restart gameplay
+
+// }
+
+
 var messages = [];
 function queueMessage(message, x, y, color = 'red') {
     messages.push({text: message, x: x, y: y, color: color});
@@ -95,5 +121,6 @@ function scytheAnimation(x, y, angle, speed) {
         });
     }
 }
+
 
 

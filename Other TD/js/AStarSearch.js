@@ -1,10 +1,3 @@
-function SearchNode(gridPos, value) {
-	this.gridPos = gridPos;
-	this.value = value;
-}
-
-SearchNode.prototype.valueOf = function() {return this.value};
-
 function AStarSearcher(grid, begin, goal, diagonals) {
 	this.grid = grid; // 2D grid of (x, y)
 	this.begin = begin;
@@ -17,13 +10,23 @@ function AStarSearcher(grid, begin, goal, diagonals) {
 
 	this.allowDiagonals = diagonals;
 
+	this.manhattanDistance = function(row1, col1, row2, col2) {
+		return Math.abs(row1 - row2) + Math.abs(col1 - col2);
+	}
+
 	this.heuristic = function(row, col) {
-		if(this.allowDiagonals) return -Math.abs(row - this.goal.row) - Math.abs(col - this.goal.col);
-		
-		let x = col - this.goal.col;
-		let y = row - this.goal.row;
+		if(	this.allowDiagonals) return -this.manhattanDistance(row, col, this.goal.row, this.goal.col);
+
+		let x = Math.abs(col - this.goal.col);
+		let y = Math.abs(row - this.goal.row);
+
+		// if(this.allowDiagonals) return -Math.max(x, y) - (Math.sqrt(2) + 1) * Math.min(x, y);
 
 		return -Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+
+		// let deltaX = Math.abs(x);
+		// let deltaY = Math.abs(y);
+		// return -7 * Math.min(deltaX,deltaY) - 10 * (Math.max(deltaX,deltaY) + Math.min(deltaX,deltaY))
 	}
 
 	// initialize values to infinity
@@ -42,50 +45,57 @@ function AStarSearcher(grid, begin, goal, diagonals) {
 
 	this.findPath = function() {
 		if(this.openSet.size() <= 0) return false;
+		var num = 0;
 
-		let curr = this.openSet.pop();
-		// console.log(curr);
-		let row = curr.gridPos.row;
-		let col = curr.gridPos.col;
-		if(row == this.goal.row && col == this.goal.col) {
-			// console.log("Found " + this.goal);
-			return true;
-		}
-		// console.log("curr " + row + ", " + col + ", " + tracker[row][col].fScore);
-		// mark this node as visited
-		this.tracker[row][col].visited = true;
-
-		// get & add neighbors
-		for(var rowOff = -1; rowOff <= 1; rowOff++) {
-			for(var colOff = -1; colOff <= 1; colOff++) {
-				// if(Math.abs(rowOff) == Math.abs(colOff)) continue; // no diagonals: only (1, 0), (0, 1), (-1, 0), (0, -1)
-				if(this.allowDiagonals) {
-					if(rowOff == 0 && colOff == 0) continue;
-				} else {
-					if(Math.abs(rowOff) == Math.abs(colOff)) continue;// no diagonals: only (1, 0), (0, 1), (-1, 0), (0, -1)
-				}
-				let r = row + rowOff;
-				let c = col + colOff;
-				// console.log("neighbor " + r + ", " + c);
-				if(gridInRange(r, c)) {
-					if(!monsterCanWalk(r, c)) continue;
-					if(this.tracker[r][c].visited) {
-						// console.log("visited");
-						continue;
-					}
-					let gScore = this.tracker[row][col].gScore - 1; // neighbors are always just 1 away
-					if(this.openSet.contains(r, c) && gScore <= this.tracker[r][c].gScore) {
-						// not a better path
-						// console.log("have a better path");
-						continue;
-					} else {
-						let totalDist = gScore + this.heuristic(r, c);
-						// console.log("adding " + totalDist);
-						this.openSet.push({gridPos: {row: r, col: c}, dist: totalDist});
-						this.tracker[r][c] = {gScore: gScore, fScore: totalDist, cameFrom: {row: row, col: col}, visited: false};
-					}
-				}
+		// while(this.openSet.size() > 0) {
+			let curr = this.openSet.pop();
+			// console.log(curr);
+			let row = curr.gridPos.row;
+			let col = curr.gridPos.col;
+			if(row == this.goal.row && col == this.goal.col) {
+				// console.log("Found " + this.goal);
+				console.log(num);
+				return true;
 			}
+			// console.log("curr " + row + ", " + col + ", " + tracker[row][col].fScore);
+			// mark this node as visited
+			this.tracker[row][col].visited = true;
+			// get & add neighbors
+			for(var rowOff = -1; rowOff <= 1; rowOff++) {
+				for(var colOff = -1; colOff <= 1; colOff++) {
+					if(this.allowDiagonals) {
+						if(rowOff == 0 && colOff == 0) continue;
+					} else {
+						if(Math.abs(rowOff) == Math.abs(colOff)) continue; // no diagonals: only (1, 0), (0, 1), (-1, 0), (0, -1)
+					}
+					let r = row + rowOff;
+					let c = col + colOff;
+					// console.log("neighbor " + r + ", " + c);
+					if(gridInRange(r, c)) {
+						if(!monsterCanWalk(r, c)) continue;
+						if(this.tracker[r][c].visited) {
+							continue;
+						}
+						let gScore = this.tracker[row][col].gScore;
+						// let weight = rowOff == colOff ? 1.5 : 1.0;
+						let weight = 1.0;
+						gScore -= weight;
+
+
+						if(!this.openSet.contains(r, c)) {
+							// console.log(r + ", " + c + ": " + gScore + ", " + this.heuristic(r, c));
+							let totalDist = gScore + this.heuristic(r, c);
+							// console.log("adding " + totalDist);
+							this.openSet.push({gridPos: {row: r, col: c}, dist: totalDist});
+							num++;
+							this.tracker[r][c] = {gScore: gScore, fScore: totalDist, cameFrom: {row: row, col: col}, visited: false};
+						} else if(gScore <= this.tracker[r][c].gScore) {
+							// not a better path
+							continue;
+						}
+					}
+				}
+			// }
 		}
 		return false;
 	}

@@ -88,9 +88,9 @@ function LevelClass(levelType, levelGrid, drawFunction, loadFunction) {
 	            }					
 			} // end of for col
 		} // end of for row
-
+		
 	    if(this.type === LEVEL_TRACK) {
-	    	calculateMonsterPath();
+	    	calculateMonsterPathBFS();
 	    }
 	} // end of load
 

@@ -9,7 +9,14 @@ var monster_send_ratio = 0.3; // income from sending
 var monsterCosts = [[50.0, 190.0, 800.0, 1500.0, 8000.0, 50000.0, 250000.0, 5000000.0],
                     [50.0, 190.0, 800.0, 1500.0, 8000.0, 50000.0, 250000.0, 5000000.0]];
 var monsterNames = ["Spook", "Fright", "Fear", "Dread", "Nightmare", "Terror", "Horror", "Chaos"]; // panic, despair, jitters, concern, creep, anguish, gloom, misery, desperation, wraith
-var monsterDescriptions = ["Weak, fast, and spooky.", "Strong, slow early-game monster.", "Be afraid!", "Shore up your defenses, or pay the price.", "The dark-alley life stealer.", "Looming, lumbering, lifeless.", "The lieutenant of Chaos.", "Game over, man."];
+var monsterDescriptions = ["Weak, fast, and spooky.", 
+                           "Strong, slow early-game monster.", 
+                           "Be afraid!", 
+                           "Shore up your defenses, or pay the price.", 
+                           "The dark-alley life stealer.", 
+                           "Looming, lumbering, lifeless.", 
+                           "The lieutenant of Chaos.", 
+                           "Game over, man."];
 
 var monsterCounts = [[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0]];
 var monsterLevels = [[1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1]];
@@ -22,6 +29,7 @@ function MonsterClass(type, owner) {
     this.x = MONSTER_START.col * TILE_W;
     this.y = MONSTER_START.row * TILE_H;
     this.currTile = MONSTER_START;
+    this.prevTile = MONSTER_START;
 
     this.imgs = monsterPics[type];
     this.imgIndex = 0; // which point in walk animation
@@ -73,9 +81,15 @@ function MonsterClass(type, owner) {
         }
 
         if(this.immobile) return;
-        if(this.pathPosition >= 0) {
-            if(this.visible) {
-                var nextGoal = monsterPath[this.pathPosition].pixel;
+        if(this.currTile.row != MONSTER_END.row || this.currTile.col != MONSTER_END.col) {
+            if(this.visible) { // should still move in visible -- ?
+                let parent = StateController.currLevel.tiles[this.currTile.row][this.currTile.col].parent;
+                if(parent === undefined || parent == null) {
+                    debugger;
+                }
+
+                var nextGoal = gridToPixel(parent.row, parent.col);
+
                 var changeX = nextGoal.x - this.x;
                 var changeY = nextGoal.y - this.y;
                 if(changeX < 0) {
@@ -88,21 +102,29 @@ function MonsterClass(type, owner) {
                 this.y += Math.sign(changeY) * this.speed;
 
                 // within range of next goal
-                // console.log(this.speed);
-                // console.log(Math.abs(nextGoal.x - this.x) + ", " + Math.abs(nextGoal.y - this.y));
-                if(Math.abs(nextGoal.x - this.x) < this.speed && Math.abs(nextGoal.y - this.y) < this.speed) {
-                    this.x = nextGoal.x;
-                    this.y = nextGoal.y;
-                    this.pathPosition--;
+                let closeX = false, closeY = false;
+                if(Math.abs(nextGoal.x - this.x) < this.speed) {
+                    closeX = true;
+                }
+                if(Math.abs(nextGoal.y - this.y) < this.speed) {
+                    closeY = true;
                 }
 
-                // since it moved, it must notify tiles if changed
-                var newTile = pixelToGrid(this.x, this.y);
-                if(newTile.col !== this.currTile.col || newTile.row !== this.currTile.row) {
-                    // notify old & new tile
+                if(closeX && closeY) {
                     StateController.currLevel.tiles[this.currTile.row][this.currTile.col].notifyMonsterDepart(this.id);
-                    StateController.currLevel.tiles[newTile.row][newTile.col].notifyMonsterArrive(this.id);
-                    this.currTile = newTile;
+                    StateController.currLevel.tiles[parent.row][parent.col].notifyMonsterArrive(this.id);
+                    
+                    this.prevTile = this.currTile;
+                    this.currTile = parent;
+                    
+                    var nextTile = StateController.currLevel.tiles[parent.row][parent.col].parent;
+                    // snap to next position if turning a corner
+                    if(nextTile != null) {;
+                        if(this.prevTile.row != nextTile.row && this.prevTile.col != nextTile.col) {
+                            this.x = nextGoal.x;
+                            this.y = nextGoal.y;
+                        }
+                    }
                 }
             }
         } else {
@@ -213,7 +235,7 @@ function Queue() {
     this.data = [];
 
     this.push = function(data) {
-        data.visited = true;
+        data.visited = searchCount;
         this.data.unshift(data);
     }
 
@@ -226,17 +248,41 @@ function Queue() {
     }
 }
 
-function calculateMonsterPath() {
-    // BFS from TILE_MONSTER_START to TILE_MONSTER_END
-    // NOTE: for now, the tiles are the same, so the path is the same
-    var currTile, finish;
-    for(var row = 0; row < TILE_ROWS; row++) {
-        for(var col = 0; col < TILE_COLS; col++) {
-            if(StateController.currLevel.tiles[row][col].type === TILE_MONSTER_START) {
-                currTile = StateController.currLevel.tiles[row][col];
+function calculateMonsterPathAStar() {
+    monsterPath = [];
+    fullMonsterPath = [];
+    var pth;
+    var diagonals = true;
+    var solver = new AStarSearcher(LEVELS[0].grid, MONSTER_START, MONSTER_END, diagonals);
+
+    if(solver.findPath()) {
+        pth = solver.makePath();
+
+        // to increase efficiency, do this part inside makePath
+        var prevXOff = 0, prevYOff = 0;
+        monsterPath.push({pixel: gridToPixel(pth[0].row, pth[0].col), position: 0});
+        for(var i = 1; i < pth.length; i++) {
+            let xOff = pth[i].row - pth[i - 1].row;
+            let yOff = pth[i].col - pth[i - 1].col;
+            if(prevXOff !== xOff || prevYOff !== yOff) {
+                let pixelPos = gridToPixel(pth[i - 1].row, pth[i - 1].col);
+                monsterPath.push({pixel: pixelPos, position: i - 1});
+                console.log(pixelPos);
             }
+            fullMonsterPath.push(pth[i]);
+            prevXOff = xOff;
+            prevYOff = yOff;
         }
     }
+}
+
+var searchCount = 0;
+function calculateMonsterPathBFS() {
+    searchCount++;
+    // BFS from TILE_MONSTER_START to TILE_MONSTER_END
+    var currTile, finish;
+    currTile = StateController.currLevel.tiles[MONSTER_END.row][MONSTER_END.col];
+    currTile.distanceToGoal = 0;
     
     if(currTile === undefined) {
         return;
@@ -248,55 +294,40 @@ function calculateMonsterPath() {
     while(!frontier.empty()) {
         var currTile = frontier.pop();
 
-        if(currTile.type === TILE_MONSTER_END) {
+        if(currTile.type === TILE_MONSTER_START) {
             finish = currTile;
-            break; // do more
+            continue; // do more
         }
 
         // add neighbors that are PATH and unvisited
         for(var rowOffset = -1; rowOffset <= 1; rowOffset++) {
-            if(rowOffset === 0) continue;
-            if(gridInRange(currTile.row + rowOffset, currTile.col)) {
-                var tile = StateController.currLevel.tiles[currTile.row + rowOffset][currTile.col];
-
-                if((tile.type === TILE_PATH || tile.type === TILE_MONSTER_END) && !tile.visited) {
-                    // add this to path
-                    tile.parent = currTile;
-                    frontier.push(tile);
+            for(var colOffset = -1; colOffset <= 1; colOffset++) {
+                if(allowDiagonals) {
+                    if(rowOffset === 0 && colOffset === 0) continue;
+                } else if(Math.abs(rowOffset) === Math.abs(colOffset)) {
+                    continue;
                 }
-            }
-        }
-        for(var colOffset = -1; colOffset <= 1; colOffset++) {
-            if(colOffset === 0) continue;
-            if(gridInRange(currTile.row, currTile.col + colOffset)) {
-                var tile = StateController.currLevel.tiles[currTile.row][currTile.col + colOffset];
-                if((tile.type === TILE_PATH || tile.type === TILE_MONSTER_END) && !tile.visited) {
-                    // add this to path
-                    tile.parent = currTile;
-                    frontier.push(tile);
+
+                if(gridInRange(currTile.row + rowOffset, currTile.col + colOffset)) {
+                    var tile = StateController.currLevel.tiles[currTile.row + rowOffset][currTile.col + colOffset];
+
+                    // if is monster start, stop!
+                    if(monsterCanWalk(tile.row, tile.col) && tile.visited < searchCount) {
+                        // add this to frontier
+                        tile.parent = currTile;
+                        tile.distanceToGoal = currTile.distanceToGoal + 1;
+                        frontier.push(tile);
+                    }
                 }
             }
         }
     }
 
-    var startPos = gridToPixel(MONSTER_START.row, MONSTER_START.col);
+    var startPos = gridToPixel(MONSTER_END.row, MONSTER_END.col);
     var prevX = startPos.x, prevY = startPos.y;
 
     while(finish.parent) {
-        var pixelPos = gridToPixel(finish.row, finish.col);
-        if(monsterPath[monsterPath.length - 1] !== undefined) {
-            if(pixelPos.x !== monsterPath[monsterPath.length - 1].pixel.x && pixelPos.y !== monsterPath[monsterPath.length - 1].pixel.y) {
-                // changing direction: add previous
-                monsterPath.push({pixel: {x: prevX, y: prevY}, position: fullMonsterPath.length});
-            }
-            prevX = pixelPos.x;
-            prevY = pixelPos.y;
-        } else {
-            monsterPath.push({pixel: pixelPos, position: fullMonsterPath.length});
-        }
-
-        var tilePos = pixelToGrid(pixelPos.x, pixelPos.y);
-        fullMonsterPath.push({tile: tilePos, position: monsterPath.length - 1}); // this one goes last-first for easy tower traversal
+        StateController.currLevel.tiles[finish.row][finish.col].onPath = searchCount;
         finish = finish.parent;
     }
 }

@@ -6,8 +6,13 @@ function TileClass(position, type, img, transparent) {
     this.transparent = transparent;
 
     // BFS variables
-    this.visited = false;
+    // instead of n^2 resetting for these variables on each search,
+    // the values correspond to the "id" of the search that assigned them
+    // so new searches will know to ignore
+    this.visited = 0;
+    this.onPath = 0;
     this.parent = null;
+    this.distanceToGoal = TILE_COLS * TILE_ROWS; // max value to start
 
     this.monstersOnTile = {}; // monster IDs
     this.towerOnTile = -1;

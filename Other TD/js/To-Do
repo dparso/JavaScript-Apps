@@ -1,7 +1,13 @@
 To-Do:
 
-When a tower is placed, recalculate paths for TILES, then give each monster on those tiles the same path
-	Instead of recalculating, could instead recalculate start-end, and then do a BFS for monsters, looking for any node that is in the new path
+Recalculating path:
+	Need to run FULL BFS!! Otherwise, if the path becomes very short, some monsters may be on tiles that don't get recalculated, and not adjust their path properly.
+	Only when a tower is placed ON the path
+	Do BFS from GOAL: only end once all tiles with monsters have been found AND the goal was found
+	Make sure tile.onPath is reset
+
+	When a tower is placed, recalculate paths for TILES, then give each monster on those tiles the same path
+		Instead of recalculating, could instead recalculate start-end, and then do a BFS for monsters, looking for any node that is in the new path
 
 Indicator with little icons for how many of a monster are in a wave
 

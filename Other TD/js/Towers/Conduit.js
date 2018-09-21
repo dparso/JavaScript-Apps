@@ -16,14 +16,14 @@ ConduitClass.prototype = Object.create(TowerClass.prototype);
 ConduitClass.prototype.constructor = ConduitClass; 
 
 ConduitClass.prototype.findChainTargets = function(fromTile) {
+    // currently, this chains *towards the goal*, not backwards (that's how tile parents work)
     var jumps = 0;
     var jumpDistance = 0;
-    var index = fromTile;
+    var pos = fromTile;
     var first = true;
 
     // walk down the path finding jumps
-    while(jumps < lightning_jumps[this.tier + 1] && jumpDistance < lightning_jump_dist[this.tier + 1] && index < fullMonsterPath[this.owner].length) {
-        var pos = fullMonsterPath[this.owner][index].tile;
+    while(jumps < lightning_jumps[this.tier + 1] && jumpDistance < lightning_jump_dist[this.tier + 1] && pos != null) {
         var tile = StateController.currLevel.tiles[pos.row][pos.col];
         Object.keys(tile.monstersOnTile).forEach(
             ((monster) => {
@@ -38,7 +38,8 @@ ConduitClass.prototype.findChainTargets = function(fromTile) {
                 }
             })
         );
-        index++;
+        
+        pos = pos.parent;
         jumpDistance++;
     }
 }
@@ -78,12 +79,11 @@ ConduitClass.prototype.move = function() {
 ConduitClass.prototype.getFirstTarget = function() {
     // follow the path, end -> start, and attack the first monster in range
     for(var tileNum = 0; tileNum < this.tilesInRange.length; tileNum++) {
-        var tilePos = this.tilesInRange[tileNum];
-        var tile = StateController.currLevel.tiles[tilePos.tile.row][tilePos.tile.col];
+        var tile = this.tilesInRange[tileNum];
         if(tile.hasMonsters()) {
             // found target
             this.targets[0] = monsterList[this.owner][Object.keys(tile.monstersOnTile)[0]];
-            this.findChainTargets(tilePos.index, 0);
+            this.findChainTargets(tile);
             return;
         }
     }
@@ -91,14 +91,11 @@ ConduitClass.prototype.getFirstTarget = function() {
 
  ConduitClass.prototype.getLastTarget = function() {
     for(var tileNum = this.tilesInRange.length - 1; tileNum > 0; tileNum--) {
-        var tilePos = this.tilesInRange[tileNum].tile;
-        if(this.inRange(tilePos.row, tilePos.col)) {
-            var tile = StateController.currLevel.tiles[tilePos.row][tilePos.col];
-            if(tile.hasMonsters()) {
-                this.targets[0] = monsterList[this.owner][Object.keys(tile.monstersOnTile)[0]];
-                this.findChainTargets(tileNum, 0);
-                return;
-            }
+        var tile = this.tilesInRange[tileNum];
+        if(tile.hasMonsters()) {
+            this.targets[0] = monsterList[this.owner][Object.keys(tile.monstersOnTile)[0]];
+            this.findChainTargets(tile);
+            return;
         }
     }
 }

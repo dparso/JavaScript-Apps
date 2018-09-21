@@ -57,7 +57,7 @@ function StateControllerClass(startLevel) {
                 tower = new GeneratorClass(ofType, onSide);
                 break;
             default:
-                return;
+                return false;
         }
 
         var pixelPos = gridToPixel(atGrid.row, atGrid.col);
@@ -92,6 +92,10 @@ function StateControllerClass(startLevel) {
 
         // display cost loss onscreen
         queueMessage("-" + towerCosts[tower.type].toLocaleString(), tower.x, tower.y);
+        // recompute monster path
+        calculateMonsterPathBFS();
+        // solver = new AStarSearcher(LEVELS[0].grid, MONSTER_START, MONSTER_END, diagonals);
+        // found = false;
         return true;
     }
 
@@ -185,8 +189,11 @@ function StateControllerClass(startLevel) {
         obj.gainGold(towerList[owner][towerId].value);
 
         queueMessage("+" + tower.value.toLocaleString(), tower.x, tower.y, 'green');
-
         delete towerList[owner][towerId];
+
+        // recalculate path!
+        calculateMonsterPathBFS();
+
     }
 
     this.changeState = function(newState, newLevel) {

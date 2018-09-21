@@ -142,12 +142,21 @@ function TowerClass(type, owner) {
 TowerClass.prototype.calculateTilesInRange = function() {
     // get all the tiles in fullMonsterPath that are in range, for attack checking
     this.tilesInRange = [];
-    for(var tileNum = 0; tileNum < fullMonsterPath.length; tileNum++) {
-        var tilePos = fullMonsterPath[tileNum].tile;
-        if(this.inRange(tilePos.row, tilePos.col)) {
-            this.tilesInRange.push({tile: tilePos, index: tileNum});
+    var lowerRow = Math.max(0, this.currTile.row - this.properties[RANGE]);
+    var upperRow = Math.min(TILE_ROWS - 1, this.currTile.row + this.properties[RANGE]);
+    
+    var lowerCol = Math.max(0, this.currTile.col - this.properties[RANGE]);
+    var upperCol = Math.min(TILE_COLS - 1, this.currTile.col + this.properties[RANGE]);
+
+    for(var row = lowerRow; row <= upperRow; row++) {
+        for(var col = lowerCol; col <= upperCol; col++) {
+            this.tilesInRange.push(StateController.currLevel.tiles[row][col]);
         }
     }
+
+    this.tilesInRange.sort(function(a, b) {
+        return a.distanceToGoal - b.distanceToGoal;
+    });
 }
 
 TowerClass.prototype.reset = function() {
@@ -160,8 +169,7 @@ TowerClass.prototype.reset = function() {
 TowerClass.prototype.getFirstTarget = function() {
     // follow the path, end -> start, and attack the first monster in range
     for(var tileNum = 0; tileNum < this.tilesInRange.length; tileNum++) {
-        var tilePos = this.tilesInRange[tileNum].tile;
-        var tile = StateController.currLevel.tiles[tilePos.row][tilePos.col];
+        var tile = this.tilesInRange[tileNum];
         if(tile.hasMonsters()) {
             // found our target!
             this.targets.push(monsterList[this.owner][Object.keys(tile.monstersOnTile)[0]]);
@@ -177,15 +185,13 @@ TowerClass.prototype.getFirstTarget = function() {
 TowerClass.prototype.getRandomTarget = function() {
     // act like we're finding first, then skip backward some random number between there and 0
     for(var tileNum = 0; tileNum < this.tilesInRange.length; tileNum++) {
-        var tilePos = this.tilesInRange[tileNum].tile;
-        var tile = StateController.currLevel.tiles[tilePos.row][tilePos.col];
+        var tile = this.tilesInRange[tileNum];
         if(tile.hasMonsters()) {
             // this is the first monster: skip forward some number of tiles
             let skipDistance = Math.floor(Math.random() * (this.tilesInRange.length - tileNum - 1));
             // from that random position, walk up finding the first random target
             while(tileNum + skipDistance < this.tilesInRange.length) {
-                tilePos = this.tilesInRange[tileNum + skipDistance].tile;
-                tile = StateController.currLevel.tiles[tilePos.row][tilePos.col];
+                tile = this.tilesInRange[tileNum + skipDistance];
                 if(tile.hasMonsters()) {
                     this.targets.push(monsterList[this.owner][Object.keys(tile.monstersOnTile)[0]]);
                     return;
@@ -197,11 +203,9 @@ TowerClass.prototype.getRandomTarget = function() {
 }
 
 TowerClass.prototype.getLastTarget = function() {
-    // last
     for(var tileNum = this.tilesInRange.length - 1; tileNum > 0; tileNum--) {
-        var tilePos = this.tilesInRange[tileNum].tile;
-        if(this.inRange(tilePos.row, tilePos.col)) {
-            var tile = StateController.currLevel.tiles[tilePos.row][tilePos.col];
+        var tile = this.tilesInRange[tileNum];
+        if(this.inRange(tile.row, tile.col)) {
             if(tile.hasMonsters()) {
                 // found our target!
                 this.targets.push(monsterList[this.owner][Object.keys(tile.monstersOnTile)[0]]);

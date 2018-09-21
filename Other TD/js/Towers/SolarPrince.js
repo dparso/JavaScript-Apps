@@ -32,7 +32,7 @@ SolarPrinceClass.prototype.radialSort = function() {
     this.yPerspective = this.y - 0.5 * this.img.height;
     this.tilesInRadialOrder = [];
     for(var tile = 0; tile < this.tilesInRange.length; tile++) {
-        var t = this.tilesInRange[tile].tile;
+        var t = this.tilesInRange[tile];
         var pix = gridToPixel(t.row, t.col);
         var angle = trueAngleBetweenPoints({x: this.x, y: this.yPerspective}, {x: pix.x, y: pix.y});
         this.tilesInRadialOrder.push({tile: this.tilesInRange[tile], angle: angle});
@@ -145,7 +145,7 @@ SolarPrinceClass.prototype.attack = function() {
             }
         }
 
-        tilePos = tileObj.tile.tile;
+        tilePos = tileObj.tile;
         var tile = StateController.currLevel.tiles[tilePos.row][tilePos.col];
         // damage all monsters on this tile
         if(tile.hasMonsters()) {

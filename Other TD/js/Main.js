@@ -18,6 +18,8 @@ var fullMonsterPath = []; // the tile coords for towers to track for first targe
 var selection = null;
 var waitingToStart = true;
 var started = false;
+var allowDiagonals = false;
+var displayVectorField = false;
 
 var player = new PlayerClass(PLAYER);
 var enemy = new PlayerClass(ENEMY);
@@ -55,6 +57,8 @@ window.onload = function() {
 
     openSelect();
     loadImages();
+    // startGame();
+    playGame();
 }
 
 function loadingDoneStartGame() {
@@ -69,7 +73,7 @@ function startGame() {
         $('#start').fadeOut(500);
         // user pressed start: bring them to the game configuration screen
         $('#levelconfig').fadeIn(500);
-        // Get the element with id="defaultOpen" and click on it
+
         document.getElementById("defaultOpen").click();
 
         $('#racedescription').text(lightDescription);
@@ -80,10 +84,10 @@ function startGame() {
     }
 }
 
-var pth;
-var diagonals = true;
-var solver = new AStarSearcher(LEVELS[0].grid, MONSTER_START, MONSTER_END, diagonals);
-var found = false;
+// var pth;
+// var diagonals = true;
+// var solver;
+// var found = false;
 function playGame() {
     started = true;
     if(waitingToStart) return;
@@ -98,7 +102,7 @@ function playGame() {
     // StateController.changeState(STATE_START, welcomeScreen);
     StateController.changeState(STATE_PLAY, LEVELS[0]);
     refreshBackground();
-
+    // solver = new AStarSearcher(LEVELS[0].grid, MONSTER_START, MONSTER_END, diagonals);
 }
 
 function refreshBackground() {
@@ -137,31 +141,50 @@ function updateAll(override = false) {
 
     drawAll();
     // drawTooltip();
-    if(!game_paused) {
-        if(!found) {
-            found = solver.findPath();
-        } else {
-            pth = solver.makePath();
-            for(var i = 0; i < pth.length; i++) {
-                highlightTile(pth[i].row, pth[i].col, 'red', 0.5);
-            }
-        }
-    }
 
-    console.log(solver.openSet.heap.length);
-    for(var i = 0; i < solver.openSet.heap.length; i++) {
-        // console.log(solver.openSet.heap[i].gridPos.row + ", " + solver.openSet.heap[i].gridPos.col)
-        highlightTile(solver.openSet.heap[i].gridPos.row, solver.openSet.heap[i].gridPos.col, 'white', 0.5);
-    }
-    for(var row = 0; row < TILE_ROWS; row++) {
-        for(var col = 0; col < TILE_COLS; col++) {
-            if(solver.tracker[row][col].visited) {
-                highlightTile(row, col, 'gray', 0.5);
-            }
-        }
+    // if(!game_paused || override) {
+    //     if(!found) {
+    //         // console.time('someFunction');
+    //         found = solver.findPath();
+    //         // console.timeEnd('someFunction');
+    //     } else {
+    //         pth = solver.makePath();
+    //         for(var i = 0; i < pth.length; i++) {
+    //             highlightTile(pth[i].row, pth[i].col, 'red', 0.5);
+    //         }
+    //     }
+    // }
 
-    }
+    // for(var i = 0; i < solver.openSet.heap.length; i++) {
+    //     // console.log(solver.openSet.heap[i].gridPos.row + ", " + solver.openSet.heap[i].gridPos.col)
+    //     highlightTile(solver.openSet.heap[i].gridPos.row, solver.openSet.heap[i].gridPos.col, 'white', 0.5);
+    // }
+    // for(var row = 0; row < TILE_ROWS; row++) {
+    //     for(var col = 0; col < TILE_COLS; col++) {
+    //         if(solver.tracker[row][col].visited) {
+    //             highlightTile(row, col, 'gray', 0.5);
+    //         }
+    //     }
+    // }
+
+    // for(var i = 0; i < monsterPath.length; i++) {
+    //     let tile = pixelToGrid(monsterPath[i].pixel.x, monsterPath[i].pixel.y);
+    //     highlightTile(tile.row, tile.col, 'red', 0.5);
+    // }
+
+    // for(var i = 0; i < fullMonsterPath.length; i++) {
+    //     highlightTile(fullMonsterPath[i].tile.row, fullMonsterPath[i].tile.col, 'white', 0.5);
+    // }
+    // let finish = StateController.currLevel.tiles[MONSTER_START.row][MONSTER_START.col];
+
+    // let finish = StateController.currLevel.tiles[showTile.row][showTile.col];
+    // while(finish.parent) {
+    //     highlightTile(finish.row, finish.col, 'white', 0.5);
+    //     finish = finish.parent;
+    // }
 }
+
+var showTile = {row: 19, col: 2};
 
 function validateMonsters() {
     // make sure that monsterIDs on tiles correspond to real monsters in monsterList
@@ -267,13 +290,108 @@ function drawAll() {
 
     drawBitmapCenteredWithRotation(tilePics[TILE_MONSTER_START][0], strt.x + TILE_W / 2, strt.y + TILE_H / 2, spiralRotate);
     drawBitmapCenteredWithRotation(tilePics[TILE_MONSTER_END][0], end.x + TILE_W / 2, end.y + TILE_H / 2, spiralRotate);
+    spiralRotate -= 0.1;
 
-    // var colors = ['white', 'yellow', 'pink', 'green', 'blue', 'purple', 'gray', 'black', 'black']
+    if(displayVectorField) {
+        drawVectorField();
+    }
+    // var colors = ['white', 'yellow', 'pink', 'green', 'blue', 'purple', 'gray', 'orange', 'black']
+
     // for(var i = 0; i < towerLocationQueue.length; i++) {
     //     highlightTile(towerLocationQueue[i].tile.row, towerLocationQueue[i].tile.col, colors[towerLocationQueue[i].pathCount], 0.5, ENEMY);
     // }
+    drawPath();
+}
 
-    spiralRotate -= 0.1;
+function drawVectorField() {
+    var arrowLength = 25;
+    var arrowWidth = 1.5;
+    for(var row = 0; row < TILE_ROWS; row++) {
+        for(var col = 0; col < TILE_COLS; col++) {
+            var tile = StateController.currLevel.tiles[row][col];
+            var par = tile.parent;
+            if(par) {
+                var startX, startY;
+                ctx.font = "10px Helvetica";
+                ctx.fillStyle = 'white';
+
+                if(par.row - tile.row < 0) { // parent is up
+                    var pos = gridToPixel(tile.row, tile.col);
+                    drawArrow(pos.x + TILE_W / 2, pos.y + arrowLength, pos.x + TILE_W / 2, pos.y, arrowWidth);
+                } else if(par.row - tile.row > 0) { // parent is down
+                    var pos = gridToPixel(tile.row, tile.col);
+                    drawArrow(pos.x + TILE_W / 2, pos.y, pos.x + TILE_W / 2, pos.y + arrowLength, arrowWidth);
+                } else if(par.col - tile.col < 0) { // parent is left
+                    var pos = gridToPixel(tile.row, tile.col);
+                    drawArrow(pos.x + arrowLength, pos.y + TILE_H / 2, pos.x, pos.y + TILE_H / 2, arrowWidth);
+                } else { // parent is right
+                    var pos = gridToPixel(tile.row, tile.col);
+                    drawArrow(pos.x, pos.y + TILE_H / 2, pos.x + arrowLength, pos.y + TILE_H / 2, arrowWidth);
+                }
+            }
+        }
+    }
+}
+
+var pathOpacity = 0;
+var pathDelta = 0.04;
+var pathHead = 0;
+var pathTail = 0;
+var pathLength = 30;
+var timeSinceDrawPath = 0;
+var pathDrawRate = 3; // once per x seconds
+var sendingPath = false;
+
+function drawPath() {
+    if(sendingPath) {
+        sendPath();
+    } else if(timeSinceDrawPath > pathDrawRate * fps) {
+        sendingPath = true;
+        pathHead = 0;
+        pathTail = 0;
+        sendPath();
+    }
+
+    timeSinceDrawPath++;
+}
+
+function sendPath() {
+    /* note that these tiles could be animated individually, but asynchronicity of requestAnimationFrame
+       makes the timing of these calls unpredictable with relation to drawing the rest of the screen;
+       as a result, the tiles are occasionally drawn over, and the result is jarring and not smooth
+    */
+
+    let finish = StateController.currLevel.tiles[MONSTER_START.row][MONSTER_START.col];
+    var count = 1;
+    // skip up to the tail
+    while(count < pathTail && finish.parent) {
+        finish = finish.parent;
+        count++;
+    }
+
+    // highlight up to the head
+    var max = Math.pow(pathLength, 2) / 2;
+    while(finish.parent && count < pathHead) {
+        var headDist = pathHead - count;
+        var tailDist = count - pathTail;
+        var product = headDist * tailDist;
+        highlightTile(finish.row, finish.col, 'white', product / max);
+        finish = finish.parent;
+        count++;
+    }
+
+    if(!finish.parent) {
+        pathTail++;
+        if(pathTail >= pathHead) {
+            sendingPath = false;
+            timeSinceDrawPath = 0;
+        }
+    } else {
+        pathHead++;
+        if(pathHead - pathTail > pathLength) {
+            pathTail++;
+        }
+    }
 }
 
 function drawSelection(owner) {
@@ -297,8 +415,8 @@ function drawSelection(owner) {
 function textDraw() {
     var tile = pixelToGrid(mouseX, mouseY);
     ctx.fillStyle = 'white';
-    // ctx.fillText(mouseX + ", " + mouseY, mouseX + 10, mouseY + 30);
-    ctx.fillText(tile.row + ", " + tile.col, mouseX + 10, mouseY + 10);
+    ctx.fillText(mouseX + ", " + mouseY, mouseX + 10, mouseY + 30);
+    // ctx.fillText(tile.row + ", " + tile.col, mouseX + 10, mouseY + 30);
 
     // draw all queued messages
     while(messages.length > 0) {

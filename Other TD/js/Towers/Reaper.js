@@ -36,8 +36,7 @@ ReaperClass.prototype.attack = function() {
 
     scytheAnimation(this.x, this.y, 0, scythe_speeds[this.tier + 1]);
     for(var tile = 0; tile < this.tilesInRange.length; tile++) {
-        var t = this.tilesInRange[tile].tile;
-        var targetTile = StateController.currLevel.tiles[t.row][t.col];
+        var targetTile = this.tilesInRange[tile];
         // apply to all monsters on that tile
         if(targetTile.hasMonsters()) {
             Object.keys(targetTile.monstersOnTile).forEach(
