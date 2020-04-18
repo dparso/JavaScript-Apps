@@ -29,6 +29,35 @@ var availableTowerLocations = [];
 var towerLocationQueue = [];
 var upgradeableTowers = []; // IDs
 
+var waveNum = 1;
+
+function generateWave() {
+	// for now, we'll add a new type every 5 rounds
+	var newUnitFrequency = 5;
+
+	for(var type = 0; type < NUM_MONSTERS; type++) {
+		if(type <= waveNum / newUnitFrequency) {
+			// how many of these to send?
+			// var count = Math.floor(((waveNum - 1) << 1) / ((type + 1)));
+			var count = 2 * (waveNum - type * newUnitFrequency);
+			var sign = Math.random() < 0.5 ? 1 : -1;
+			var uncertainty = Math.floor(Math.random() * Math.floor(count / 4));
+			count += sign * uncertainty; // +/- within 25%
+			while(count--) {
+				var monster = new MonsterClass(type, PLAYER);
+				StateController.monstersWaiting[PLAYER].push(monster);
+			}
+		} else {
+			break;
+		}
+	}
+
+    // var monster = new MonsterClass(ofType, toSide);
+    // StateController.monstersWaiting[toSide].push(monster);
+
+    waveNum++;
+}
+
 function pathByTile(row, col) {
 	// returns the number of path squares within 1 step of {row, col} (including diagonals)
 	var pathCount = 0;
@@ -71,21 +100,6 @@ function prepareEnemy() {
 	for (var i = 0; i < towerCosts.length; i++) {
 		minTowerCost = Math.min(minTowerCost, towerCosts[i]);
 	}
-
-	// add some towers beforehand
-	// careful, these are still in availableTowerLocations
-	// StateController.placeTower(CANNON, ENEMY, {row: 4, col: 6});
-	// StateController.placeTower(SHOOTER, ENEMY, {row: 4, col: 7});
-	// enemy.gainGold(towerCosts[CANNON]);
-	// enemy.gainGold(towerCosts[SHOOTER]);
-	// StateController.placeTower(CONDUIT, ENEMY, {row: 3, col: 10});
-	// StateController.placeTower(REAPER, ENEMY, {row: 6, col: 10});
-	// StateController.upgradeTower(towerList[ENEMY][3], 0, false);
-	// StateController.upgradeTower(towerList[ENEMY][3], 0, false);
-	// StateController.upgradeTower(towerList[ENEMY][3], 0, false);
-	// StateController.upgradeTower(towerList[ENEMY][3], 0, false);
-	// StateController.upgradeTower(towerList[ENEMY][3], 0, false);
-	// StateController.upgradeTower(towerList[ENEMY][3], 0, false);
 	processTilePriorities();
 }
 
@@ -258,7 +272,6 @@ function buyUpgrade() {
 
 	return false;
 }
-
 
 function buyTower() {
 	// enough money?

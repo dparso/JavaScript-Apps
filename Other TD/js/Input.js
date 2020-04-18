@@ -112,7 +112,7 @@ function handleMouseDown(evt) {
                 var tile = StateController.currLevel.tiles[tileClicked.row][tileClicked.col];
                 if(typeIsTower(tile.type)) {
                     if(player.gold < towerCosts[tile.type - TOWER_OFFSET_NUM]) {
-                        queueMessage("Insufficient gold!", mouseX, mouseY);
+                        queueMessage("Insufficient gold!", mouseX, mouseY, 1);
                     } else {
                         setDrag(tile.type, mouseX, mouseY, false);
                     }
@@ -157,7 +157,7 @@ function handleMouseUp(evt) {
 
 function setDrag(towerType, x, y, visible) {
     if(towerType - TOWER_OFFSET_NUM === REAPER && REAPER_UNIQUE[PLAYER]) {
-        queueMessage("Maximum reapers!", mouseX, mouseY, PLAYER);
+        queueMessage("Maximum reapers!", mouseX, mouseY, 1);
         return;
     }
     dragObject = new DraggableClass(towerType, x, y, PLAYER, "tower");

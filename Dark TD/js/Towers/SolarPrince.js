@@ -88,9 +88,19 @@ SolarPrinceClass.prototype.draw = function() {
 }
 
 SolarPrinceClass.prototype.attack = function() {
+    let targetX, targetY;
+    if (debugMode) {
+        targetX = mouseX;
+        targetY = mouseY;
+    } else {
+        targetX = this.targets[0].x;
+        targetY = this.targets[0].y;
+    }
+    
     var start = {x: this.x, y: this.yPerspective};
-    var myAngle = Math.atan2(this.targets[0].y - this.yPerspective, this.targets[0].x - this.x);
-    var ang = trueAngleBetweenPoints({x: this.x, y: this.yPerspective}, {x: this.targets[0].x, y: this.targets[0].y});
+
+    var myAngle = Math.atan2(targetY - this.yPerspective, targetX - this.x);
+    var ang = trueAngleBetweenPoints({x: this.x, y: this.yPerspective}, {x: targetX, y: targetY});
     var lowerBound = ang - this.attackAngle;
     var upperBound = ang + this.attackAngle;
 

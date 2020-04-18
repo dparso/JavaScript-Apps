@@ -56,6 +56,9 @@ ConduitClass.prototype.move = function() {
     }
     this.timeSinceTargetCheck++;
 
+    if (debugMode) {
+        this.attack();
+    }
     // has targets
     if(this.targets.length > 0) {
         if(this.targets[0]) {
@@ -123,6 +126,9 @@ ConduitClass.prototype.attack = function() {
         }
         if(chain > 0) strength = 2; // reduce clutter for the chain
         var tar = {x: trgt.x + TILE_W / 2, y: trgt.y + TILE_H / 2};
+        if (debugMode) {
+            tar = {x: mouseX, y: mouseY};
+        }
         // lightning gets slightly less crazy as it jumps
         this.drawLightning(start, tar, Math.max(MAX_LIGHTNING_DIFFERENCE - chain * 5, 10), strength);
         start = tar;

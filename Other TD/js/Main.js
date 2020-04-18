@@ -58,7 +58,7 @@ window.onload = function() {
     openSelect();
     loadImages();
     // startGame();
-    playGame();
+    // playGame();
 }
 
 function loadingDoneStartGame() {
@@ -226,6 +226,7 @@ var gaveIncome = false;
 function sendWave() {
     if(timeSinceLastWave > WAVE_RATE * fps) {
         if(!gaveIncome) {
+            generateWave();
             playerIncome();
             gaveIncome = true;
         }
@@ -238,18 +239,17 @@ function sendWave() {
     timeSinceLastWave++;
 }
 
-var monsterReleaseSpeed = 0.15;
+var monsterReleaseSpeed = 0.1;
 var timeSinceLastRelease = [monsterReleaseSpeed * fps + 1, monsterReleaseSpeed * fps + 1];
 
 function monsterUpdate(owner) {
+    // returns true if there are no monsters left to send
     var len = StateController.monstersWaiting[owner].length;
     if(len > 0) {
         if(timeSinceLastRelease[owner] > monsterReleaseSpeed * fps) {
-            // while(StateController.monstersWaiting[owner].length > 0) {
-            var monster = StateController.monstersWaiting[owner].shift();
+            var monster = StateController.monstersWaiting[owner].pop();
             monsterList[owner][monster.id] = monster;
             monster.visible = true;
-            // }
             timeSinceLastRelease[owner] = 0;
         }
     } else {
@@ -304,8 +304,8 @@ function drawAll() {
 }
 
 function drawVectorField() {
-    var arrowLength = 25;
-    var arrowWidth = 1.5;
+    var arrowLength = 20;
+    var arrowWidth = 1;
     for(var row = 0; row < TILE_ROWS; row++) {
         for(var col = 0; col < TILE_COLS; col++) {
             var tile = StateController.currLevel.tiles[row][col];
@@ -415,6 +415,7 @@ function drawSelection(owner) {
 function textDraw() {
     var tile = pixelToGrid(mouseX, mouseY);
     ctx.fillStyle = 'white';
+    ctx.font = "10px Helvetica";
     ctx.fillText(mouseX + ", " + mouseY, mouseX + 10, mouseY + 30);
     // ctx.fillText(tile.row + ", " + tile.col, mouseX + 10, mouseY + 30);
 
@@ -426,7 +427,7 @@ function textDraw() {
         if(xPos + textWidth > canvas.width) {
             xPos = canvas.width - textWidth;
         }
-        drawMessage(message.text, 1.0, -0.008, xPos, message.y, message.color, message.ctx);
+        drawMessage(message.text, 1.0, -0.008, xPos, message.y, message.color, message.float);
     }
 
     var time = Math.max(0, (WAVE_RATE - Math.floor(timeSinceLastWave * fps / 1000)));
@@ -627,7 +628,7 @@ function scrollMenu(direction) {
 
 function selectTower(type) {
     if(player.gold < towerCosts[type]) {
-        queueMessage("Insufficient gold!", TILE_H * (TILE_ROWS + 1) / 2, TILE_W * (TILE_COLS + 1) / 2, PLAYER);
+        queueMessage("Insufficient gold!", TILE_H * (TILE_ROWS + 1) / 2, TILE_W * (TILE_COLS + 1) / 2, PLAYER, true);
     } else {
         setDrag(type + TOWER_OFFSET_NUM, TILE_H * (TILE_ROWS + 1) / 2, TILE_W * (TILE_COLS + 1) / 2, true);
     }
@@ -635,7 +636,7 @@ function selectTower(type) {
 
 function sendMonster(type) {
     if(player.gold < monsterCosts[PLAYER][type]) {
-        queueMessage("Insufficient gold!", TILE_H * (TILE_ROWS + 1) / 2, TILE_W * (TILE_COLS + 1) / 2, PLAYER);
+        queueMessage("Insufficient gold!", TILE_H * (TILE_ROWS + 1) / 2, TILE_W * (TILE_COLS + 1) / 2, PLAYER, true);
     } else {
         StateController.sendMonster(type, ENEMY);
     }

@@ -129,7 +129,7 @@ function MonsterClass(type, owner) {
             }
         } else {
             // reached the end: take a life
-            queueMessage("-1", this.x, this.y);
+            queueMessage("-1", this.x, this.y, 1);
             StateController.notifyLifeLost(this.owner);
             this.die(false);
         }
@@ -280,9 +280,11 @@ var searchCount = 0;
 function calculateMonsterPathBFS() {
     searchCount++;
     // BFS from TILE_MONSTER_START to TILE_MONSTER_END
-    var currTile, finish;
+    var currTile;
+    var foundPath = false;
     currTile = StateController.currLevel.tiles[MONSTER_END.row][MONSTER_END.col];
     currTile.distanceToGoal = 0;
+    var finish = currTile;
     
     if(currTile === undefined) {
         return;
@@ -296,6 +298,7 @@ function calculateMonsterPathBFS() {
 
         if(currTile.type === TILE_MONSTER_START) {
             finish = currTile;
+            foundPath = true;
             continue; // do more
         }
 
@@ -329,6 +332,10 @@ function calculateMonsterPathBFS() {
     while(finish.parent) {
         StateController.currLevel.tiles[finish.row][finish.col].onPath = searchCount;
         finish = finish.parent;
+    }
+
+    if(!foundPath) {
+        queueMessage("You closed the path! The monsters won't be happy.", 3 * canvas.width / 8, canvas.height / 2, 0);
     }
 }
 

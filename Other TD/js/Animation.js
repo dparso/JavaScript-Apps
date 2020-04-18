@@ -71,12 +71,12 @@ function tileFlash(row, col, opacity, delta) {
 
 
 var messages = [];
-function queueMessage(message, x, y, color = 'red') {
-    messages.push({text: message, x: x, y: y, color: color});
+function queueMessage(message, x, y, float, color = 'red') {
+    messages.push({text: message, x: x, y: y, color: color, float: float});
 }
 
 // message scrolls up as it fades out
-function drawMessage(message, alpha, delta, x, y, color) {
+function drawMessage(message, alpha, delta, x, y, color, float) {
     ctx.fillStyle = color;
     ctx.globalAlpha = alpha;
 
@@ -88,7 +88,8 @@ function drawMessage(message, alpha, delta, x, y, color) {
 
     if(alpha >= 0.2) {
         requestAnimationFrame(function() {
-            drawMessage(message, alpha + delta, delta, x, y - 0.9, color);
+            console.log(message);
+            drawMessage(message, alpha + delta, delta, x, y - 0.9 * float, color, float);
         });
     }
 }

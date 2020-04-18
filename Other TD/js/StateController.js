@@ -38,14 +38,14 @@ function StateControllerClass(startLevel) {
                 break;
             case REAPER:
                 if(REAPER_UNIQUE[onSide]) {
-                    if(onSide === PLAYER) queueMessage("Maximum reapers!", mouseX, mouseY);
+                    if(onSide === PLAYER) queueMessage("Maximum reapers!", mouseX, mouseY, 1);
                     return false;
                 }
                 tower = new ReaperClass(ofType, onSide);
                 break;
             case SOLAR_PRINCE:
                 if(SOLAR_PRINCE_UNIQUE[onSide]) {
-                    if(onSide === PLAYER) queueMessage("Maximum solar prince!", mouseX, mouseY);
+                    if(onSide === PLAYER) queueMessage("Maximum solar prince!", mouseX, mouseY, 1);
                     return false;
                 }
                 tower = new SolarPrinceClass(ofType, onSide);
@@ -68,6 +68,7 @@ function StateControllerClass(startLevel) {
         tower.active = true;
         tower.visible = true;
         tower.calculateTilesInRange();
+
         if(ofType === SOLAR_PRINCE) {
             tower.radialSort();
         }
@@ -81,8 +82,6 @@ function StateControllerClass(startLevel) {
         if(onSide === PLAYER) {
             player.buyTower(tower.type);
             player.towerStrength += towerCosts[tower.type];
-            // console.log("PLACE " + player.towerStrength);
-            selection = tower.id;
         } else {
             enemy.buyTower(tower.type);
             enemy.towerStrength += towerCosts[tower.type];
@@ -91,11 +90,9 @@ function StateControllerClass(startLevel) {
 
 
         // display cost loss onscreen
-        queueMessage("-" + towerCosts[tower.type].toLocaleString(), tower.x, tower.y);
-        // recompute monster path
-        calculateMonsterPathBFS();
-        // solver = new AStarSearcher(LEVELS[0].grid, MONSTER_START, MONSTER_END, diagonals);
-        // found = false;
+        queueMessage("-" + towerCosts[tower.type].toLocaleString(), tower.x, tower.y, 1);
+
+        this.mapChanged();        
         return true;
     }
 
@@ -116,11 +113,8 @@ function StateControllerClass(startLevel) {
         // }
 
         var monster = new MonsterClass(ofType, toSide);
-        monster.reset();
-
         StateController.monstersWaiting[toSide].push(monster);
         // toSide is the resulting side, but the opposite side sent it
-        var level = monsterLevels[toSide][ofType];
         if(toSide === PLAYER) {
             if(!fromBarracks) {
                 enemy.sendMonster(ofType);
@@ -130,7 +124,7 @@ function StateControllerClass(startLevel) {
             
             if(!fromBarracks) {
                 player.sendMonster(ofType);
-                queueMessage("-" + (monsterCosts[sender][monster.type]).toLocaleString(), mouseX, mouseY);
+                queueMessage("-" + (monsterCosts[sender][monster.type]).toLocaleString(), mouseX, mouseY, 1);
             }
             player.monsterStrength += monsterCosts[sender][ofType] * 4;
             // console.log(player.monsterStrength);
@@ -154,14 +148,14 @@ function StateControllerClass(startLevel) {
                 xPos = tower.x;
                 yPos = tower.y
             }
-            queueMessage("-" + tier_costs[tower.type][tower.tier + 1].toLocaleString(), xPos, yPos);
+            queueMessage("-" + tier_costs[tower.type][tower.tier + 1].toLocaleString(), xPos, yPos, 1);
             tower.upgradeTier(upgradeType);
             obj.towerStrength += tier_costs[tower.type][tower.tier];
             obj.gainGold(-tier_costs[tower.type][tower.tier]);
             return true;
         } else {
             if(isPlayer) {
-                queueMessage("Insufficient gold!", mouseX, mouseY);
+                queueMessage("Insufficient gold!", mouseX, mouseY, 1);
             } else {
                 return false;
             }
@@ -188,12 +182,10 @@ function StateControllerClass(startLevel) {
         obj.towerStrength -= towerCosts[tower.type];
         obj.gainGold(towerList[owner][towerId].value);
 
-        queueMessage("+" + tower.value.toLocaleString(), tower.x, tower.y, 'green');
+        queueMessage("+" + tower.value.toLocaleString(), tower.x, tower.y, true, 'green');
         delete towerList[owner][towerId];
 
-        // recalculate path!
-        calculateMonsterPathBFS();
-
+        this.mapChanged();
     }
 
     this.changeState = function(newState, newLevel) {
@@ -214,6 +206,17 @@ function StateControllerClass(startLevel) {
 
     	// this.prepareState(newState);
     	this.state = newState;
+    }
+
+    this.mapChanged = function() {
+        // currently only prompted by selling or placing a tower
+        calculateMonsterPathBFS();
+
+        for(var owner = 0; owner <= 1; owner++) {
+            for(tower in towerList[owner]) {
+                towerList[owner][tower].calculateTilesInRange();
+            }
+        }
     }
 
     // these should be combined
@@ -259,6 +262,7 @@ function StateControllerClass(startLevel) {
 
         var type = code - KEY_NUM_OFFSET - 1;
         if(shift) {
+            return;
             // monster
             if(type > 7) {
                 console.log("Not yet!");
@@ -266,9 +270,9 @@ function StateControllerClass(startLevel) {
             }
             if(player.gold >= monsterCosts[PLAYER][type]) {
                 this.sendMonster(type, ENEMY, true);
-                // for(var i = 0; i < 10; i++) this.sendMonster(type, PLAYER, true);
+                // for(var i = 0; i < 10; i++) this.sendMonster(type, PLAYER, 1);
             } else {
-                queueMessage("Insufficient gold!", mouseX, mouseY);
+                queueMessage("Insufficient gold!", mouseX, mouseY, 1);
             }
         } else {
             // tower
@@ -278,10 +282,10 @@ function StateControllerClass(startLevel) {
             }
 
             if(type === REAPER && REAPER_UNIQUE[PLAYER]) {
-                queueMessage("Maximum reapers!", mouseX, mouseY);
+                queueMessage("Maximum reapers!", mouseX, mouseY, 1);
                 return false;
             } else if(type === SOLAR_PRINCE && SOLAR_PRINCE_UNIQUE[PLAYER]) {
-                queueMessage("Maximum solar prince!", mouseX, mouseY);
+                queueMessage("Maximum solar prince!", mouseX, mouseY, 1);
                 return false;
             }
 
@@ -289,10 +293,10 @@ function StateControllerClass(startLevel) {
                 // cancel current selection
                 dragObject = null;
             } else if(player.gold >= towerCosts[type]) {
-                setDrag(type + TOWER_OFFSET_NUM, mouseX, mouseY, true);
+                setDrag(type + TOWER_OFFSET_NUM, mouseX, mouseY, 1);
                 dragDelay = dragWait; // don't wait to draw
             } else {
-                queueMessage("Insufficient gold!", mouseX, mouseY);
+                queueMessage("Insufficient gold!", mouseX, mouseY, 1);
             }
         }
     }

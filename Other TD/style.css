@@ -113,9 +113,9 @@
 /* box for selected tower */
 .infopane {
 	top: 575px;
-	right: 12.5%;
+	right: 20%;
 	position: absolute;
-	width: 75%;
+	width: 60%;
 	height: 100px;
   	background-color: #7a4414;
     border: 5px solid #7a4414;

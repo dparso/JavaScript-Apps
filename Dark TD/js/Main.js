@@ -2,6 +2,15 @@ var canvas = [], ctx = [], bg_canvas = [], bg_ctx = [];
 
 var PLAYER = 0, ENEMY = 1;
 
+
+
+
+// TODO: maps not updating on 'continue'
+// middle panel doesn't come all the way down
+
+
+
+var debugMode = true;
 var gameWon = false;
 var gameLost = false;
 var fps = 30;
@@ -22,6 +31,7 @@ var started = false;
 var player = new PlayerClass(PLAYER);
 var enemy = new PlayerClass(ENEMY);
 player.gold = 100000000;
+enemy.gold = 30000000;
 // enemy.gold = 20;
 // enemy.income = 5.0;
 
@@ -381,6 +391,8 @@ function nextLevel() {
     prepareEnemy();
 
     infoPane = [new InfoPaneClass(PLAYER), new InfoPaneClass(ENEMY)];
+
+    refreshBackground();
 
     clearInterval(timerId);
     fadeOut(STATE_PLAY, LEVELS[StateController.levelNum], PLAYER);
